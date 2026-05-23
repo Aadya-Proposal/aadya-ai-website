@@ -907,6 +907,97 @@ footer {
 }
 
 /* ── RESPONSIVE ── */
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,20,50,0.7);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+  background: var(--navy);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.modal-header-text { }
+.modal-header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+.modal-header-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+}
+.modal-close-btn {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.modal-close-btn:hover { background: rgba(255,255,255,0.25); }
+.modal-iframe-wrap {
+  flex: 1;
+  overflow: hidden;
+}
+.modal-iframe-wrap iframe {
+  width: 100%;
+  height: 75vh;
+  border: none;
+  display: block;
+}
+.modal-footer {
+  padding: 10px 24px;
+  border-top: 1px solid rgba(15,45,107,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.modal-footer-note { font-size: 11px; color: var(--muted); }
+.modal-footer-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #16A34A;
+  background: #DCFCE7;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+
 @media (max-width: 768px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
@@ -945,7 +1036,7 @@ footer {
   </ul>
   <div class="nav-cta">
     <a href="#" class="btn-ghost">Sign in</a>
-    <a href="#" class="btn-primary">Start free →</a>
+    <a href="#" class="btn-primary" onclick="event.preventDefault();openModal()">Start free →</a>
   </div>
 </nav>
 
@@ -960,7 +1051,7 @@ footer {
     <h1>Win clients with <em>proposals</em> that write themselves</h1>
     <p>The AI platform for proposals, SOWs and professional documents — generated in seconds, delivered to your client's inbox as a branded PDF.</p>
     <div class="hero-actions">
-      <a href="#" class="btn-primary-lg">Generate your first proposal free →</a>
+      <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate your first proposal free →</a>
       <a href="#how" class="btn-outline-lg">See how it works</a>
     </div>
     <div class="hero-stats">
@@ -1248,7 +1339,7 @@ footer {
     <div class="cta-title">Ready to win your next client?</div>
     <div class="cta-sub">Generate your first proposal free. No credit card required.</div>
     <div class="cta-actions">
-      <a href="#" class="btn-primary-lg" style="background:white;color:#0F2D6B;">Generate free proposal →</a>
+      <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()" style="background:white;color:#0F2D6B;">Generate free proposal →</a>
       <a href="#" class="btn-outline-lg" style="border-color:rgba(255,255,255,0.25);color:white;">See pricing</a>
     </div>
   </div>
@@ -1301,6 +1392,40 @@ footer {
     </div>
   </div>
 </footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="proposalModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-text">
+        <div class="modal-header-title">Generate your proposal — free</div>
+        <div class="modal-header-sub">Fill the form · AI generates · PDF sent to client in 60s</div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-iframe-wrap">
+      <iframe src="https://forms.fillout.com/t/6wFLHhk2tXus" allowfullscreen></iframe>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-footer-note">No credit card required · 3 free documents/month</div>
+      <div class="modal-footer-badge">Free to start</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal() {
+  document.getElementById('proposalModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('proposalModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
 
 </body>
 </html>
