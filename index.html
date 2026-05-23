@@ -1153,7 +1153,7 @@ footer {
       </div>
       <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:20px;">
         <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">Email preview</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:4px;">From: <strong style="color:white;">Biswaranjan Samal</strong></div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:4px;">From: <strong style="color:white;">Manjunath M.</strong></div>
         <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:4px;">To: client@infosys.com</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:16px;">Subject: <strong style="color:white;">Scope of Work for SAP S4 HANA</strong></div>
         <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:12px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">Dear Infosys Team,<br><br>Please find attached your Scope of Work, prepared and ready for your review...</div>
@@ -1229,6 +1229,10 @@ footer {
     <div class="section-tag">Pricing</div>
     <div class="section-title">Start free. Scale as you grow.</div>
     <div class="section-sub">Transparent pricing for freelancers at every stage.</div>
+    <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:100px;padding:8px 20px;margin-bottom:40px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#10B981;display:inline-block;animation:pulse 2s infinite;"></span>
+      <span style="font-size:13px;font-weight:500;color:#10B981;">🎉 Launch pricing — locked in forever for early members · First 50 spots only</span>
+    </div>
     <div class="pricing-grid">
       <!-- Free -->
       <div class="price-card">
@@ -1237,27 +1241,31 @@ footer {
           <span class="price-currency">$</span>
           <span class="price-num">0</span>
         </div>
-        <div class="price-period">/ month</div>
-        <div class="price-subtext">₹0 · €0 · Forever free</div>
+        <div class="price-period">/ month · forever free</div>
+        <div class="price-subtext">₹0 · €0 · No credit card needed</div>
         <ul class="price-features">
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>3 documents per month</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Proposal & SOW formats</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Custom logo upload</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>PDF email delivery</li>
         </ul>
-        <a href="#" class="price-btn">Get started free</a>
+        <a href="#" class="price-btn" onclick="event.preventDefault();openModal()">Get started free</a>
         <div class="price-india">No credit card required</div>
       </div>
       <!-- Starter -->
       <div class="price-card popular">
         <div class="popular-badge">Most popular</div>
         <div class="price-plan">Starter</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;">$9/mo</span>
+          <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
+        </div>
         <div class="price-amount">
           <span class="price-currency">$</span>
-          <span class="price-num">9</span>
+          <span class="price-num">5</span>
         </div>
-        <div class="price-period">/ month</div>
-        <div class="price-subtext">₹499 · €9 · billed monthly</div>
+        <div class="price-period">/ month · locked in forever</div>
+        <div class="price-subtext">₹299 · €5 · billed monthly</div>
         <ul class="price-features">
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>20 documents per month</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>All document formats</li>
@@ -1265,18 +1273,22 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Document history</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Multi-currency support</li>
         </ul>
-        <a href="#" class="price-btn">Start Starter plan</a>
-        <div class="price-india">7-day free trial included</div>
+        <a href="#" class="price-btn" onclick="event.preventDefault();openModal()">Start Starter plan</a>
+        <div class="price-india">Regular price $9/mo after launch</div>
       </div>
       <!-- Pro -->
       <div class="price-card">
         <div class="price-plan">Pro</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;">$19/mo</span>
+          <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
+        </div>
         <div class="price-amount">
           <span class="price-currency">$</span>
-          <span class="price-num">19</span>
+          <span class="price-num">10</span>
         </div>
-        <div class="price-period">/ month</div>
-        <div class="price-subtext">₹999 · €19 · billed monthly</div>
+        <div class="price-period">/ month · locked in forever</div>
+        <div class="price-subtext">₹599 · €10 · billed monthly</div>
         <ul class="price-features">
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Unlimited documents</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Custom writing styles</li>
@@ -1284,9 +1296,12 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>API access</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Priority support</li>
         </ul>
-        <a href="#" class="price-btn">Go Pro</a>
-        <div class="price-india">Best for active freelancers</div>
+        <a href="#" class="price-btn" onclick="event.preventDefault();openModal()">Go Pro</a>
+        <div class="price-india">Regular price $19/mo after launch</div>
       </div>
+    </div>
+    <div style="text-align:center;margin-top:28px;font-size:13px;color:rgba(255,255,255,0.4);">
+      ⚡ Launch pricing for first 50 members only · <span style="color:#10B981;font-weight:500;">Spots filling fast</span>
     </div>
   </div>
 </section>
