@@ -1271,7 +1271,7 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Document history</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Multi-currency support</li>
         </ul>
-        <a href="https://rzp.io/rzp/GkOfSXx" target="_blank" class="price-btn">Start Starter plan</a>
+        <a href="https://rzp.io/rzp/GkOfSXx" target="_blank" class="price-btn" onclick="showPaymentOverlay('Starter')">Start Starter plan</a>
         <div class="price-india">🇮🇳 ₹299/month · Auto-renews monthly · Cancel anytime</div>
       </div>
       <!-- Pro -->
@@ -1294,7 +1294,7 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>API access</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Priority support</li>
         </ul>
-        <a href="https://rzp.io/rzp/PuIYPg61" target="_blank" class="price-btn">Go Pro</a>
+        <a href="https://rzp.io/rzp/PuIYPg61" target="_blank" class="price-btn" onclick="showPaymentOverlay('Pro')">Go Pro</a>
         <div class="price-india">🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime</div>
       </div>
     </div>
@@ -1437,6 +1437,33 @@ function closeModal() {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeModal();
+});
+</script>
+
+<!-- Payment overlay -->
+<div id="payment-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,45,107,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:40px 36px;max-width:440px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+    <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Complete your payment</h2>
+    <p style="color:#555;font-size:15px;line-height:1.6;margin-bottom:8px;">Your <strong id="overlay-plan"></strong> plan payment page has opened in a <strong>new tab</strong>.</p>
+    <p style="color:#555;font-size:15px;line-height:1.6;margin-bottom:28px;">Once payment is done, <strong>close that tab</strong> and you'll be right back here. ✅</p>
+    <button onclick="closePaymentOverlay()" style="background:#3B82F6;color:white;border:none;padding:12px 32px;border-radius:28px;font-size:15px;font-weight:600;cursor:pointer;width:100%;">Got it — I'll complete payment in the new tab</button>
+    <p style="margin-top:14px;font-size:12px;color:#aaa;">Payments are processed securely by Razorpay</p>
+  </div>
+</div>
+
+<script>
+function showPaymentOverlay(plan) {
+  document.getElementById('overlay-plan').textContent = plan;
+  var overlay = document.getElementById('payment-overlay');
+  overlay.style.display = 'flex';
+}
+function closePaymentOverlay() {
+  document.getElementById('payment-overlay').style.display = 'none';
+}
+// Close overlay if user clicks outside the box
+document.getElementById('payment-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePaymentOverlay();
 });
 </script>
 
