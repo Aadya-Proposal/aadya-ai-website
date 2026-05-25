@@ -430,99 +430,102 @@ const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function initDashboard(user) {
+function hideLoader() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+}
+
+async function start() {
+  // Hard timeout — loading screen ALWAYS hides after 4 seconds no matter what
+  setTimeout(hideLoader, 4000);
+
   try {
-    if (!user) {
-      window.location.href = "https://aadya-ai.com";
+    // getSession() correctly reads the access_token from the URL hash
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    
+    if (!session || !session.user) {
+      window.location.href = 'https://aadya-ai.com';
       return;
     }
 
-    // Set user info
+    const user = session.user;
     const email = user.email;
     const firstName = email.split('@')[0].charAt(0).toUpperCase();
-  document.getElementById('userEmail').textContent = email;
-  document.getElementById('userAvatar').textContent = firstName;
-  const displayName = userData?.name || email.split('@')[0];
-  document.getElementById('heroGreeting').textContent = `Welcome back, ${displayName} 👋`;
 
-  // Fetch user plan from Supabase users table
-  const { data: userData } = await supabaseClient
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .single();
+    // Show basic info immediately
+    document.getElementById('userEmail').textContent = email;
+    document.getElementById('userAvatar').textContent = firstName;
+    document.getElementById('heroGreeting').textContent = `Welcome back, ${email.split('@')[0]} 👋`;
 
-  if (userData) {
-    const plan = userData.plan || 'starter';
-    const isPro = plan.toLowerCase().includes('pro');
-    const planLabel = isPro ? 'Pro' : 'Starter';
-    const planLimit = isPro ? 9999 : 20;
-    const planPrice = isPro ? '₹599 / month' : '₹299 / month';
-    const docsUsed = userData.documents_used || 0;
+    // Hide loader — auth confirmed
+    hideLoader();
 
-    document.getElementById('planBadge').textContent = planLabel;
-    if (isPro) document.getElementById('planBadge').classList.add('pro');
-    document.getElementById('planName').textContent = `${planLabel} Plan`;
-    document.querySelector('.stat-card:nth-child(2) .stat-sub').textContent = planPrice;
-    document.getElementById('docsUsed').textContent = docsUsed;
-    document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${planLimit} included in Starter`;
+    // Load user plan data
+    try {
+      const { data: userData } = await supabaseClient
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
 
-    const pct = isPro ? 0 : Math.min((docsUsed / planLimit) * 100, 100);
-    document.getElementById('usageFill').style.width = pct + '%';
+      if (userData) {
+        const plan = userData.plan || 'starter';
+        const isPro = plan.toLowerCase().includes('pro');
+        const planLabel = isPro ? 'Pro' : 'Starter';
+        const planLimit = isPro ? 9999 : 20;
+        const planPrice = isPro ? '₹599 / month' : '₹299 / month';
+        const docsUsed = userData.documents_used || 0;
+        const displayName = userData.name || email.split('@')[0];
+
+        document.getElementById('heroGreeting').textContent = `Welcome back, ${displayName} 👋`;
+        document.getElementById('planBadge').textContent = planLabel;
+        if (isPro) document.getElementById('planBadge').classList.add('pro');
+        document.getElementById('planName').textContent = `${planLabel} Plan`;
+        document.querySelector('.stat-card:nth-child(2) .stat-sub').textContent = planPrice;
+        document.getElementById('docsUsed').textContent = docsUsed;
+        document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${planLimit} included in Starter`;
+        const pct = isPro ? 0 : Math.min((docsUsed / planLimit) * 100, 100);
+        document.getElementById('usageFill').style.width = pct + '%';
+      }
+    } catch(e) { console.warn('User plan load failed:', e); }
+
+    // Load proposal history
+    try {
+      const { data: proposals } = await supabaseClient
+        .from('proposals')
+        .select('*')
+        .eq('user_email', email)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (proposals && proposals.length > 0) {
+        document.getElementById('totalDocs').textContent = proposals.length;
+        document.getElementById('historyContainer').innerHTML = proposals.map(p => `
+          <div class="history-item">
+            <div class="file-icon">📄</div>
+            <div class="history-info">
+              <div class="history-name">${p.client_name || 'Proposal'} — ${p.proposal_title || 'Document'}</div>
+              <div class="history-date">${new Date(p.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+            </div>
+            ${p.pdf_url ? `<button class="history-download" onclick="window.open('${p.pdf_url}')">Download</button>` : ''}
+          </div>
+        `).join('');
+      }
+    } catch(e) { console.warn('Proposals load failed:', e); }
+
+  } catch(e) {
+    console.error('Dashboard error:', e);
+    hideLoader();
   }
-
-  // Fetch proposal history from proposals table
-  const { data: proposals } = await supabaseClient
-    .from('proposals')
-    .select('*')
-    .eq('user_email', email)
-    .order('created_at', { ascending: false })
-    .limit(5);
-
-  if (proposals && proposals.length > 0) {
-    document.getElementById('totalDocs').textContent = proposals.length;
-    const container = document.getElementById('historyContainer');
-    container.innerHTML = proposals.map(p => `
-      <div class="history-item">
-        <div class="file-icon">📄</div>
-        <div class="history-info">
-          <div class="history-name">${p.client_name || 'Proposal'} — ${p.proposal_title || 'Document'}</div>
-          <div class="history-date">${new Date(p.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</div>
-        </div>
-        ${p.pdf_url ? `<button class="history-download" onclick="window.open('${p.pdf_url}')">Download</button>` : ''}
-      </div>
-    `).join('');
-  }
-
-  // Hide loading
-  document.getElementById('loadingScreen').classList.add('hidden');
 }
 
 async function logout() {
   await supabaseClient.auth.signOut();
   localStorage.clear();
   sessionStorage.clear();
-  window.location.href = "https://aadya-ai.com";
+  window.location.href = 'https://aadya-ai.com';
 }
 
-// Use onAuthStateChange — correct pattern for OAuth redirects
-// Waits for Supabase to process the token from the URL hash
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  console.log('Auth event:', event, 'User:', session?.user?.email);
-
-  if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-    if (session?.user) {
-      await initDashboard(session.user);
-    } else {
-      // No session — redirect to home
-      window.location.href = 'https://aadya-ai.com';
-    }
-    // Always hide loading regardless
-    document.getElementById('loadingScreen').classList.add('hidden');
-  } else if (event === 'SIGNED_OUT') {
-    window.location.href = 'https://aadya-ai.com';
-  }
-});
+start();
 </script>
 </body>
 </html>
