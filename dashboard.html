@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aadya AI Dashboard</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .card {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      color: #163b8c;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+      font-size: 18px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background: #163b8c;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Welcome to Aadya AI</h1>
+
+  <p id="user-email">Checking login...</p>
+
+  <button onclick="signOut()">Logout</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseUrl = 'https://rscpsmwqtkduahhaejtv.supabase.co';
+const supabaseKey = 'sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA';
+
+const supabase = window.supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+);
+
+async function checkUser() {
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    window.location.href = "/";
+    return;
+  }
+
+  document.getElementById("user-email").innerText =
+    "Logged in as: " + user.email;
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  window.location.href = "/";
+}
+
+checkUser();
+
+</script>
+
+</body>
+</html>
