@@ -1033,7 +1033,7 @@ footer {
     <li><a href="#pricing">Pricing</a></li>
   </ul>
   <div class="nav-cta">
-    <a href="#" class="btn-ghost">Sign in</a>
+    <a href="#" class="btn-ghost" onclick="event.preventDefault(); signInWithGoogle();">Sign in</a>
     <a href="#" class="btn-primary" onclick="event.preventDefault();openModal()">Start free →</a>
   </div>
 </nav>
@@ -1467,5 +1467,39 @@ document.getElementById('payment-overlay').addEventListener('click', function(e)
 });
 </script>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = 'https://rscpsmwqtkduahhaejtv.supabase.co';
+const supabaseKey = 'sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA';
+
+const supabase = window.supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+);
+
+async function signInWithGoogle() {
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://aadya-ai.com/dashboard.html'
+    }
+  });
+
+  if (error) {
+    console.error(error.message);
+    alert(error.message);
+  }
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  window.location.href = "/";
+}
+</script>
+
 </body>
+
 </html>
