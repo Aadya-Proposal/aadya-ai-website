@@ -1,14 +1,19 @@
+<!-- ========================= -->
+<!-- CORRECTED COMPLETE index.html -->
+<!-- Public Landing Page -->
+<!-- ========================= -->
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  />
+  >
 
   <title>Aadya AI</title>
 
@@ -25,42 +30,124 @@
 
     body{
       background:#f5f7fb;
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:20px;
+      color:#0f172a;
     }
 
-    .login-box{
+    .navbar{
       width:100%;
-      max-width:420px;
+      height:90px;
       background:white;
-      padding:40px;
-      border-radius:20px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.08);
-    }
+      border-bottom:1px solid #e2e8f0;
 
-    .logo{
-      text-align:center;
-      margin-bottom:30px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+
+      padding:0 50px;
     }
 
     .logo img{
-      height:80px;
+      height:72px;
+      width:auto;
     }
 
-    h1{
-      font-size:32px;
-      color:#0f172a;
-      margin-bottom:12px;
-      text-align:center;
+    .nav-buttons{
+      display:flex;
+      gap:16px;
     }
 
-    p{
+    .signin-btn{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:14px 24px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:15px;
+    }
+
+    .hero{
+      width:100%;
+      max-width:1200px;
+      margin:80px auto;
+      padding:0 20px;
+
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:60px;
+      align-items:center;
+    }
+
+    .hero-left h1{
+      font-size:68px;
+      line-height:1.1;
+      margin-bottom:24px;
+    }
+
+    .hero-left p{
+      font-size:20px;
       color:#64748b;
-      text-align:center;
-      margin-bottom:30px;
+      line-height:1.7;
+      margin-bottom:32px;
+    }
+
+    .hero-btn{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:18px 32px;
+      border-radius:16px;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .hero-card{
+      background:white;
+      padding:40px;
+      border-radius:28px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    .hero-card h2{
+      font-size:32px;
+      margin-bottom:20px;
+    }
+
+    .hero-card p{
+      color:#64748b;
+      line-height:1.7;
+      margin-bottom:20px;
+    }
+
+    .popup-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+
+      display:none;
+      justify-content:center;
+      align-items:center;
+
+      z-index:9999;
+    }
+
+    .popup{
+      width:100%;
+      max-width:420px;
+      background:white;
+      border-radius:24px;
+      padding:40px;
+    }
+
+    .popup h2{
+      margin-bottom:14px;
+    }
+
+    .popup p{
+      color:#64748b;
+      margin-bottom:24px;
       line-height:1.6;
     }
 
@@ -74,18 +161,13 @@
       font-size:16px;
       font-weight:600;
       cursor:pointer;
-      transition:0.3s;
-    }
-
-    .google-btn:hover{
-      opacity:0.9;
+      margin-bottom:20px;
     }
 
     .divider{
       text-align:center;
-      margin:24px 0;
       color:#94a3b8;
-      font-size:14px;
+      margin-bottom:20px;
     }
 
     .email-input{
@@ -93,7 +175,7 @@
       padding:14px;
       border-radius:12px;
       border:1px solid #dbe2ea;
-      margin-bottom:12px;
+      margin-bottom:14px;
       font-size:15px;
     }
 
@@ -108,50 +190,153 @@
       cursor:pointer;
     }
 
+    .close-btn{
+      margin-top:20px;
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      background:#eef2ff;
+      cursor:pointer;
+    }
+
+    @media(max-width:900px){
+
+      .hero{
+        grid-template-columns:1fr;
+      }
+
+      .hero-left h1{
+        font-size:48px;
+      }
+
+    }
+
   </style>
 
 </head>
 
 <body>
 
-  <div class="login-box">
+  <!-- NAVBAR -->
+
+  <nav class="navbar">
 
     <div class="logo">
-      <img src="logo.png" alt="Aadya AI Logo">
+      <img src="logo.png" alt="Aadya AI">
     </div>
 
-    <h1>Welcome to Aadya AI</h1>
+    <div class="nav-buttons">
 
-    <p>
-      AI-powered proposal generation platform.
-    </p>
+      <button
+        class="signin-btn"
+        onclick="openPopup()"
+      >
+        Sign In
+      </button>
 
-    <button
-      class="google-btn"
-      onclick="signInWithGoogle()"
-    >
-      Continue with Google
-    </button>
-
-    <div class="divider">
-      OR
     </div>
 
-    <input
-      id="emailInput"
-      class="email-input"
-      type="email"
-      placeholder="Enter your email"
-    >
+  </nav>
 
-    <button
-      class="email-btn"
-      onclick="signInWithEmail()"
-    >
-      Continue with Email
-    </button>
+  <!-- HERO -->
+
+  <section class="hero">
+
+    <div class="hero-left">
+
+      <h1>
+        AI Proposal Generation
+        for Modern Businesses
+      </h1>
+
+      <p>
+        Generate professional proposals,
+        SOWs and business documents in seconds
+        using Aadya AI.
+      </p>
+
+      <button
+        class="hero-btn"
+        onclick="openPopup()"
+      >
+        Try Aadya AI
+      </button>
+
+    </div>
+
+    <div class="hero-card">
+
+      <h2>
+        Faster Proposal Creation
+      </h2>
+
+      <p>
+        Save hours of manual work by generating
+        polished client proposals instantly.
+      </p>
+
+      <p>
+        Perfect for agencies, consultants,
+        freelancers and growing startups.
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- LOGIN POPUP -->
+
+  <div
+    class="popup-overlay"
+    id="loginPopup"
+  >
+
+    <div class="popup">
+
+      <h2>Sign In</h2>
+
+      <p>
+        Continue with Google or Email.
+      </p>
+
+      <button
+        class="google-btn"
+        onclick="signInWithGoogle()"
+      >
+        Continue with Google
+      </button>
+
+      <div class="divider">
+        OR
+      </div>
+
+      <input
+        id="emailInput"
+        class="email-input"
+        type="email"
+        placeholder="Enter your email"
+      >
+
+      <button
+        class="email-btn"
+        onclick="signInWithEmail()"
+      >
+        Continue with Email
+      </button>
+
+      <button
+        class="close-btn"
+        onclick="closePopup()"
+      >
+        Close
+      </button>
+
+    </div>
 
   </div>
+
+  <!-- SUPABASE -->
 
   <script>
 
@@ -166,20 +351,30 @@
       SUPABASE_KEY
     );
 
+    function openPopup(){
+
+      document.getElementById("loginPopup")
+        .style.display = "flex";
+
+    }
+
+    function closePopup(){
+
+      document.getElementById("loginPopup")
+        .style.display = "none";
+
+    }
+
     async function signInWithGoogle() {
 
       await supabaseClient.auth.signInWithOAuth({
 
-        provider: 'google',
+        provider:'google',
 
-        options: {
+        options:{
 
           redirectTo:
-            'https://aadya-ai.com/dashboard.html',
-
-          queryParams: {
-            prompt: 'select_account'
-          }
+            'https://aadya-ai.com/dashboard.html'
 
         }
 
@@ -192,7 +387,7 @@
       const email =
         document.getElementById("emailInput").value;
 
-      if (!email) {
+      if(!email){
 
         alert("Please enter your email");
         return;
@@ -202,22 +397,20 @@
       const { error } =
         await supabaseClient.auth.signInWithOtp({
 
-          email: email,
+          email:email,
 
-          options: {
-
+          options:{
             emailRedirectTo:
               'https://aadya-ai.com/dashboard.html'
-
           }
 
         });
 
-      if (error) {
+      if(error){
 
         alert(error.message);
 
-      } else {
+      }else{
 
         alert(
           "Magic login link sent to your email."
