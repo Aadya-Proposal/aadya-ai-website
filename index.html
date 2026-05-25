@@ -1485,7 +1485,7 @@ const aadyaSupabase = window.supabase.createClient(
 
 async function signInWithGoogle() {
 
-  await supabaseClient.auth.signInWithOAuth({
+  const { error } = await aadyaSupabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: 'https://aadya-ai.com/dashboard.html',
@@ -1495,6 +1495,10 @@ async function signInWithGoogle() {
     }
   });
 
+  if (error) {
+    console.error(error.message);
+    alert(error.message);
+  }
 }
 
 async function signOut() {
