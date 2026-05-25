@@ -1,14 +1,19 @@
+<!-- ========================= -->
+<!-- CORRECTED COMPLETE dashboard.html -->
+<!-- Private Dashboard -->
+<!-- ========================= -->
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  />
+  >
 
   <title>Aadya AI Dashboard</title>
 
@@ -20,7 +25,7 @@
       margin:0;
       padding:0;
       box-sizing:border-box;
-      font-family:Arial, sans-serif;
+      font-family:Arial,sans-serif;
     }
 
     body{
@@ -29,7 +34,6 @@
     }
 
     .navbar{
-      width:100%;
       background:white;
       padding:20px 40px;
       display:flex;
@@ -40,20 +44,18 @@
 
     .logo img{
       height:72px;
-      width:auto;
-      object-fit:contain;
     }
 
-    .right-nav{
+    .nav-right{
       display:flex;
       align-items:center;
-      gap:20px;
+      gap:16px;
     }
 
-    .email-box{
+    .user-email{
       background:#eef2ff;
       color:#2563eb;
-      padding:14px 24px;
+      padding:12px 20px;
       border-radius:999px;
       font-weight:600;
     }
@@ -62,51 +64,51 @@
       background:#ef4444;
       color:white;
       border:none;
-      padding:14px 24px;
+      padding:12px 20px;
       border-radius:14px;
       cursor:pointer;
       font-weight:600;
     }
 
     .hero{
-      padding:60px 80px;
+      padding:60px 80px 30px;
     }
 
     .hero h1{
-      font-size:64px;
+      font-size:60px;
       margin-bottom:20px;
     }
 
     .hero p{
       color:#64748b;
       font-size:22px;
-      line-height:1.6;
+      line-height:1.7;
     }
 
     .dashboard-grid{
       padding:0 80px 80px;
+
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
       gap:24px;
     }
 
     .card{
       background:white;
-      padding:30px;
       border-radius:24px;
-      box-shadow:0 8px 30px rgba(0,0,0,0.05);
+      padding:30px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.05);
     }
 
     .card h2{
       margin-bottom:20px;
-      font-size:24px;
     }
 
     .proposal-form input,
     .proposal-form textarea{
       width:100%;
-      margin-bottom:14px;
       padding:14px;
+      margin-bottom:14px;
       border-radius:12px;
       border:1px solid #dbe2ea;
       font-size:15px;
@@ -134,7 +136,7 @@
       background:#e2e8f0;
       border-radius:999px;
       overflow:hidden;
-      margin-top:16px;
+      margin-top:18px;
     }
 
     .usage-fill{
@@ -149,16 +151,18 @@
 
 <body>
 
+  <!-- NAVBAR -->
+
   <nav class="navbar">
 
     <div class="logo">
-      <img src="logo.png" alt="Aadya AI Logo">
+      <img src="logo.png" alt="Aadya AI">
     </div>
 
-    <div class="right-nav">
+    <div class="nav-right">
 
       <div
-        class="email-box"
+        class="user-email"
         id="userEmail"
       >
         Loading...
@@ -175,6 +179,8 @@
 
   </nav>
 
+  <!-- HERO -->
+
   <section class="hero">
 
     <h1>
@@ -182,11 +188,13 @@
     </h1>
 
     <p>
-      Generate winning proposals, SOWs and professional
-      documents in seconds.
+      Generate professional proposals and
+      business documents instantly using Aadya AI.
     </p>
 
   </section>
+
+  <!-- DASHBOARD -->
 
   <section class="dashboard-grid">
 
@@ -224,15 +232,15 @@
       <h2>Proposal History</h2>
 
       <div class="history-item">
-        Startup Pitch Proposal.pdf
+        Branding Proposal.pdf
       </div>
 
       <div class="history-item">
-        SaaS Website Proposal.pdf
+        SaaS Scope of Work.pdf
       </div>
 
       <div class="history-item">
-        Branding Scope of Work.pdf
+        Marketing Proposal.pdf
       </div>
 
     </div>
@@ -253,6 +261,8 @@
 
   </section>
 
+  <!-- SUPABASE -->
+
   <script>
 
     const SUPABASE_URL =
@@ -266,13 +276,13 @@
       SUPABASE_KEY
     );
 
-    async function checkUser() {
+    async function checkUser(){
 
       const {
-        data: { user },
+        data:{ user },
       } = await supabaseClient.auth.getUser();
 
-      if (!user) {
+      if(!user){
 
         window.location.href =
           "https://aadya-ai.com";
@@ -281,12 +291,12 @@
 
       }
 
-      document.getElementById("userEmail").innerText =
-        user.email;
+      document.getElementById("userEmail")
+        .innerText = user.email;
 
     }
 
-    async function logout() {
+    async function logout(){
 
       await supabaseClient.auth.signOut();
 
