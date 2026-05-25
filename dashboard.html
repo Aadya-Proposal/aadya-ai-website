@@ -430,17 +430,16 @@ const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function initDashboard() {
-  const { data:{ user } } = await supabaseClient.auth.getUser();
+async function initDashboard(user) {
+  try {
+    if (!user) {
+      window.location.href = "https://aadya-ai.com";
+      return;
+    }
 
-  if (!user) {
-    window.location.href = "https://aadya-ai.com";
-    return;
-  }
-
-  // Set user info
-  const email = user.email;
-  const firstName = email.split('@')[0].charAt(0).toUpperCase();
+    // Set user info
+    const email = user.email;
+    const firstName = email.split('@')[0].charAt(0).toUpperCase();
   document.getElementById('userEmail').textContent = email;
   document.getElementById('userAvatar').textContent = firstName;
   const displayName = userData?.name || email.split('@')[0];
@@ -506,7 +505,24 @@ async function logout() {
   window.location.href = "https://aadya-ai.com";
 }
 
-initDashboard();
+// Use onAuthStateChange — correct pattern for OAuth redirects
+// Waits for Supabase to process the token from the URL hash
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  console.log('Auth event:', event, 'User:', session?.user?.email);
+
+  if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+    if (session?.user) {
+      await initDashboard(session.user);
+    } else {
+      // No session — redirect to home
+      window.location.href = 'https://aadya-ai.com';
+    }
+    // Always hide loading regardless
+    document.getElementById('loadingScreen').classList.add('hidden');
+  } else if (event === 'SIGNED_OUT') {
+    window.location.href = 'https://aadya-ai.com';
+  }
+});
 </script>
 </body>
 </html>
