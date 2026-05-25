@@ -443,7 +443,8 @@ async function initDashboard() {
   const firstName = email.split('@')[0].charAt(0).toUpperCase();
   document.getElementById('userEmail').textContent = email;
   document.getElementById('userAvatar').textContent = firstName;
-  document.getElementById('heroGreeting').textContent = `Welcome back, ${email.split('@')[0]} 👋`;
+  const displayName = userData?.name || email.split('@')[0];
+  document.getElementById('heroGreeting').textContent = `Welcome back, ${displayName} 👋`;
 
   // Fetch user plan from Supabase users table
   const { data: userData } = await supabaseClient
@@ -475,7 +476,7 @@ async function initDashboard() {
   const { data: proposals } = await supabaseClient
     .from('proposals')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_email', email)
     .order('created_at', { ascending: false })
     .limit(5);
 
@@ -486,7 +487,7 @@ async function initDashboard() {
       <div class="history-item">
         <div class="file-icon">📄</div>
         <div class="history-info">
-          <div class="history-name">${p.client_name || 'Proposal'} — ${p.document_type || 'Document'}</div>
+          <div class="history-name">${p.client_name || 'Proposal'} — ${p.proposal_title || 'Document'}</div>
           <div class="history-date">${new Date(p.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</div>
         </div>
         ${p.pdf_url ? `<button class="history-download" onclick="window.open('${p.pdf_url}')">Download</button>` : ''}
