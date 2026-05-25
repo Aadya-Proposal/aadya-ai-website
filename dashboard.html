@@ -1,53 +1,439 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aadya AI Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Aadya AI Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, sans-serif;
+    }
+
+    body {
+      background: #f5f7fb;
+      color: #0f172a;
+    }
+
+    /* NAVBAR */
+
+    .navbar {
+      width: 100%;
+      height: 80px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 40px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo img {
+      width: 42px;
+    }
+
+    .logo h2 {
+      font-size: 24px;
+      color: #0f172a;
+    }
+
+    .logo span {
+      color: #3b82f6;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-badge {
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .logout-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* PAGE */
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .welcome {
+      margin-bottom: 30px;
+    }
+
+    .welcome h1 {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .welcome p {
+      color: #64748b;
+      font-size: 18px;
+    }
+
+    /* CARDS */
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    }
+
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .card-value {
+      font-size: 38px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .muted {
+      color: #64748b;
+    }
+
+    /* PROPOSAL FORM */
+
+    .proposal-section {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+      margin-bottom: 30px;
+    }
+
+    .proposal-section h2 {
+      margin-bottom: 10px;
+      font-size: 30px;
+    }
+
+    .proposal-section p {
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid #dbe2ea;
+      font-size: 15px;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 160px;
+    }
+
+    .generate-btn {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      border: none;
+      padding: 16px 26px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    /* HISTORY */
+
+    .history-section {
+      background: white;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    }
+
+    .history-section h2 {
+      margin-bottom: 24px;
+    }
+
+    .history-item {
+      border: 1px solid #e2e8f0;
+      padding: 18px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-item h4 {
+      margin-bottom: 6px;
+    }
+
+    .download-btn {
+      background: #0f172a;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    @media(max-width: 768px) {
+
+      .navbar {
+        padding: 0 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full-width {
+        grid-column: span 1;
+      }
+
+      .welcome h1 {
+        font-size: 32px;
+      }
+
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>Welcome to Aadya AI</h1>
+  <!-- NAVBAR -->
 
-<p id="user-email">Checking login...</p>
+  <div class="navbar">
 
-<button onclick="signOut()">Logout</button>
+    <div class="logo">
+      <img src="LOGO-ICON-only.png" />
+      <h2>aadya <span>ai</span></h2>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div class="nav-right">
 
-<script>
+      <div class="user-badge" id="userEmail">
+        Loading...
+      </div>
 
-const supabaseUrl = 'https://rscpsmwqtkduahhaejtv.supabase.co';
-const supabaseKey = 'sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA';
+      <button class="logout-btn" onclick="logout()">
+        Logout
+      </button>
 
-const aadyaSupabase = window.supabase.createClient(
-  supabaseUrl,
-  supabaseKey
-);
+    </div>
 
-async function checkUser() {
+  </div>
 
-  const {
-    data: { user }
-  } = await aadyaSupabase.auth.getUser();
+  <!-- PAGE -->
 
-  if (!user) {
-    window.location.href = "/";
-    return;
-  }
+  <div class="container">
 
-  document.getElementById("user-email").innerText =
-    "Logged in as: " + user.email;
-}
+    <!-- WELCOME -->
 
-async function signOut() {
-  await aadyaSupabase.auth.signOut();
-  window.location.href = "/";
-}
+    <div class="welcome">
+      <h1>Welcome back 👋</h1>
+      <p>
+        Generate winning proposals, SOWs and professional documents in seconds.
+      </p>
+    </div>
 
-checkUser();
+    <!-- TOP CARDS -->
 
-</script>
+    <div class="top-grid">
+
+      <div class="card">
+        <h3>Current Plan</h3>
+        <div class="card-value">Free</div>
+        <div class="muted">Upgrade anytime</div>
+      </div>
+
+      <div class="card">
+        <h3>Documents Used</h3>
+        <div class="card-value">0</div>
+        <div class="muted">This month</div>
+      </div>
+
+      <div class="card">
+        <h3>Remaining Credits</h3>
+        <div class="card-value">5</div>
+        <div class="muted">Available proposals</div>
+      </div>
+
+    </div>
+
+    <!-- GENERATE -->
+
+    <div class="proposal-section">
+
+      <h2>Create Proposal</h2>
+
+      <p>
+        Fill the project details below and Aadya AI will generate a professional proposal instantly.
+      </p>
+
+      <div class="form-grid">
+
+        <input type="text" placeholder="Client Name" />
+
+        <input type="text" placeholder="Proposal Title" />
+
+        <input type="text" placeholder="Your Company Name" />
+
+        <select>
+          <option>Select Proposal Type</option>
+          <option>IT Consulting</option>
+          <option>Software Development</option>
+          <option>Marketing Services</option>
+          <option>UI/UX Design</option>
+          <option>Video Production</option>
+        </select>
+
+        <textarea
+          class="full-width"
+          placeholder="Describe project scope, deliverables, timelines and requirements..."
+        ></textarea>
+
+      </div>
+
+      <button class="generate-btn">
+        Generate Proposal
+      </button>
+
+    </div>
+
+    <!-- HISTORY -->
+
+    <div class="history-section">
+
+      <h2>Recent Proposals</h2>
+
+      <div class="history-item">
+
+        <div>
+          <h4>HDFC SAP Integration Proposal</h4>
+          <p class="muted">Generated 2 days ago</p>
+        </div>
+
+        <button class="download-btn">
+          Download PDF
+        </button>
+
+      </div>
+
+      <div class="history-item">
+
+        <div>
+          <h4>Aditya Dhar Films SOW</h4>
+          <p class="muted">Generated 5 days ago</p>
+        </div>
+
+        <button class="download-btn">
+          Download PDF
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SUPABASE -->
+
+  <script>
+
+    const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
+
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    async function checkUser() {
+
+      const {
+        data: { user },
+      } = await supabaseClient.auth.getUser();
+
+      if (!user) {
+        window.location.href = "/";
+        return;
+      }
+
+      document.getElementById("userEmail").innerText =
+        user.email;
+
+    }
+
+    async function logout() {
+
+      await supabaseClient.auth.signOut();
+
+      window.location.href = "/";
+
+    }
+
+    checkUser();
+
+  </script>
 
 </body>
 </html>
