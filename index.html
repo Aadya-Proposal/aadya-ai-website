@@ -1,265 +1,235 @@
-<!-- ========================= -->
-<!-- CORRECTED COMPLETE index.html -->
-<!-- Public Landing Page -->
-<!-- ========================= -->
-
+```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aadya AI</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, sans-serif;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
 
-    body{
-      background:#f5f7fb;
-      color:#0f172a;
+    body {
+      background: #f5f7fb;
+      color: #0f172a;
     }
 
-    .navbar{
-      width:100%;
-      height:90px;
-      background:white;
-      border-bottom:1px solid #e2e8f0;
-
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-
-      padding:0 50px;
+    header {
+      width: 100%;
+      height: 90px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .logo img{
-      height:72px;
-      width:auto;
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .nav-buttons{
-      display:flex;
-      gap:16px;
+    .logo img {
+      height: 52px;
+      width: auto;
     }
 
-    .signin-btn{
-      background:#2563eb;
-      color:white;
-      border:none;
-      padding:14px 24px;
-      border-radius:14px;
-      cursor:pointer;
-      font-weight:600;
-      font-size:15px;
+    .nav-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
     }
 
-    .hero{
-      width:100%;
-      max-width:1200px;
-      margin:80px auto;
-      padding:0 20px;
-
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:60px;
-      align-items:center;
+    .hero {
+      min-height: calc(100vh - 90px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 80px;
+      padding: 80px;
     }
 
-    .hero-left h1{
-      font-size:68px;
-      line-height:1.1;
-      margin-bottom:24px;
+    .hero-left {
+      max-width: 700px;
     }
 
-    .hero-left p{
-      font-size:20px;
-      color:#64748b;
-      line-height:1.7;
-      margin-bottom:32px;
+    .hero-left h1 {
+      font-size: 78px;
+      line-height: 1.05;
+      margin-bottom: 30px;
+      color: #0b1440;
     }
 
-    .hero-btn{
-      background:#2563eb;
-      color:white;
-      border:none;
-      padding:18px 32px;
-      border-radius:16px;
-      font-size:16px;
-      font-weight:700;
-      cursor:pointer;
+    .hero-left p {
+      font-size: 30px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 40px;
     }
 
-    .hero-card{
-      background:white;
-      padding:40px;
-      border-radius:28px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.06);
+    .hero-left button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 18px 38px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
     }
 
-    .hero-card h2{
-      font-size:32px;
-      margin-bottom:20px;
+    .hero-card {
+      width: 500px;
+      background: white;
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
     }
 
-    .hero-card p{
-      color:#64748b;
-      line-height:1.7;
-      margin-bottom:20px;
+    .hero-card h2 {
+      font-size: 48px;
+      margin-bottom: 24px;
+      color: #0b1440;
     }
 
-    .popup-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.55);
-
-      display:none;
-      justify-content:center;
-      align-items:center;
-
-      z-index:9999;
+    .hero-card p {
+      font-size: 24px;
+      color: #64748b;
+      line-height: 1.7;
     }
 
-    .popup{
-      width:100%;
-      max-width:420px;
-      background:white;
-      border-radius:24px;
-      padding:40px;
+    #loginPopup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
     }
 
-    .popup h2{
-      margin-bottom:14px;
+    .popup-box {
+      background: white;
+      width: 420px;
+      padding: 35px;
+      border-radius: 24px;
     }
 
-    .popup p{
-      color:#64748b;
-      margin-bottom:24px;
-      line-height:1.6;
+    .popup-box h2 {
+      margin-bottom: 25px;
+      font-size: 32px;
+      color: #0b1440;
     }
 
-    .google-btn{
-      width:100%;
-      padding:16px;
-      border:none;
-      border-radius:14px;
-      background:#2563eb;
-      color:white;
-      font-size:16px;
-      font-weight:600;
-      cursor:pointer;
-      margin-bottom:20px;
+    .popup-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 18px;
     }
 
-    .divider{
-      text-align:center;
-      color:#94a3b8;
-      margin-bottom:20px;
+    .google-btn {
+      background: #2563eb;
+      color: white;
     }
 
-    .email-input{
-      width:100%;
-      padding:14px;
-      border-radius:12px;
-      border:1px solid #dbe2ea;
-      margin-bottom:14px;
-      font-size:15px;
+    .email-btn {
+      background: #111827;
+      color: white;
     }
 
-    .email-btn{
-      width:100%;
-      padding:14px;
-      border:none;
-      border-radius:12px;
-      background:#0f172a;
-      color:white;
-      font-weight:600;
-      cursor:pointer;
+    .close-btn {
+      background: #e5e7eb;
+      color: #111827;
     }
 
-    .close-btn{
-      margin-top:20px;
-      width:100%;
-      padding:14px;
-      border:none;
-      border-radius:12px;
-      background:#eef2ff;
-      cursor:pointer;
+    .popup-box input {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid #d1d5db;
+      margin-bottom: 18px;
+      font-size: 16px;
     }
 
-    @media(max-width:900px){
+    .or-text {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #64748b;
+    }
 
-      .hero{
-        grid-template-columns:1fr;
+    @media(max-width: 1100px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
       }
 
-      .hero-left h1{
-        font-size:48px;
+      .hero-left h1 {
+        font-size: 54px;
       }
 
-    }
+      .hero-left p {
+        font-size: 22px;
+      }
 
+      .hero-card {
+        width: 100%;
+        max-width: 600px;
+      }
+    }
   </style>
-
 </head>
-
 <body>
 
-  <!-- NAVBAR -->
-
-  <nav class="navbar">
+  <header>
 
     <div class="logo">
-      <img src="logo.png" alt="Aadya AI">
+      <img src="logo.png" alt="Aadya AI Logo">
     </div>
 
-    <div class="nav-buttons">
+    <button class="nav-btn" onclick="openPopup()">
+      Sign In
+    </button>
 
-      <button
-        class="signin-btn"
-        onclick="openPopup()"
-      >
-        Sign In
-      </button>
-
-    </div>
-
-  </nav>
-
-  <!-- HERO -->
+  </header>
 
   <section class="hero">
 
     <div class="hero-left">
 
       <h1>
-        AI Proposal Generation
-        for Modern Businesses
+        AI Proposal<br>
+        Generation for<br>
+        Modern Businesses
       </h1>
 
       <p>
-        Generate professional proposals,
-        SOWs and business documents in seconds
-        using Aadya AI.
+        Generate professional proposals, SOWs and business
+        documents in seconds using Aadya AI.
       </p>
 
-      <button
-        class="hero-btn"
-        onclick="openPopup()"
-      >
+      <button onclick="openPopup()">
         Try Aadya AI
       </button>
 
@@ -272,61 +242,46 @@
       </h2>
 
       <p>
-        Save hours of manual work by generating
-        polished client proposals instantly.
-      </p>
-
-      <p>
-        Perfect for agencies, consultants,
-        freelancers and growing startups.
+        Save hours of manual work by generating polished client
+        proposals instantly.
+        <br><br>
+        Perfect for agencies, consultants, freelancers and growing startups.
       </p>
 
     </div>
 
   </section>
 
-  <!-- LOGIN POPUP -->
+  <div id="loginPopup">
 
-  <div
-    class="popup-overlay"
-    id="loginPopup"
-  >
-
-    <div class="popup">
+    <div class="popup-box">
 
       <h2>Sign In</h2>
 
-      <p>
-        Continue with Google or Email.
-      </p>
-
       <button
-        class="google-btn"
+        class="popup-btn google-btn"
         onclick="signInWithGoogle()"
       >
         Continue with Google
       </button>
 
-      <div class="divider">
-        OR
-      </div>
+      <div class="or-text">OR</div>
 
       <input
         id="emailInput"
-        class="email-input"
         type="email"
         placeholder="Enter your email"
       >
 
       <button
-        class="email-btn"
+        class="popup-btn email-btn"
         onclick="signInWithEmail()"
       >
         Continue with Email
       </button>
 
       <button
-        class="close-btn"
+        class="popup-btn close-btn"
         onclick="closePopup()"
       >
         Close
@@ -336,29 +291,28 @@
 
   </div>
 
-  <!-- SUPABASE -->
-
   <script>
 
     const SUPABASE_URL =
       "https://rscpsmwqtkduahhaejtv.supabase.co";
 
     const SUPABASE_KEY =
-      "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
+      "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
 
-    const supabaseClient = supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
 
-    function openPopup(){
+    function openPopup() {
 
       document.getElementById("loginPopup")
         .style.display = "flex";
 
     }
 
-    function closePopup(){
+    function closePopup() {
 
       document.getElementById("loginPopup")
         .style.display = "none";
@@ -369,13 +323,15 @@
 
       await supabaseClient.auth.signInWithOAuth({
 
-        provider:'google',
+        provider: 'google',
 
-        options:{
-
+        options: {
           redirectTo:
-            'https://aadya-ai.com/dashboard.html'
+            'https://aadya-ai.com/dashboard.html',
 
+          queryParams: {
+            prompt: 'select_account'
+          }
         }
 
       });
@@ -387,9 +343,9 @@
       const email =
         document.getElementById("emailInput").value;
 
-      if(!email){
+      if (!email) {
 
-        alert("Please enter your email");
+        alert("Please enter email");
         return;
 
       }
@@ -397,20 +353,20 @@
       const { error } =
         await supabaseClient.auth.signInWithOtp({
 
-          email:email,
+          email,
 
-          options:{
+          options: {
             emailRedirectTo:
               'https://aadya-ai.com/dashboard.html'
           }
 
         });
 
-      if(error){
+      if (error) {
 
         alert(error.message);
 
-      }else{
+      } else {
 
         alert(
           "Magic login link sent to your email."
@@ -423,5 +379,5 @@
   </script>
 
 </body>
-
 </html>
+```
