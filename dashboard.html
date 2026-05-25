@@ -2,256 +2,260 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <title>Aadya AI Dashboard</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
       font-family: Inter, sans-serif;
     }
 
-    body {
-      background: #f5f7fb;
-      color: #0f172a;
+    body{
+      background:#f5f7fb;
+      color:#0f172a;
     }
 
     /* NAVBAR */
 
-    .navbar {
-      width: 100%;
-      height: 80px;
-      background: white;
-      border-bottom: 1px solid #e2e8f0;
+    .navbar{
+      width:100%;
+      height:84px;
+      background:white;
+      border-bottom:1px solid #e2e8f0;
 
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
 
-      padding: 0 40px;
+      padding:0 40px;
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .logo{
+      display:flex;
+      align-items:center;
     }
 
-    .logo img {
-      width: 42px;
+    .logo img{
+      height:54px;
+      width:auto;
+      object-fit:contain;
     }
 
-    .logo h2 {
-      font-size: 24px;
-      color: #0f172a;
+    .nav-right{
+      display:flex;
+      align-items:center;
+      gap:16px;
     }
 
-    .logo span {
-      color: #3b82f6;
+    .user-badge{
+      background:#eff6ff;
+      color:#2563eb;
+      padding:12px 18px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:600;
     }
 
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .logout-btn{
+      background:#ef4444;
+      color:white;
+      border:none;
+      padding:12px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      transition:0.2s;
     }
 
-    .user-badge {
-      background: #eff6ff;
-      color: #2563eb;
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
+    .logout-btn:hover{
+      opacity:0.92;
     }
 
-    .logout-btn {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
+    /* MAIN */
+
+    .container{
+      width:100%;
+      max-width:1280px;
+      margin:40px auto;
+      padding:0 20px;
     }
 
-    .logout-btn:hover {
-      opacity: 0.9;
+    .welcome{
+      margin-bottom:32px;
     }
 
-    /* PAGE */
-
-    .container {
-      width: 100%;
-      max-width: 1280px;
-      margin: 40px auto;
-      padding: 0 20px;
+    .welcome h1{
+      font-size:42px;
+      margin-bottom:10px;
     }
 
-    .welcome {
-      margin-bottom: 30px;
-    }
-
-    .welcome h1 {
-      font-size: 42px;
-      margin-bottom: 12px;
-    }
-
-    .welcome p {
-      color: #64748b;
-      font-size: 18px;
+    .welcome p{
+      font-size:18px;
+      color:#64748b;
     }
 
     /* CARDS */
 
-    .top-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      margin-bottom: 30px;
+    .top-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:24px;
+      margin-bottom:30px;
     }
 
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    .card{
+      background:white;
+      border-radius:22px;
+      padding:28px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.04);
     }
 
-    .card h3 {
-      font-size: 18px;
-      margin-bottom: 16px;
+    .card h3{
+      font-size:18px;
+      margin-bottom:14px;
     }
 
-    .card-value {
-      font-size: 38px;
-      font-weight: 700;
-      margin-bottom: 8px;
+    .card-value{
+      font-size:40px;
+      font-weight:700;
+      margin-bottom:8px;
     }
 
-    .muted {
-      color: #64748b;
+    .muted{
+      color:#64748b;
     }
 
-    /* PROPOSAL FORM */
+    /* FORM */
 
-    .proposal-section {
-      background: white;
-      border-radius: 24px;
-      padding: 40px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
-      margin-bottom: 30px;
+    .proposal-section{
+      background:white;
+      border-radius:24px;
+      padding:40px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.04);
+      margin-bottom:30px;
     }
 
-    .proposal-section h2 {
-      margin-bottom: 10px;
-      font-size: 30px;
+    .proposal-section h2{
+      font-size:30px;
+      margin-bottom:10px;
     }
 
-    .proposal-section p {
-      color: #64748b;
-      margin-bottom: 30px;
+    .proposal-section p{
+      color:#64748b;
+      margin-bottom:30px;
     }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
     }
 
-    .full-width {
-      grid-column: span 2;
+    .full-width{
+      grid-column:span 2;
     }
 
     input,
     textarea,
-    select {
-      width: 100%;
-      padding: 16px;
-      border-radius: 14px;
-      border: 1px solid #dbe2ea;
-      font-size: 15px;
-      outline: none;
+    select{
+      width:100%;
+      padding:16px;
+      border-radius:14px;
+      border:1px solid #dbe2ea;
+      font-size:15px;
+      outline:none;
+      background:white;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 160px;
+    textarea{
+      resize:vertical;
+      min-height:160px;
     }
 
-    .generate-btn {
-      background: linear-gradient(135deg, #2563eb, #3b82f6);
-      color: white;
-      border: none;
-      padding: 16px 26px;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 20px;
+    .generate-btn{
+      background:linear-gradient(135deg,#2563eb,#3b82f6);
+      color:white;
+      border:none;
+      padding:16px 28px;
+      border-radius:14px;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+      margin-top:20px;
     }
 
     /* HISTORY */
 
-    .history-section {
-      background: white;
-      border-radius: 24px;
-      padding: 30px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    .history-section{
+      background:white;
+      border-radius:24px;
+      padding:30px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.04);
     }
 
-    .history-section h2 {
-      margin-bottom: 24px;
+    .history-section h2{
+      margin-bottom:24px;
     }
 
-    .history-item {
-      border: 1px solid #e2e8f0;
-      padding: 18px;
-      border-radius: 14px;
-      margin-bottom: 16px;
+    .history-item{
+      border:1px solid #e2e8f0;
+      padding:18px;
+      border-radius:16px;
+      margin-bottom:16px;
 
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
-    .history-item h4 {
-      margin-bottom: 6px;
+    .history-item h4{
+      margin-bottom:6px;
     }
 
-    .download-btn {
-      background: #0f172a;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 10px;
-      cursor: pointer;
+    .download-btn{
+      background:#0f172a;
+      color:white;
+      border:none;
+      padding:10px 16px;
+      border-radius:10px;
+      cursor:pointer;
     }
 
-    @media(max-width: 768px) {
+    /* MOBILE */
 
-      .navbar {
-        padding: 0 20px;
+    @media(max-width:768px){
+
+      .navbar{
+        padding:0 20px;
       }
 
-      .form-grid {
-        grid-template-columns: 1fr;
+      .form-grid{
+        grid-template-columns:1fr;
       }
 
-      .full-width {
-        grid-column: span 1;
+      .full-width{
+        grid-column:span 1;
       }
 
-      .welcome h1 {
-        font-size: 32px;
+      .welcome h1{
+        font-size:32px;
+      }
+
+      .history-item{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:16px;
       }
 
     }
+
   </style>
 </head>
 
@@ -262,8 +266,7 @@
   <div class="navbar">
 
     <div class="logo">
-      <img src="LOGO-ICON-only.png" />
-      <h2>aadya <span>ai</span></h2>
+      <img src="./logo.png" alt="Aadya AI Logo">
     </div>
 
     <div class="nav-right">
@@ -284,16 +287,15 @@
 
   <div class="container">
 
-    <!-- WELCOME -->
-
     <div class="welcome">
       <h1>Welcome back 👋</h1>
+
       <p>
         Generate winning proposals, SOWs and professional documents in seconds.
       </p>
     </div>
 
-    <!-- TOP CARDS -->
+    <!-- TOP STATS -->
 
     <div class="top-grid">
 
@@ -317,23 +319,23 @@
 
     </div>
 
-    <!-- GENERATE -->
+    <!-- PROPOSAL GENERATOR -->
 
     <div class="proposal-section">
 
       <h2>Create Proposal</h2>
 
       <p>
-        Fill the project details below and Aadya AI will generate a professional proposal instantly.
+        Fill the details below and Aadya AI will generate a professional proposal instantly.
       </p>
 
       <div class="form-grid">
 
-        <input type="text" placeholder="Client Name" />
+        <input type="text" placeholder="Client Name">
 
-        <input type="text" placeholder="Proposal Title" />
+        <input type="text" placeholder="Proposal Title">
 
-        <input type="text" placeholder="Your Company Name" />
+        <input type="text" placeholder="Your Company Name">
 
         <select>
           <option>Select Proposal Type</option>
@@ -397,7 +399,8 @@
 
   <script>
 
-    const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
+    const SUPABASE_URL =
+      "https://rscpsmwqtkduahhaejtv.supabase.co";
 
     const SUPABASE_KEY =
       "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
@@ -427,7 +430,8 @@
 
       await supabaseClient.auth.signOut();
 
-      window.location.href = "/";
+      window.location.href =
+        "https://accounts.google.com/logout";
 
     }
 
