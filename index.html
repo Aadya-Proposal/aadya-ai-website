@@ -1033,7 +1033,7 @@ footer {
     <li><a href="#pricing">Pricing</a></li>
   </ul>
   <div class="nav-cta">
-    <a href="#" class="btn-ghost" onclick="event.preventDefault(); signInWithGoogle();" onclick="signInWithGoogle(); return false;">Sign in</a>
+    <a href="#" class="btn-ghost" onclick="event.preventDefault(); openSignIn();">Sign in</a>
     <a href="#" class="btn-primary" onclick="event.preventDefault();openModal()">Start free →</a>
   </div>
 </nav>
@@ -1392,10 +1392,10 @@ footer {
       <div>
         <div class="footer-col-title">Legal</div>
         <ul class="footer-links">
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Terms of Service</a></li>
-          <li><a href="#">Cookie Policy</a></li>
-          <li><a href="#">GDPR</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/privacy">Cookie Policy</a></li>
+          <li><a href="/privacy">GDPR</a></li>
         </ul>
       </div>
     </div>
@@ -1440,6 +1440,46 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
+<!-- SIGN IN MODAL -->
+<div id="signInModal" style="display:none;position:fixed;inset:0;background:rgba(15,45,107,0.85);z-index:9998;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
+    <button onclick="closeSignIn()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:#aaa;cursor:pointer;">✕</button>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="" style="height:36px;margin-bottom:16px;display:none;">
+    <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin-bottom:6px;">Welcome to Aadya AI</h2>
+    <p style="font-size:14px;color:#64748b;margin-bottom:28px;">Sign in to access your dashboard</p>
+
+    <!-- Google -->
+    <button onclick="signInWithGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:white;border:1.5px solid #e2e8f0;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:600;color:#1a1a1a;cursor:pointer;margin-bottom:16px;transition:all 0.2s;" onmouseover="this.style.borderColor='#3B82F6'" onmouseout="this.style.borderColor='#e2e8f0'">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Continue with Google
+    </button>
+
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+      <span style="font-size:12px;color:#94a3b8;font-weight:500;">or use your email</span>
+      <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+    </div>
+
+    <!-- Magic Link -->
+    <div id="magicLinkForm">
+      <input type="email" id="magicEmail" placeholder="you@example.com" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:12px;outline:none;transition:border 0.2s;" onfocus="this.style.borderColor='#3B82F6'" onblur="this.style.borderColor='#e2e8f0'">
+      <button onclick="sendMagicLink()" id="magicBtn" style="width:100%;background:#0F2D6B;color:white;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#3B82F6'" onmouseout="this.style.background='#0F2D6B'">
+        Send magic link →
+      </button>
+    </div>
+
+    <!-- Success state -->
+    <div id="magicLinkSent" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;">
+      <div style="font-size:24px;margin-bottom:8px;">📬</div>
+      <div style="font-weight:700;color:#15803d;margin-bottom:4px;">Check your inbox!</div>
+      <div style="font-size:13px;color:#166534;">We sent a sign-in link to <strong id="sentEmail"></strong>. Click it to log in — no password needed.</div>
+    </div>
+
+    <p style="font-size:11px;color:#94a3b8;margin-top:20px;">By signing in you agree to our <a href="/terms" style="color:#3B82F6;">Terms</a> & <a href="/privacy" style="color:#3B82F6;">Privacy Policy</a></p>
+  </div>
+</div>
+
 <!-- Payment overlay -->
 <div id="payment-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,45,107,0.85);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:40px 36px;max-width:440px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
@@ -1483,21 +1523,55 @@ const aadyaSupabase = window.supabase.createClient(
   supabaseKey
 );
 
-async function signInWithGoogle() {
+function openSignIn() {
+  document.getElementById('signInModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('magicEmail').focus(), 100);
+}
+function closeSignIn() {
+  document.getElementById('signInModal').style.display = 'none';
+  document.body.style.overflow = '';
+  // Reset form
+  document.getElementById('magicLinkForm').style.display = 'block';
+  document.getElementById('magicLinkSent').style.display = 'none';
+  document.getElementById('magicEmail').value = '';
+}
 
+async function signInWithGoogle() {
+  closeSignIn();
   const { error } = await aadyaSupabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: 'https://aadya-ai.com/dashboard.html',
-      queryParams: {
-        prompt: 'select_account'
-      }
+      queryParams: { prompt: 'select_account' }
     }
+  });
+  if (error) { console.error(error.message); alert(error.message); }
+}
+
+async function sendMagicLink() {
+  const email = document.getElementById('magicEmail').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('magicEmail').style.borderColor = '#ef4444';
+    return;
+  }
+  const btn = document.getElementById('magicBtn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  const { error } = await aadyaSupabase.auth.signInWithOtp({
+    email: email,
+    options: { emailRedirectTo: 'https://aadya-ai.com/dashboard.html' }
   });
 
   if (error) {
-    console.error(error.message);
-    alert(error.message);
+    btn.textContent = 'Send magic link →';
+    btn.disabled = false;
+    alert('Error: ' + error.message);
+  } else {
+    document.getElementById('sentEmail').textContent = email;
+    document.getElementById('magicLinkForm').style.display = 'none';
+    document.getElementById('magicLinkSent').style.display = 'block';
   }
 }
 
