@@ -575,6 +575,96 @@ async function logout() {
 }
 
 start();
+
+// After user logs in, check if they have a name - if not, ask for it
+async function checkAndCollectName() {
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (!session || !session.user) return;
+    
+    const userEmail = session.user.email;
+    
+    // Get user record
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('name')
+      .eq('email', userEmail)
+      .maybeSingle();
+    
+    // If user has no name, ask for it
+    if (!userData || !userData.name) {
+      showNameCollectionModal(userEmail);
+    }
+  } catch(e) {
+    console.error('Name collection error:', e);
+  }
+}
+
+function showNameCollectionModal(email) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(15,45,107,0.85);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Before you win clients, let's get your name</h2>
+      <p style="font-size:14px;color:#64748b;margin-bottom:28px;">It'll appear on all your generated proposals</p>
+      
+      <input type="text" id="dashboardNameInput" placeholder="Your full name" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:16px;outline:none;box-sizing:border-box;" autofocus>
+      
+      <button onclick="saveDashboardName('${email}', document.getElementById('dashboardNameInput').value)" style="width:100%;background:#0F2D6B;color:white;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:background 0.2s;">
+        Save & Continue
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  document.getElementById('dashboardNameInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      saveDashboardName(email, this.value);
+    }
+  });
+}
+
+async function saveDashboardName(email, name) {
+  if (!name.trim()) {
+    alert('Please enter your name');
+    return;
+  }
+  
+  try {
+    // Update user in Supabase
+    const { error } = await supabaseClient
+      .from('users')
+      .update({ name: name.trim() })
+      .eq('email', email);
+    
+    if (error) throw error;
+    
+    // Remove modal and refresh greeting
+    const modal = document.querySelector('div[style*="rgba(15,45,107,0.85)"]');
+    if (modal) modal.remove();
+    
+    // Update greeting with the new name
+    document.getElementById('heroGreeting').textContent = `Welcome back, ${name.trim()} 👋`;
+    
+    console.log('Name saved:', name);
+  } catch(e) {
+    console.error('Save name error:', e);
+    alert('Error saving name. Please try again.');
+  }
+}
+
+// Check for name when dashboard loads
+setTimeout(checkAndCollectName, 1000);
 </script>
 </body>
 </html>
