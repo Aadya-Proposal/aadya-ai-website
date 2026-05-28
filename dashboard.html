@@ -446,8 +446,9 @@ async function openGenerateForm() {
     }
     
     const userEmail = session.user.email;
+    console.log('User email:', userEmail);
     
-    // Try to get user name from Supabase, fallback to email prefix
+    // Try to get user name from Supabase
     let userName = userEmail.split('@')[0];
     try {
       const { data: userData } = await supabaseClient
@@ -458,13 +459,21 @@ async function openGenerateForm() {
       
       if (userData && userData.name) {
         userName = userData.name;
+        console.log('User name from DB:', userName);
       }
     } catch(e) {
       console.warn('Could not fetch user name:', e);
     }
     
-    // Build Fillout form URL with pre-filled parameters
-    const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?userName=${encodeURIComponent(userName)}&userEmail=${encodeURIComponent(userEmail)}`;
+    // Build form URL - Fillout uses encoded query params
+    // Try field IDs: questions[0] for name, questions[2] for email
+    const params = new URLSearchParams();
+    params.append('questions[0]', userName);  // Your Name (index 0)
+    params.append('questions[2]', userEmail); // Your Email (index 2)
+    
+    const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
+    
+    console.log('Opening form URL:', formUrl);
     
     // Open in new tab
     window.open(formUrl, '_blank');
