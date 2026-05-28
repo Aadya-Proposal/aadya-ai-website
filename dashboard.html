@@ -446,7 +446,22 @@ async function openGenerateForm() {
       return;
     }
     
-    // User IS logged in - open form with auto-fill
+    // User IS logged in - check if they have a name
+    const userEmail = session.user.email;
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('name')
+      .eq('email', userEmail)
+      .maybeSingle();
+    
+    // If no name, ask for it first
+    if (!userData || !userData.name) {
+      localStorage.setItem('pendingDashboardAction', 'generate');
+      showNameCollectionModal(userEmail);
+      return;
+    }
+    
+    // User has name - open form with auto-fill
     openFormWithAutoFill();
   } catch(e) {
     console.error('Form open error:', e);
@@ -785,6 +800,20 @@ async function saveDashboardName(email, name) {
     document.getElementById('heroGreeting').textContent = `Welcome back, ${name.trim()} 👋`;
     
     console.log('Name saved:', name);
+    
+    // Check if there's a pending action to execute
+    const pendingAction = localStorage.getItem('pendingDashboardAction');
+    if (pendingAction) {
+      localStorage.removeItem('pendingDashboardAction');
+      console.log('Executing pending action:', pendingAction);
+      
+      // Small delay to ensure UI is ready
+      setTimeout(() => {
+        if (pendingAction === 'generate') {
+          openGenerateForm();
+        }
+      }, 500);
+    }
   } catch(e) {
     console.error('Save name error:', e);
     alert('Error saving name. Please try again.');
