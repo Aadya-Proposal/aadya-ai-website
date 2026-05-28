@@ -1247,7 +1247,7 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Custom logo upload</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>PDF email delivery</li>
         </ul>
-        <a href="#" class="price-btn" onclick="event.preventDefault();openModal()">Get started free</a>
+        <a href="javascript:void(0);" class="price-btn" onclick="openUserOnboarding('free')">Get started free</a>
         <div class="price-india">No credit card required</div>
       </div>
       <!-- Starter -->
@@ -1271,7 +1271,7 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Document history</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Multi-currency support</li>
         </ul>
-        <a href="javascript:void(0);" class="price-btn" onclick="handlePaymentClick('Starter', 'vVWB1lQ')">Start Starter plan</a>
+        <a href="javascript:void(0);" class="price-btn" onclick="openUserOnboarding('starter')">Start Starter plan</a>
         <div class="price-india">🇮🇳 ₹299/month · Auto-renews monthly · Cancel anytime</div>
       </div>
       <!-- Pro -->
@@ -1294,7 +1294,7 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>API access</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Priority support</li>
         </ul>
-        <a href="javascript:void(0);" class="price-btn" onclick="handlePaymentClick('Pro', 'bEQTH8N')">Go Pro</a>
+        <a href="javascript:void(0);" class="price-btn" onclick="openUserOnboarding('pro')">Go Pro</a>
         <div class="price-india">🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime</div>
       </div>
     </div>
@@ -1493,39 +1493,260 @@ document.addEventListener('keydown', function(e) {
 </div>
 
 <script>
-// Payment handler - checks if user is logged in and gets their email
-async function handlePaymentClick(plan, razorpayId) {
+// UNIVERSAL ONBOARDING MODAL - Handles all user entry flows
+async function openUserOnboarding(actionType) {
   try {
     // Check if user is logged in
     const { data: { session } } = await aadyaSupabase.auth.getSession();
     
-    if (!session || !session.user) {
-      // User not logged in - store pending payment and show login
-      localStorage.setItem('pendingPayment', JSON.stringify({
-        plan: plan,
-        razorpayId: razorpayId
-      }));
-      openSignIn();
+    if (session && session.user) {
+      // User is logged in - proceed directly with action
+      proceedWithAction(actionType, session.user.email);
       return;
     }
     
-    // User is logged in - get their email
-    const userEmail = session.user.email;
-    
-    // Build Razorpay URL with email parameter
-    const paymentUrl = `https://rzp.io/rzp/${razorpayId}?customer_email=${encodeURIComponent(userEmail)}`;
-    
-    // Show payment overlay and open payment window
-    showPaymentOverlay(plan, paymentUrl);
+    // User NOT logged in - show modal
+    showOnboardingModal(actionType);
   } catch(e) {
-    console.error('Payment handler error:', e);
-    alert('Error processing payment. Please try again.');
+    console.error('Onboarding error:', e);
+    alert('Error. Please try again.');
   }
 }
 
-// Check for pending payment after login
-function checkPendingPayment() {
+// Show the universal onboarding modal
+function showOnboardingModal(actionType) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(15,45,107,0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  modal.id = 'onboardingModal';
+  
+  const actionText = {
+    'free': 'Generate Your First Proposal',
+    'starter': 'Subscribe to Starter Plan',
+    'pro': 'Subscribe to Pro Plan',
+    'signin': 'Sign In to Your Account'
+  };
+  
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:24px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">${actionText[actionType] || 'Ready to get started?'}</h2>
+      <p style="font-size:14px;color:#64748b;margin-bottom:32px;">Choose how you'd like to proceed</p>
+      
+      <button onclick="handleSignInClick('${actionType}')" style="width:100%;background:#0F2D6B;color:white;padding:14px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px;transition:all 0.2s;">
+        Sign In to Your Account
+      </button>
+      
+      <button onclick="showEmailCapture('${actionType}')" style="width:100%;background:white;color:#0F2D6B;border:2px solid #0F2D6B;padding:12px 20px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;">
+        Continue with Email & Name
+      </button>
+      
+      <p style="font-size:12px;color:#64748b;margin-top:20px;">Your data is secure and encrypted</p>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Handle Sign In click
+function handleSignInClick(actionType) {
+  // Close current modal
+  const modal = document.getElementById('onboardingModal');
+  if (modal) modal.remove();
+  
+  // Store the pending action
+  localStorage.setItem('pendingAction', actionType);
+  
+  // Show login modal
+  openSignIn();
+}
+
+// Show email & name capture
+function showEmailCapture(actionType) {
+  const currentModal = document.getElementById('onboardingModal');
+  if (currentModal) currentModal.remove();
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(15,45,107,0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  modal.id = 'emailCaptureModal';
+  
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Before you win clients, let's get your details</h2>
+      <p style="font-size:14px;color:#64748b;margin-bottom:24px;">We'll use these to personalize everything</p>
+      
+      <input type="text" id="onboardingName" placeholder="Your full name" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:12px;outline:none;box-sizing:border-box;" autofocus>
+      
+      <input type="email" id="onboardingEmail" placeholder="Your email address" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:20px;outline:none;box-sizing:border-box;">
+      
+      <button onclick="proceedWithEmailCapture('${actionType}')" style="width:100%;background:#0F2D6B;color:white;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;margin-bottom:12px;">
+        Continue
+      </button>
+      
+      <button onclick="document.getElementById('emailCaptureModal').remove(); showOnboardingModal('${actionType}');" style="width:100%;background:transparent;color:#0F2D6B;padding:10px 20px;border:none;cursor:pointer;font-size:14px;font-weight:600;">
+        Back
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Allow Enter key
+  document.getElementById('onboardingEmail').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') proceedWithEmailCapture(actionType);
+  });
+}
+
+// Process email capture and create user
+async function proceedWithEmailCapture(actionType) {
+  const name = document.getElementById('onboardingName').value.trim();
+  const email = document.getElementById('onboardingEmail').value.trim();
+  
+  if (!name) {
+    alert('Please enter your name');
+    return;
+  }
+  
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid email');
+    return;
+  }
+  
   try {
+    // Create user in Supabase (or update if exists)
+    const { data: existingUser } = await aadyaSupabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+    
+    if (!existingUser) {
+      // Create new user
+      const { error: insertError } = await aadyaSupabase
+        .from('users')
+        .insert({
+          email: email,
+          name: name,
+          plan: 'free',
+          documents_used: 0,
+          created_at: new Date()
+        });
+      
+      if (insertError) throw insertError;
+    } else if (!existingUser.name) {
+      // Update name if missing
+      const { error: updateError } = await aadyaSupabase
+        .from('users')
+        .update({ name: name })
+        .eq('email', email);
+      
+      if (updateError) throw updateError;
+    }
+    
+    // Close modal
+    const modal = document.getElementById('emailCaptureModal');
+    if (modal) modal.remove();
+    
+    // Store user info for form pre-fill
+    localStorage.setItem('currentUserEmail', email);
+    localStorage.setItem('currentUserName', name);
+    
+    // Proceed with the action
+    proceedWithAction(actionType, email);
+  } catch(e) {
+    console.error('User creation error:', e);
+    alert('Error creating account. Please try again.');
+  }
+}
+
+// Proceed with the action (free, starter, pro)
+async function proceedWithAction(actionType, userEmail) {
+  const modal = document.getElementById('onboardingModal');
+  if (modal) modal.remove();
+  
+  // Get user name for form pre-fill
+  let userName = userEmail.split('@')[0];
+  try {
+    const { data: userData } = await aadyaSupabase
+      .from('users')
+      .select('name')
+      .eq('email', userEmail)
+      .maybeSingle();
+    
+    if (userData && userData.name) {
+      userName = userData.name;
+    }
+  } catch(e) {
+    console.warn('Could not fetch user name:', e);
+  }
+  
+  // Execute action based on type
+  if (actionType === 'free') {
+    // Open Fillout form with pre-fill
+    const params = new URLSearchParams();
+    params.append('questions[0]', userName);
+    params.append('questions[2]', userEmail);
+    const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
+    window.open(formUrl, '_blank');
+  } else if (actionType === 'starter' || actionType === 'pro') {
+    // Open Razorpay payment
+    const razorpayId = actionType === 'starter' ? 'vVWB1lQ' : 'bEQTH8N';
+    const paymentUrl = `https://rzp.io/rzp/${razorpayId}?customer_email=${encodeURIComponent(userEmail)}`;
+    window.open(paymentUrl, '_blank');
+  } else if (actionType === 'signin') {
+    // Just close the modal, user is now logged in
+    window.location.reload();
+  }
+}
+
+// Update handleSignInClick to handle pending action after login
+function handleSignInAfterLogin() {
+  const pendingAction = localStorage.getItem('pendingAction');
+  if (pendingAction) {
+    localStorage.removeItem('pendingAction');
+    // Get user email and proceed
+    aadyaSupabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        proceedWithAction(pendingAction, session.user.email);
+      }
+    });
+  }
+}
+
+// Check for pending payment or action after login
+function checkPendingPaymentAndAction() {
+  try {
+    // Check for pending action first (Sign In flow)
+    const pendingAction = localStorage.getItem('pendingAction');
+    if (pendingAction) {
+      console.log('Found pending action:', pendingAction);
+      localStorage.removeItem('pendingAction');
+      
+      setTimeout(() => {
+        aadyaSupabase.auth.getSession().then(({ data: { session } }) => {
+          if (session && session.user) {
+            proceedWithAction(pendingAction, session.user.email);
+          }
+        });
+      }, 500);
+      return;
+    }
+    
+    // Check for pending payment (old flow, kept for compatibility)
     const pending = localStorage.getItem('pendingPayment');
     console.log('Checking pending payment:', pending);
     
@@ -1534,16 +1755,14 @@ function checkPendingPayment() {
       console.log('Found pending payment:', plan, razorpayId);
       localStorage.removeItem('pendingPayment');
       
-      // Small delay to ensure session is fully loaded
       setTimeout(() => {
-        console.log('Triggering payment click after login');
         handlePaymentClick(plan, razorpayId);
       }, 800);
     } else {
       console.log('No pending payment found');
     }
   } catch(e) {
-    console.error('Pending payment check error:', e);
+    console.error('Pending check error:', e);
   }
 }
 
@@ -1715,16 +1934,18 @@ async function saveUserName(email, name) {
 }
 
 // Also check on page visibility change (when coming back from email/payment)
-// Only check for name if user is logged in
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
-    checkPendingPayment();
-    // Check for name ONLY if user is logged in
-    const session = localStorage.getItem('sb-' + 'rscpsmwqtkduahhaejtv' + '-auth-token');
-    if (session) {
-      checkAndUpdateUserName();
-    }
+    checkPendingPaymentAndAction();
   }
+});
+
+// Initial page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Small delay to ensure Supabase session is ready
+  setTimeout(() => {
+    checkPendingPaymentAndAction();
+  }, 100);
 });
 
 // Initial page load - ONLY check for pending payment
