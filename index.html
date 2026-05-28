@@ -1525,15 +1525,25 @@ async function handlePaymentClick(plan, razorpayId) {
 
 // Check for pending payment after login
 function checkPendingPayment() {
-  const pending = localStorage.getItem('pendingPayment');
-  if (pending) {
-    const { plan, razorpayId } = JSON.parse(pending);
-    localStorage.removeItem('pendingPayment');
+  try {
+    const pending = localStorage.getItem('pendingPayment');
+    console.log('Checking pending payment:', pending);
     
-    // Small delay to ensure session is fully loaded
-    setTimeout(() => {
-      handlePaymentClick(plan, razorpayId);
-    }, 500);
+    if (pending) {
+      const { plan, razorpayId } = JSON.parse(pending);
+      console.log('Found pending payment:', plan, razorpayId);
+      localStorage.removeItem('pendingPayment');
+      
+      // Small delay to ensure session is fully loaded
+      setTimeout(() => {
+        console.log('Triggering payment click after login');
+        handlePaymentClick(plan, razorpayId);
+      }, 800);
+    } else {
+      console.log('No pending payment found');
+    }
+  } catch(e) {
+    console.error('Pending payment check error:', e);
   }
 }
 
