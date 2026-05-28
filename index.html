@@ -1271,7 +1271,7 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Document history</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Multi-currency support</li>
         </ul>
-        <a href="https://rzp.io/rzp/vVWB1lQ" target="_blank" class="price-btn" onclick="showPaymentOverlay('Starter')">Start Starter plan</a>
+        <a href="javascript:void(0);" class="price-btn" onclick="handlePaymentClick('Starter', 'vVWB1lQ')">Start Starter plan</a>
         <div class="price-india">🇮🇳 ₹299/month · Auto-renews monthly · Cancel anytime</div>
       </div>
       <!-- Pro -->
@@ -1294,7 +1294,7 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>API access</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Priority support</li>
         </ul>
-        <a href="https://rzp.io/rzp/bEQTH8N" target="_blank" class="price-btn" onclick="showPaymentOverlay('Pro')">Go Pro</a>
+        <a href="javascript:void(0);" class="price-btn" onclick="handlePaymentClick('Pro', 'bEQTH8N')">Go Pro</a>
         <div class="price-india">🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime</div>
       </div>
     </div>
@@ -1493,10 +1493,38 @@ document.addEventListener('keydown', function(e) {
 </div>
 
 <script>
-function showPaymentOverlay(plan) {
+// Payment handler - checks if user is logged in and gets their email
+async function handlePaymentClick(plan, razorpayId) {
+  try {
+    // Check if user is logged in
+    const { data: { session } } = await aadyaSupabase.auth.getSession();
+    
+    if (!session || !session.user) {
+      // User not logged in - show sign-in modal
+      openSignIn();
+      return;
+    }
+    
+    // User is logged in - get their email
+    const userEmail = session.user.email;
+    
+    // Build Razorpay URL with email parameter
+    const paymentUrl = `https://rzp.io/rzp/${razorpayId}?customer_email=${encodeURIComponent(userEmail)}`;
+    
+    // Show payment overlay and open payment window
+    showPaymentOverlay(plan, paymentUrl);
+  } catch(e) {
+    console.error('Payment handler error:', e);
+    alert('Error processing payment. Please try again.');
+  }
+}
+
+function showPaymentOverlay(plan, paymentUrl) {
   document.getElementById('overlay-plan').textContent = plan;
   var overlay = document.getElementById('payment-overlay');
   overlay.style.display = 'flex';
+  // Open Razorpay in new tab
+  window.open(paymentUrl, '_blank');
 }
 function closePaymentOverlay() {
   document.getElementById('payment-overlay').style.display = 'none';
