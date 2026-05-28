@@ -813,6 +813,12 @@ async function saveDashboardName(email, name) {
           openGenerateForm();
         }
       }, 500);
+    } else {
+      // No pending action - auto-open the form since they now have a name
+      console.log('Auto-opening form after name save');
+      setTimeout(() => {
+        openGenerateForm();
+      }, 500);
     }
   } catch(e) {
     console.error('Save name error:', e);
