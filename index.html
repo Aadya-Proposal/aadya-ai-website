@@ -1715,19 +1715,24 @@ async function saveUserName(email, name) {
 }
 
 // Also check on page visibility change (when coming back from email/payment)
+// Only check for name if user is logged in
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
     checkPendingPayment();
-    checkAndUpdateUserName(); // Also check if user needs to add name
+    // Check for name ONLY if user is logged in
+    const session = localStorage.getItem('sb-' + 'rscpsmwqtkduahhaejtv' + '-auth-token');
+    if (session) {
+      checkAndUpdateUserName();
+    }
   }
 });
 
-// Initial page load
+// Initial page load - ONLY check for pending payment
+// Don't check for name on initial load (only after login)
 document.addEventListener('DOMContentLoaded', function() {
   // Small delay to ensure Supabase session is ready
   setTimeout(() => {
     checkPendingPayment();
-    checkAndUpdateUserName();
   }, 100);
 });
 </script>
