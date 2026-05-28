@@ -1500,7 +1500,11 @@ async function handlePaymentClick(plan, razorpayId) {
     const { data: { session } } = await aadyaSupabase.auth.getSession();
     
     if (!session || !session.user) {
-      // User not logged in - show sign-in modal
+      // User not logged in - store pending payment and show login
+      localStorage.setItem('pendingPayment', JSON.stringify({
+        plan: plan,
+        razorpayId: razorpayId
+      }));
       openSignIn();
       return;
     }
@@ -1516,6 +1520,20 @@ async function handlePaymentClick(plan, razorpayId) {
   } catch(e) {
     console.error('Payment handler error:', e);
     alert('Error processing payment. Please try again.');
+  }
+}
+
+// Check for pending payment after login
+function checkPendingPayment() {
+  const pending = localStorage.getItem('pendingPayment');
+  if (pending) {
+    const { plan, razorpayId } = JSON.parse(pending);
+    localStorage.removeItem('pendingPayment');
+    
+    // Small delay to ensure session is fully loaded
+    setTimeout(() => {
+      handlePaymentClick(plan, razorpayId);
+    }, 500);
   }
 }
 
@@ -1607,6 +1625,19 @@ async function signOut() {
   await aadyaSupabase.auth.signOut();
   window.location.href = "/";
 }
+
+// Check for pending payment when page loads or when redirected back from magic link
+document.addEventListener('DOMContentLoaded', function() {
+  // Small delay to ensure Supabase session is ready
+  setTimeout(checkPendingPayment, 100);
+});
+
+// Also check on page visibility change (when coming back from email/payment)
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    checkPendingPayment();
+  }
+});
 </script>
 
 </body>
