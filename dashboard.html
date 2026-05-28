@@ -434,21 +434,146 @@ function hideLoader() {
   document.getElementById('loadingScreen').classList.add('hidden');
 }
 
-// Open Fillout form with auto-filled user data
+// Open Fillout form with auto-filled user data OR show sign-in/guest modal
 async function openGenerateForm() {
   try {
     // Get the logged-in user's session
     const { data: { session } } = await supabaseClient.auth.getSession();
     
     if (!session || !session.user) {
-      alert('Please log in first');
+      // User NOT logged in - show "Sign In or Continue" modal
+      showSignInOrContinueModal();
       return;
     }
     
+    // User IS logged in - open form with auto-fill
+    openFormWithAutoFill();
+  } catch(e) {
+    console.error('Form open error:', e);
+    alert('Error opening form. Please try again.');
+  }
+}
+
+// Show modal with "Sign In" or "Continue as Guest" options
+function showSignInOrContinueModal() {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(15,45,107,0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  modal.id = 'signInOrContinueModal';
+  
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:460px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:24px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Ready to create a professional proposal?</h2>
+      <p style="font-size:14px;color:#64748b;margin-bottom:32px;">Choose how you'd like to proceed</p>
+      
+      <button onclick="handleSignInClick()" style="width:100%;background:#0F2D6B;color:white;padding:14px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-bottom:12px;transition:all 0.2s;">
+        Sign In to Your Account
+      </button>
+      
+      <button onclick="showGuestEmailModal()" style="width:100%;background:white;color:#0F2D6B;border:2px solid #0F2D6B;padding:12px 20px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;">
+        Continue as Guest
+      </button>
+      
+      <p style="font-size:12px;color:#64748b;margin-top:20px;">Don't have an account? Sign up during checkout</p>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Handle Sign In click
+function handleSignInClick() {
+  // Close current modal
+  const modal = document.getElementById('signInOrContinueModal');
+  if (modal) modal.remove();
+  
+  // Show login modal
+  openSignIn();
+}
+
+// Guest flow - ask for email and name
+function showGuestEmailModal() {
+  const currentModal = document.getElementById('signInOrContinueModal');
+  if (currentModal) currentModal.remove();
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(15,45,107,0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  modal.id = 'guestEmailModal';
+  
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Before we generate your proposal</h2>
+      <p style="font-size:14px;color:#64748b;margin-bottom:24px;">Help us personalize your documents</p>
+      
+      <input type="text" id="guestName" placeholder="Your full name" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:12px;outline:none;box-sizing:border-box;" autofocus>
+      
+      <input type="email" id="guestEmail" placeholder="Your email address" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:20px;outline:none;box-sizing:border-box;">
+      
+      <button onclick="proceedAsGuest()" style="width:100%;background:#0F2D6B;color:white;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;margin-bottom:12px;">
+        Continue to Proposal
+      </button>
+      
+      <button onclick="document.getElementById('guestEmailModal').remove(); showSignInOrContinueModal();" style="width:100%;background:transparent;color:#0F2D6B;padding:10px 20px;border:none;cursor:pointer;font-size:14px;font-weight:600;">
+        Back
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Allow Enter key to submit
+  document.getElementById('guestEmail').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') proceedAsGuest();
+  });
+}
+
+// Guest proceeds to form
+async function proceedAsGuest() {
+  const name = document.getElementById('guestName').value.trim();
+  const email = document.getElementById('guestEmail').value.trim();
+  
+  if (!name) {
+    alert('Please enter your name');
+    return;
+  }
+  
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid email');
+    return;
+  }
+  
+  // Store guest info in localStorage for Make.com to pick up
+  localStorage.setItem('guestFormData', JSON.stringify({ name, email }));
+  
+  // Close modal
+  const modal = document.getElementById('guestEmailModal');
+  if (modal) modal.remove();
+  
+  // Open form with guest data pre-filled
+  openFormAsGuest(name, email);
+}
+
+// Open form as logged-in user (with auto-fill from Supabase)
+async function openFormWithAutoFill() {
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
     const userEmail = session.user.email;
-    console.log('User email:', userEmail);
     
-    // Try to get user name from Supabase
     let userName = userEmail.split('@')[0];
     try {
       const { data: userData } = await supabaseClient
@@ -459,28 +584,31 @@ async function openGenerateForm() {
       
       if (userData && userData.name) {
         userName = userData.name;
-        console.log('User name from DB:', userName);
       }
     } catch(e) {
       console.warn('Could not fetch user name:', e);
     }
     
-    // Build form URL - Fillout uses encoded query params
-    // Try field IDs: questions[0] for name, questions[2] for email
     const params = new URLSearchParams();
-    params.append('questions[0]', userName);  // Your Name (index 0)
-    params.append('questions[2]', userEmail); // Your Email (index 2)
+    params.append('questions[0]', userName);
+    params.append('questions[2]', userEmail);
     
     const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
-    
-    console.log('Opening form URL:', formUrl);
-    
-    // Open in new tab
     window.open(formUrl, '_blank');
   } catch(e) {
     console.error('Form open error:', e);
     alert('Error opening form. Please try again.');
   }
+}
+
+// Open form as guest (pre-filled with guest data)
+function openFormAsGuest(name, email) {
+  const params = new URLSearchParams();
+  params.append('questions[0]', name);
+  params.append('questions[2]', email);
+  
+  const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
+  window.open(formUrl, '_blank');
 }
 
 async function start() {
