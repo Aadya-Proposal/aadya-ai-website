@@ -1636,17 +1636,99 @@ async function signOut() {
   window.location.href = "/";
 }
 
-// Check for pending payment when page loads or when redirected back from magic link
-document.addEventListener('DOMContentLoaded', function() {
-  // Small delay to ensure Supabase session is ready
-  setTimeout(checkPendingPayment, 100);
-});
+// After successful login, check if user has a name - if not, ask for it
+async function checkAndUpdateUserName() {
+  try {
+    const { data: { session } } = await aadyaSupabase.auth.getSession();
+    
+    if (!session || !session.user) return;
+    
+    const userEmail = session.user.email;
+    
+    // Get user record
+    const { data: userData } = await aadyaSupabase
+      .from('users')
+      .select('name')
+      .eq('email', userEmail)
+      .maybeSingle();
+    
+    // If user has no name, ask for it
+    if (!userData || !userData.name) {
+      showNameModal(userEmail);
+    }
+  } catch(e) {
+    console.error('Name check error:', e);
+  }
+}
+
+function showNameModal(email) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: rgba(15,45,107,0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Before you win clients, let's get your name</h2>
+      <p style="font-size:14px;color:#64748b;margin-bottom:28px;">It'll appear on all your generated proposals</p>
+      
+      <input type="text" id="nameInput" placeholder="Your full name" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:16px;outline:none;box-sizing:border-box;" autofocus>
+      
+      <button onclick="saveUserName('${email}', document.getElementById('nameInput').value)" style="width:100%;background:#0F2D6B;color:white;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:background 0.2s;">
+        Save & Continue
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+async function saveUserName(email, name) {
+  if (!name.trim()) {
+    alert('Please enter your name');
+    return;
+  }
+  
+  try {
+    // Update user in Supabase
+    const { error } = await aadyaSupabase
+      .from('users')
+      .update({ name: name.trim() })
+      .eq('email', email);
+    
+    if (error) throw error;
+    
+    // Remove modal
+    document.querySelector('div[style*="rgba(15,45,107,0.85)"]').remove();
+    
+    console.log('Name saved:', name);
+  } catch(e) {
+    console.error('Save name error:', e);
+    alert('Error saving name. Please try again.');
+  }
+}
 
 // Also check on page visibility change (when coming back from email/payment)
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
     checkPendingPayment();
+    checkAndUpdateUserName(); // Also check if user needs to add name
   }
+});
+
+// Initial page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Small delay to ensure Supabase session is ready
+  setTimeout(() => {
+    checkPendingPayment();
+    checkAndUpdateUserName();
+  }, 100);
 });
 </script>
 
