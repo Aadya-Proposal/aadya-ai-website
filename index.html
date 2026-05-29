@@ -1535,7 +1535,9 @@ function showOnboardingModal(actionType) {
   };
   
   modal.innerHTML = `
-    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="background:white;border-radius:20px;padding:40px 36px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
+      <button onclick="document.getElementById('onboardingModal').remove(); window.location.href='https://aadya-ai.com';" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;color:#64748b;font-size:24px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">×</button>
+      
       <h2 style="font-size:24px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">${actionText[actionType] || 'Ready to get started?'}</h2>
       <p style="font-size:14px;color:#64748b;margin-bottom:32px;">Choose how you'd like to proceed</p>
       
