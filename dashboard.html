@@ -775,7 +775,7 @@ function showNameCollectionModal(email) {
 }
 
 async function saveDashboardName(email, name) {
-  console.log('👤 Starting saveDashboardName...');
+  console.log('👤 Saving name:', name);
   
   name = (name || '').trim();
   if (!name) {
@@ -784,102 +784,45 @@ async function saveDashboardName(email, name) {
   }
   
   try {
-    console.log('💾 Saving to Supabase:', name, 'for email:', email);
-    
-    // FIRST: Check if user exists
-    const { data: existingUser, error: checkError } = await supabaseClient
+    // Simple UPSERT - create or update
+    const { data, error } = await supabaseClient
       .from('users')
-      .select('id, email')
-      .eq('email', email)
-      .maybeSingle();
-    
-    console.log('🔍 User check:', existingUser, 'Error:', checkError);
-    
-    if (checkError) {
-      console.error('❌ Error checking user:', checkError);
-      throw checkError;
-    }
-    
-    if (!existingUser) {
-      // User doesn't exist - CREATE it
-      console.log('📝 User not found, creating new user...');
-      const { error: createError } = await supabaseClient
-        .from('users')
-        .insert({
+      .upsert(
+        {
           email: email,
           name: name,
           plan: 'free',
           documents_used: 0,
           created_at: new Date()
-        });
-      
-      if (createError) {
-        console.error('❌ Create error:', createError);
-        throw createError;
-      }
-      console.log('✅ User created!');
-    } else {
-      // User exists - UPDATE the name
-      console.log('📝 Updating existing user...');
-      const { data: updateResult, error: updateError } = await supabaseClient
-        .from('users')
-        .update({ name: name })
-        .eq('email', email)
-        .select();
-      
-      if (updateError) {
-        console.error('❌ Update error:', updateError);
-        throw updateError;
-      }
-      console.log('✅ User updated:', updateResult);
-    }
+        },
+        { onConflict: 'email' }
+      );
     
-    // VERIFY it was saved
-    const { data: verifyUser } = await supabaseClient
-      .from('users')
-      .select('name')
-      .eq('email', email)
-      .maybeSingle();
-    
-    console.log('✅ VERIFICATION - Name in DB:', verifyUser?.name);
-    
-    if (verifyUser?.name !== name) {
-      console.warn('⚠️ WARNING: Name verification failed!');
-      alert('Warning: Name may not have saved correctly. Please try again.');
+    if (error) {
+      console.error('❌ Error:', error);
+      alert('Error: ' + error.message);
       return;
     }
     
-    console.log('✅ Name saved successfully!');
+    console.log('✅ Name saved!');
     
-    // Remove modal by ID
+    // Close modal
     const modal = document.getElementById('nameCollectionModal');
-    if (modal) {
-      modal.remove();
-      console.log('✅ Modal removed');
-    }
+    if (modal) modal.remove();
     
-    // Update greeting
+    // Update UI
     const greeting = document.getElementById('heroGreeting');
-    if (greeting) {
-      greeting.textContent = `Welcome back, ${name} 👋`;
-      console.log('✅ Greeting updated');
-    }
+    if (greeting) greeting.textContent = `Welcome back, ${name} 👋`;
     
-    // Update header
-    const headerName = document.getElementById('userNameDisplay');
-    if (headerName) {
-      headerName.textContent = name;
-      console.log('✅ Header updated');
-    }
+    const header = document.getElementById('userNameDisplay');
+    if (header) header.textContent = name;
     
-    // Show success alert
-    alert(`Great! Your name (${name}) is saved.\n\nNow click "Generate Proposal"!`);
-    
-    console.log('✅ Flow completed');
+    // Show alert
+    alert(`Perfect! Your name is saved.\n\nClick "Generate Proposal" now!`);
     
   } catch(e) {
-    console.error('❌ Save name error:', e);
-    alert('Error saving name: ' + (e.message || 'Unknown error'));
+    console.error('❌ Error:', e);
+    alert('Error: ' + e.message);
   }
 }
 
