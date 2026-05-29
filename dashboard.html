@@ -886,6 +886,74 @@ async function checkAndHandlePendingAction() {
 
 // Check for pending action/payment when dashboard loads
 setTimeout(checkAndHandlePendingAction, 1000);
+
+// ─── AUTO-REFRESH DOCUMENT COUNT WHEN USER RETURNS TO TAB ───────────────────
+// After submitting the Fillout form, the user closes that tab and returns here.
+// We re-fetch documents_used + proposals so the count updates automatically.
+
+async function refreshUserStats() {
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session || !session.user) return;
+    const email = session.user.email;
+
+    // Re-fetch user stats
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('plan, documents_used, name')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (userData) {
+      const plan = userData.plan || 'free';
+      const isPro = plan.toLowerCase().includes('pro');
+      const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
+      const planLimit = isPro ? 9999 : 20;
+      const docsUsed = userData.documents_used || 0;
+
+      document.getElementById('docsUsed').textContent = docsUsed;
+      document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${planLimit} included in ${planLabel}`;
+      const pct = isPro ? 0 : Math.min((docsUsed / planLimit) * 100, 100);
+      document.getElementById('usageFill').style.width = pct + '%';
+    }
+
+    // Re-fetch proposal history
+    const { data: proposals } = await supabaseClient
+      .from('proposals')
+      .select('*')
+      .eq('user_email', email)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (proposals && proposals.length > 0) {
+      document.getElementById('totalDocs').textContent = proposals.length;
+      document.getElementById('historyContainer').innerHTML = proposals.map(p => `
+        <div class="history-item">
+          <div class="file-icon">📄</div>
+          <div class="history-info">
+            <div class="history-name">${p.client_name || 'Proposal'} — ${p.proposal_title || 'Document'}</div>
+            <div class="history-date">${new Date(p.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+          </div>
+          ${p.pdf_url ? `<button class="history-download" onclick="window.open('${p.pdf_url}')">Download</button>` : ''}
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    console.warn('Stats refresh failed:', e);
+  }
+}
+
+// Refresh when user switches back to this tab (returns from Fillout)
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    refreshUserStats();
+  }
+});
+
+// Refresh when the browser window regains focus
+window.addEventListener('focus', function() {
+  refreshUserStats();
+});
 </script>
 </body>
 </html>
