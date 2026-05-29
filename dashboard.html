@@ -773,7 +773,7 @@ function showNameCollectionModal(email) {
   document.body.appendChild(modal);
 }
 
-function function saveDashboardName(email, name) {
+async function saveDashboardName(email, name) {
   if (!name.trim()) {
     alert('Please enter your name');
     return;
