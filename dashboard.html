@@ -581,24 +581,79 @@ async function openFormWithAutoFill() {
         .select('name')
         .eq('email', userEmail)
         .maybeSingle();
-      
-      if (userData && userData.name) {
-        userName = userData.name;
-      }
-    } catch(e) {
-      console.warn('Could not fetch user name:', e);
-    }
+      if (userData && userData.name) userName = userData.name;
+    } catch(e) { console.warn('Could not fetch user name:', e); }
     
     const params = new URLSearchParams();
     params.append('questions[0]', userName);
     params.append('questions[2]', userEmail);
     
     const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
+    
+    // Open Fillout in new tab — stay on dashboard
     window.open(formUrl, '_blank');
+
+    // Show banner telling user to come back here
+    showFormOpenedBanner();
+
+    // Poll every 8s — when documents_used increases, refresh and stop
+    startPostSubmitPolling(userEmail);
+
   } catch(e) {
     console.error('Form open error:', e);
     alert('Error opening form. Please try again.');
   }
+}
+
+let _pollInterval = null;
+let _pollBaseline = null;
+
+async function startPostSubmitPolling(email) {
+  if (_pollInterval) clearInterval(_pollInterval);
+  try {
+    const { data } = await supabaseClient
+      .from('users').select('documents_used').eq('email', email).maybeSingle();
+    _pollBaseline = data ? (data.documents_used || 0) : 0;
+  } catch(e) { _pollBaseline = 0; }
+
+  let attempts = 0;
+  _pollInterval = setInterval(async () => {
+    attempts++;
+    if (attempts > 75) { clearInterval(_pollInterval); return; }
+    try {
+      const { data } = await supabaseClient
+        .from('users').select('documents_used').eq('email', email).maybeSingle();
+      const newCount = data ? (data.documents_used || 0) : 0;
+      if (newCount > _pollBaseline) {
+        clearInterval(_pollInterval);
+        await refreshUserStats();
+        hideFormOpenedBanner();
+        showSuccessToast('Proposal generated! Your document count has been updated.');
+      }
+    } catch(e) { /* silent */ }
+  }, 8000);
+}
+
+function showFormOpenedBanner() {
+  if (document.getElementById('formOpenBanner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'formOpenBanner';
+  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0F2D6B;color:white;padding:14px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.25);text-align:center;display:flex;align-items:center;gap:10px;max-width:90vw;';
+  banner.innerHTML = '<span>🟡</span><span>Form open in another tab — fill it in, then come back here. This page updates automatically.</span><button onclick="document.getElementById(\'formOpenBanner\').remove()" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:4px 10px;border-radius:8px;cursor:pointer;font-size:13px;margin-left:6px;">✕</button>';
+  document.body.appendChild(banner);
+}
+
+function hideFormOpenedBanner() {
+  const b = document.getElementById('formOpenBanner');
+  if (b) b.remove();
+}
+
+function showSuccessToast(msg) {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:14px 28px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.2);';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 6000);
 }
 
 // Open form as guest (pre-filled with guest data)
