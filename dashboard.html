@@ -682,7 +682,7 @@ async function start() {
         const plan = userData.data.plan || 'free';  // Default to 'free', not 'starter'
         const isPro = plan.toLowerCase().includes('pro');
         const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
-        const planLimit = isPro ? 9999 : 20;
+        const planLimit = isPro ? 9999 : (plan === 'free' ? 3 : 20);
         const planPrice = isPro ? '₹599 / month' : (plan === 'free' ? 'Free' : '₹299 / month');
         const docsUsed = userData.data.documents_used || 0;
         const displayName = userData.data.name || email.split('@')[0];
@@ -737,6 +737,11 @@ async function logout() {
 }
 
 start();
+
+// When "Return to Aadya AI" opens a fresh dashboard tab, the auth session
+// restores from localStorage asynchronously. Wait for start() to finish,
+// then force a fresh DB fetch so the latest documents_used always shows.
+setTimeout(refreshUserStats, 2000);
 
 // After user logs in, check if they have a name - if not, ask for it
 async function checkAndCollectName() {
@@ -908,7 +913,7 @@ async function refreshUserStats() {
       const plan = userData.plan || 'free';
       const isPro = plan.toLowerCase().includes('pro');
       const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
-      const planLimit = isPro ? 9999 : 20;
+      const planLimit = isPro ? 9999 : (plan === 'free' ? 3 : 20);
       const docsUsed = userData.documents_used || 0;
 
       document.getElementById('docsUsed').textContent = docsUsed;
