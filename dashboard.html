@@ -784,22 +784,74 @@ async function saveDashboardName(email, name) {
   }
   
   try {
-    console.log('💾 Saving to Supabase:', name);
+    console.log('💾 Saving to Supabase:', name, 'for email:', email);
     
-    // Update user in Supabase
-    const { error } = await supabaseClient
+    // FIRST: Check if user exists
+    const { data: existingUser, error: checkError } = await supabaseClient
       .from('users')
-      .update({ name: name })
-      .eq('email', email);
+      .select('id, email')
+      .eq('email', email)
+      .maybeSingle();
     
-    if (error) {
-      console.error('❌ Supabase error:', error);
-      throw error;
+    console.log('🔍 User check:', existingUser, 'Error:', checkError);
+    
+    if (checkError) {
+      console.error('❌ Error checking user:', checkError);
+      throw checkError;
+    }
+    
+    if (!existingUser) {
+      // User doesn't exist - CREATE it
+      console.log('📝 User not found, creating new user...');
+      const { error: createError } = await supabaseClient
+        .from('users')
+        .insert({
+          email: email,
+          name: name,
+          plan: 'free',
+          documents_used: 0,
+          created_at: new Date()
+        });
+      
+      if (createError) {
+        console.error('❌ Create error:', createError);
+        throw createError;
+      }
+      console.log('✅ User created!');
+    } else {
+      // User exists - UPDATE the name
+      console.log('📝 Updating existing user...');
+      const { data: updateResult, error: updateError } = await supabaseClient
+        .from('users')
+        .update({ name: name })
+        .eq('email', email)
+        .select();
+      
+      if (updateError) {
+        console.error('❌ Update error:', updateError);
+        throw updateError;
+      }
+      console.log('✅ User updated:', updateResult);
+    }
+    
+    // VERIFY it was saved
+    const { data: verifyUser } = await supabaseClient
+      .from('users')
+      .select('name')
+      .eq('email', email)
+      .maybeSingle();
+    
+    console.log('✅ VERIFICATION - Name in DB:', verifyUser?.name);
+    
+    if (verifyUser?.name !== name) {
+      console.warn('⚠️ WARNING: Name verification failed!');
+      alert('Warning: Name may not have saved correctly. Please try again.');
+      return;
     }
     
     console.log('✅ Name saved successfully!');
     
-    // Remove modal by ID (most reliable)
+    // Remove modal by ID
     const modal = document.getElementById('nameCollectionModal');
     if (modal) {
       modal.remove();
@@ -813,8 +865,15 @@ async function saveDashboardName(email, name) {
       console.log('✅ Greeting updated');
     }
     
+    // Update header
+    const headerName = document.getElementById('userNameDisplay');
+    if (headerName) {
+      headerName.textContent = name;
+      console.log('✅ Header updated');
+    }
+    
     // Show success alert
-    alert(`Great! Your name is saved.\n\nNow click "Generate Proposal" to create your first document!`);
+    alert(`Great! Your name (${name}) is saved.\n\nNow click "Generate Proposal"!`);
     
     console.log('✅ Flow completed');
     
