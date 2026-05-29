@@ -764,7 +764,7 @@ function showNameCollectionModal(email) {
       
       <input type="text" id="dashboardNameInput" placeholder="Your full name" style="width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:15px;margin-bottom:16px;outline:none;box-sizing:border-box;" autofocus>
       
-      <button onclick="saveDashboardName('${email}', document.getElementById('dashboardNameInput').value)" style="width:100%;background:#0F2D6B;color:white;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;">
+      <button onclick="const nameVal = document.getElementById('dashboardNameInput').value; saveDashboardName('${email}', nameVal);" style="width:100%;background:#0F2D6B;color:white;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:background 0.2s;">
         Save & Continue
       </button>
     </div>
@@ -774,45 +774,52 @@ function showNameCollectionModal(email) {
 }
 
 async function saveDashboardName(email, name) {
-  if (!name.trim()) {
+  console.log('👤 Starting saveDashboardName...');
+  
+  name = (name || '').trim();
+  if (!name) {
     alert('Please enter your name');
     return;
   }
   
   try {
+    console.log('💾 Saving to Supabase:', name);
+    
     // Update user in Supabase
     const { error } = await supabaseClient
       .from('users')
-      .update({ name: name.trim() })
+      .update({ name: name })
       .eq('email', email);
     
-    if (error) throw error;
-    
-    // Remove modal and refresh greeting
-    const modal = document.querySelector('div[style*="rgba(15,45,107,0.85)"]');
-    if (modal) modal.remove();
-    
-    // Update greeting with the new name
-    document.getElementById('heroGreeting').textContent = `Welcome back, ${name.trim()} 👋`;
-    
-    console.log('Name saved:', name);
-    
-    // Check if there's a pending action to execute
-    const pendingAction = localStorage.getItem('pendingDashboardAction');
-    if (pendingAction) {
-      localStorage.removeItem('pendingDashboardAction');
-      console.log('Executing pending action:', pendingAction);
-      
-      // Small delay to ensure UI is ready
-      setTimeout(() => {
-        if (pendingAction === 'generate') {
-          openGenerateForm();
-        }
-      }, 500);
+    if (error) {
+      console.error('❌ Supabase error:', error);
+      throw error;
     }
+    
+    console.log('✅ Name saved successfully!');
+    
+    // Remove modal by ID (most reliable)
+    const modal = document.getElementById('nameCollectionModal');
+    if (modal) {
+      modal.remove();
+      console.log('✅ Modal removed');
+    }
+    
+    // Update greeting
+    const greeting = document.getElementById('heroGreeting');
+    if (greeting) {
+      greeting.textContent = `Welcome back, ${name} 👋`;
+      console.log('✅ Greeting updated');
+    }
+    
+    // Show success alert
+    alert(`Great! Your name is saved.\n\nNow click "Generate Proposal" to create your first document!`);
+    
+    console.log('✅ Flow completed');
+    
   } catch(e) {
-    console.error('Save name error:', e);
-    alert('Error saving name. Please try again.');
+    console.error('❌ Save name error:', e);
+    alert('Error saving name: ' + (e.message || 'Unknown error'));
   }
 }
 
