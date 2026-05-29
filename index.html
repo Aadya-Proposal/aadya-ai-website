@@ -1627,35 +1627,46 @@ async function proceedWithEmailCapture(actionType) {
   }
   
   try {
-    // Create user in Supabase (or update if exists)
-    const { data: existingUser } = await aadyaSupabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
+    console.log('📧 Step 1: Creating auth account...');
     
-    if (!existingUser) {
-      // Create new user
-      const { error: insertError } = await aadyaSupabase
-        .from('users')
-        .insert({
-          email: email,
-          name: name,
-          plan: 'free',
-          documents_used: 0,
-          created_at: new Date()
-        });
-      
-      if (insertError) throw insertError;
-    } else if (!existingUser.name) {
-      // Update name if missing
-      const { error: updateError } = await aadyaSupabase
-        .from('users')
-        .update({ name: name })
-        .eq('email', email);
-      
-      if (updateError) throw updateError;
+    // STEP 1: Sign up with Supabase Auth FIRST (creates authenticated user)
+    const tempPassword = Math.random().toString(36).slice(-12);
+    const { data: authData, error: authError } = await aadyaSupabase.auth.signUp({
+      email: email,
+      password: tempPassword
+    });
+    
+    if (authError) {
+      console.error('Auth error:', authError);
+      // If already registered, that's okay - user might be signing up again
+      if (!authError.message.includes('already registered')) {
+        alert('Error: ' + authError.message);
+        return;
+      }
+    } else {
+      console.log('✅ Auth account created');
     }
+    
+    // STEP 2: Now create/update users table record (RLS will allow because authenticated)
+    console.log('📧 Step 2: Creating database record...');
+    
+    const { error: upsertError } = await aadyaSupabase
+      .from('users')
+      .upsert({
+        email: email,
+        name: name,
+        plan: 'free',
+        documents_used: 0,
+        created_at: new Date()
+      }, { onConflict: 'email' });
+    
+    if (upsertError) {
+      console.error('DB error:', upsertError);
+      alert('Error creating account. Please try again.');
+      return;
+    }
+    
+    console.log('✅ User record created');
     
     // Close modal
     const modal = document.getElementById('emailCaptureModal');
@@ -1953,7 +1964,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
   // Small delay to ensure Supabase session is ready
   setTimeout(() => {
-    checkPendingPayment();
+    checkPendingPaymentAndAction();
   }, 100);
 });
 </script>
