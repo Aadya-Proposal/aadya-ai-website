@@ -826,8 +826,48 @@ async function saveDashboardName(email, name) {
   }
 }
 
-// Check for name when dashboard loads
-setTimeout(checkAndCollectName, 1000);
+// Check for pending payment/action after login
+async function checkAndHandlePendingAction() {
+  try {
+    // Check if there's a pending action (from Sign In flow)
+    const pendingAction = localStorage.getItem('pendingAction');
+    
+    if (pendingAction) {
+      console.log('🎯 Found pending action:', pendingAction);
+      localStorage.removeItem('pendingAction');
+      
+      // Get user email
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        const userEmail = session.user.email;
+        
+        // Open Razorpay
+        if (pendingAction === 'starter' || pendingAction === 'pro') {
+          const razorpayId = pendingAction === 'starter' ? 'vVWB1lQ' : 'bEQTH8N';
+          const paymentUrl = `https://rzp.io/rzp/${razorpayId}?customer_email=${encodeURIComponent(userEmail)}`;
+          console.log('💳 Opening Razorpay:', pendingAction);
+          window.open(paymentUrl, '_blank');
+          return; // Don't ask for name, user is going to pay
+        } else if (pendingAction === 'free') {
+          // Open Fillout form
+          window.open('https://forms.fillout.com/t/6wFLHhk2tXus', '_blank');
+          return;
+        }
+      }
+    }
+    
+    // No pending action - check if user needs to provide name
+    console.log('✅ No pending action - checking for name');
+    checkAndCollectName();
+    
+  } catch(e) {
+    console.error('Pending action check error:', e);
+    checkAndCollectName(); // Fallback
+  }
+}
+
+// Check for pending action/payment when dashboard loads
+setTimeout(checkAndHandlePendingAction, 1000);
 </script>
 </body>
 </html>
