@@ -654,20 +654,38 @@ async function start() {
       document.getElementById('heroGreeting').textContent = `Welcome back, ${greetingName} 👋`;
       
       // Continue loading plan data
-      const { data: userData } = await supabaseClient
+      let userData = await supabaseClient
         .from('users')
         .select('*')
         .eq('email', email)
         .maybeSingle();
 
-      if (userData) {
-        const plan = userData.plan || 'starter';
+      // If user doesn't exist in database, create a record with plan='free'
+      if (!userData.data) {
+        console.log('📝 Creating new user record with plan=free');
+        await supabaseClient.from('users').insert({
+          email: email,
+          plan: 'free',
+          documents_used: 0,
+          created_at: new Date()
+        });
+        
+        // Re-fetch the user data
+        userData = await supabaseClient
+          .from('users')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+      }
+
+      if (userData.data) {
+        const plan = userData.data.plan || 'free';  // Default to 'free', not 'starter'
         const isPro = plan.toLowerCase().includes('pro');
-        const planLabel = isPro ? 'Pro' : 'Starter';
+        const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
         const planLimit = isPro ? 9999 : 20;
-        const planPrice = isPro ? '₹599 / month' : '₹299 / month';
-        const docsUsed = userData.documents_used || 0;
-        const displayName = userData.name || email.split('@')[0];
+        const planPrice = isPro ? '₹599 / month' : (plan === 'free' ? 'Free' : '₹299 / month');
+        const docsUsed = userData.data.documents_used || 0;
+        const displayName = userData.data.name || email.split('@')[0];
 
         document.getElementById('heroGreeting').textContent = `Welcome back, ${displayName} 👋`;
         document.getElementById('planBadge').textContent = planLabel;
@@ -675,7 +693,7 @@ async function start() {
         document.getElementById('planName').textContent = `${planLabel} Plan`;
         document.querySelector('.stat-card:nth-child(2) .stat-sub').textContent = planPrice;
         document.getElementById('docsUsed').textContent = docsUsed;
-        document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${planLimit} included in Starter`;
+        document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${planLimit} included in ${planLabel}`;
         const pct = isPro ? 0 : Math.min((docsUsed / planLimit) * 100, 100);
         document.getElementById('usageFill').style.width = pct + '%';
       }
