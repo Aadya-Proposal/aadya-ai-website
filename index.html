@@ -1647,18 +1647,13 @@ async function proceedWithEmailCapture(actionType) {
       console.log('✅ Auth account created');
     }
     
-    // STEP 2: Now create/update users table record (RLS will allow because authenticated)
+    // STEP 2: Now create/update users table record using RPC function (bypasses RLS)
     console.log('📧 Step 2: Creating database record...');
     
-    const { error: upsertError } = await aadyaSupabase
-      .from('users')
-      .upsert({
-        email: email,
-        name: name,
-        plan: 'free',
-        documents_used: 0,
-        created_at: new Date()
-      }, { onConflict: 'email' });
+    const { error: upsertError } = await aadyaSupabase.rpc('upsert_guest_user', {
+      p_email: email,
+      p_name: name
+    });
     
     if (upsertError) {
       console.error('DB error:', upsertError);
