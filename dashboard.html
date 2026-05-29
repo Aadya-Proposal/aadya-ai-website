@@ -317,7 +317,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   <div class="nav-right">
     <div class="user-badge">
       <div class="avatar" id="userAvatar">?</div>
-      <span id="userEmail">Loading...</span>
+      <span id="userNameDisplay">Loading...</span>
     </div>
     <span class="plan-badge" id="planBadge">Starter</span>
     <button class="logout-btn" onclick="logout()">Sign out</button>
@@ -446,22 +446,7 @@ async function openGenerateForm() {
       return;
     }
     
-    // User IS logged in - check if they have a name
-    const userEmail = session.user.email;
-    const { data: userData } = await supabaseClient
-      .from('users')
-      .select('name')
-      .eq('email', userEmail)
-      .maybeSingle();
-    
-    // If no name, ask for it first
-    if (!userData || !userData.name) {
-      localStorage.setItem('pendingDashboardAction', 'generate');
-      showNameCollectionModal(userEmail);
-      return;
-    }
-    
-    // User has name - open form with auto-fill
+    // User IS logged in - open form with auto-fill (name already saved)
     openFormWithAutoFill();
   } catch(e) {
     console.error('Form open error:', e);
@@ -643,16 +628,32 @@ async function start() {
     const email = user.email;
     const firstName = email.split('@')[0].charAt(0).toUpperCase();
 
-    // Show basic info immediately
-    document.getElementById('userEmail').textContent = email;
+    // Show basic info immediately (with loading state for name)
+    document.getElementById('userNameDisplay').textContent = 'Loading...';
     document.getElementById('userAvatar').textContent = firstName;
     document.getElementById('heroGreeting').textContent = `Welcome back, ${email.split('@')[0]} 👋`;
 
     // Hide loader — auth confirmed
     hideLoader();
 
-    // Load user plan data
+    // Load user plan data AND fetch user name
     try {
+      // Fetch user name from database
+      const { data: userNameData } = await supabaseClient
+        .from('users')
+        .select('name')
+        .eq('email', email)
+        .maybeSingle();
+      
+      // Display name if it exists, otherwise show email
+      const displayName = userNameData?.name || email;
+      document.getElementById('userNameDisplay').textContent = displayName;
+      
+      // Update greeting with actual name
+      const greetingName = userNameData?.name ? userNameData.name.split(' ')[0] : email.split('@')[0];
+      document.getElementById('heroGreeting').textContent = `Welcome back, ${greetingName} 👋`;
+      
+      // Continue loading plan data
       const { data: userData } = await supabaseClient
         .from('users')
         .select('*')
