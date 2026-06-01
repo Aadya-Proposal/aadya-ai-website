@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aadya AI — You're Offline</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0F2D6B;
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .container { max-width: 420px; }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 40px;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: #3B82F6; }
+  .icon {
+    font-size: 72px;
+    margin-bottom: 24px;
+    display: block;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .btn {
+    background: #3B82F6;
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: #2563eb; }
+  .tip {
+    margin-top: 32px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">aadya <span>ai</span></div>
+    <span class="icon">📡</span>
+    <h1>You're offline</h1>
+    <p>No internet connection detected. Connect to the internet to generate proposals and access your dashboard.</p>
+    <button class="btn" onclick="window.location.reload()">Try Again</button>
+    <p class="tip">Your previously generated proposals are saved and will be available once you're back online.</p>
+  </div>
+</body>
+</html>
