@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-W18E4HNGES"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-W18E4HNGES');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aadya AI — Dashboard</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F2D6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aadya AI">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -453,13 +451,72 @@ async function openGenerateForm() {
       showSignInOrContinueModal();
       return;
     }
-    
-    // User IS logged in - open form with auto-fill (name already saved)
+
+    // ── USAGE GATE: Check document limit before opening form ──────────────
+    const email = session.user.email;
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('plan, documents_used')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (userData) {
+      const plan = (userData.plan || 'free').toLowerCase();
+      const docsUsed = userData.documents_used || 0;
+      const isPro = plan.includes('pro');
+      const isStarter = plan.includes('starter');
+      const limit = isPro ? Infinity : (isStarter ? 20 : 3);
+
+      if (docsUsed >= limit) {
+        // Block — show upgrade wall
+        showUpgradeWall(plan, docsUsed, limit);
+        return;
+      }
+    }
+    // ── END GATE ───────────────────────────────────────────────────────────
+
+    // User IS logged in and within limit - open form with auto-fill
     openFormWithAutoFill();
   } catch(e) {
     console.error('Form open error:', e);
     alert('Error opening form. Please try again.');
   }
+}
+
+function showUpgradeWall(plan, docsUsed, limit) {
+  const existing = document.getElementById('upgradeWallModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'upgradeWallModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="font-size:48px;margin-bottom:16px;">🚀</div>
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've used all ${limit} free proposals!</h2>
+      <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
+        Your clients deserve more. Upgrade to <strong>Starter</strong> for just <strong>₹299/month</strong> and generate up to 20 proposals every month.
+      </p>
+
+      <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
+        <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Starter Plan — ₹299/month</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;20 proposals per month</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;AI-generated branded PDFs</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to client inbox</div>
+        <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
+      </div>
+
+      <a href="https://rzp.io/rzp/W8Loh6g" target="_blank"
+         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
+        Upgrade for ₹299 →
+      </a>
+      <button onclick="document.getElementById('upgradeWallModal').remove()"
+              style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
+        Maybe later
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
 }
 
 // Show modal with "Sign In" or "Continue as Guest" options
@@ -1023,5 +1080,16 @@ window.addEventListener('focus', function() {
   refreshUserStats();
 });
 </script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('[PWA] Service worker registered:', reg.scope))
+          .catch(err => console.warn('[PWA] Service worker failed:', err));
+      });
+    }
+  </script>
 </body>
 </html>
