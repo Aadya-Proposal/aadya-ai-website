@@ -1269,8 +1269,8 @@ footer {
       <div class="price-card">
         <div class="price-plan">Try Free</div>
         <div class="price-amount">
-          <span class="price-currency">$</span>
-          <span class="price-num">0</span>
+          <span class="price-currency" id="free-currency">₹</span>
+          <span class="price-num" id="free-num">0</span>
         </div>
         <div class="price-period">Get started free</div>
         <div class="price-subtext">No credit card needed</div>
@@ -1292,8 +1292,8 @@ footer {
           <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
         </div>
         <div class="price-amount">
-          <span class="price-currency">$</span>
-          <span class="price-num">5</span>
+          <span class="price-currency" id="starter-currency">₹</span>
+          <span class="price-num" id="starter-num">299</span>
         </div>
         <div class="price-period">/ month · locked in forever</div>
         <div class="price-subtext" id="starter-price-sub">₹299 · billed monthly</div>
@@ -1315,8 +1315,8 @@ footer {
           <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
         </div>
         <div class="price-amount">
-          <span class="price-currency">$</span>
-          <span class="price-num">10</span>
+          <span class="price-currency" id="pro-currency">₹</span>
+          <span class="price-num" id="pro-num">599</span>
         </div>
         <div class="price-period">/ month · locked in forever</div>
         <div class="price-subtext" id="pro-price-sub">₹599 · billed monthly</div>
@@ -2033,6 +2033,14 @@ function setCurrency(currency) {
   const proTag       = document.getElementById('pro-tagline');
 
   if (currency === 'usd') {
+    // Update big price display
+    document.getElementById('free-currency').textContent = '$';
+    document.getElementById('free-num').textContent = '0';
+    document.getElementById('starter-currency').textContent = '$';
+    document.getElementById('starter-num').textContent = '5';
+    document.getElementById('pro-currency').textContent = '$';
+    document.getElementById('pro-num').textContent = '10';
+
     starterBtn.href = LEMON_STARTER;
     starterBtn.setAttribute('target', '_blank');
     starterBtn.onclick = null;
@@ -2047,6 +2055,14 @@ function setCurrency(currency) {
     proSub.textContent = '$10 · billed monthly';
     proTag.textContent = '🌍 $10/month · USD · Cancel anytime';
   } else {
+    // Restore INR big price display
+    document.getElementById('free-currency').textContent = '₹';
+    document.getElementById('free-num').textContent = '0';
+    document.getElementById('starter-currency').textContent = '₹';
+    document.getElementById('starter-num').textContent = '299';
+    document.getElementById('pro-currency').textContent = '₹';
+    document.getElementById('pro-num').textContent = '599';
+
     starterBtn.href = 'javascript:void(0);';
     starterBtn.removeAttribute('target');
     starterBtn.onclick = function(){ openUserOnboarding('starter'); };
