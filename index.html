@@ -1288,7 +1288,7 @@ footer {
         <div class="popular-badge">Most popular</div>
         <div class="price-plan">Starter</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;">$9/mo</span>
+          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;" id="starter-strike">₹599/mo</span>
           <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
         </div>
         <div class="price-amount">
@@ -1311,7 +1311,7 @@ footer {
       <div class="price-card">
         <div class="price-plan">Pro</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;">$19/mo</span>
+          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;" id="pro-strike">₹999/mo</span>
           <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
         </div>
         <div class="price-amount">
@@ -2038,8 +2038,10 @@ function setCurrency(currency) {
     document.getElementById('free-num').textContent = '0';
     document.getElementById('starter-currency').textContent = '$';
     document.getElementById('starter-num').textContent = '5';
+    document.getElementById('starter-strike').textContent = '$9/mo';
     document.getElementById('pro-currency').textContent = '$';
     document.getElementById('pro-num').textContent = '10';
+    document.getElementById('pro-strike').textContent = '$19/mo';
 
     starterBtn.href = LEMON_STARTER;
     starterBtn.setAttribute('target', '_blank');
@@ -2060,8 +2062,10 @@ function setCurrency(currency) {
     document.getElementById('free-num').textContent = '0';
     document.getElementById('starter-currency').textContent = '₹';
     document.getElementById('starter-num').textContent = '299';
+    document.getElementById('starter-strike').textContent = '₹599/mo';
     document.getElementById('pro-currency').textContent = '₹';
     document.getElementById('pro-num').textContent = '599';
+    document.getElementById('pro-strike').textContent = '₹999/mo';
 
     starterBtn.href = 'javascript:void(0);';
     starterBtn.removeAttribute('target');
