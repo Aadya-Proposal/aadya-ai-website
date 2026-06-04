@@ -589,6 +589,29 @@ nav {
 .pricing-section .section-title { color: white; }
 .pricing-section .section-sub { color: rgba(255,255,255,0.6); }
 
+.currency-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.currency-btn {
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.currency-btn.active {
+  background: white;
+  color: #0F2D6B;
+  border-color: white;
+}
 .pricing-toggle {
   display: inline-flex;
   background: rgba(255,255,255,0.08);
@@ -1249,6 +1272,10 @@ footer {
     <div class="section-tag">Pricing</div>
     <div class="section-title">Start free. Scale as you grow.</div>
     <div class="section-sub">Transparent pricing for freelancers at every stage.</div>
+    <div class="currency-toggle" style="margin-top:20px;">
+      <button class="currency-btn active" id="btn-inr" onclick="setCurrency('inr')">🇮🇳 INR</button>
+      <button class="currency-btn" id="btn-usd" onclick="setCurrency('usd')">🌍 USD / EUR</button>
+    </div>
     <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:100px;padding:8px 20px;margin-bottom:40px;">
       <span style="width:8px;height:8px;border-radius:50%;background:#10B981;display:inline-block;animation:pulse 2s infinite;"></span>
       <span style="font-size:13px;font-weight:500;color:#10B981;">🎉 Launch pricing — locked in forever for early members · First 50 spots only</span>
@@ -1258,8 +1285,8 @@ footer {
       <div class="price-card">
         <div class="price-plan">Try Free</div>
         <div class="price-amount">
-          <span class="price-currency">$</span>
-          <span class="price-num">0</span>
+          <span class="price-currency" id="free-currency">₹</span>
+          <span class="price-num" id="free-num">0</span>
         </div>
         <div class="price-period">Get started free</div>
         <div class="price-subtext">No credit card needed</div>
@@ -1277,15 +1304,15 @@ footer {
         <div class="popular-badge">Most popular</div>
         <div class="price-plan">Starter</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;">$9/mo</span>
+          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;" id="starter-strike">₹599/mo</span>
           <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
         </div>
         <div class="price-amount">
-          <span class="price-currency">$</span>
-          <span class="price-num">5</span>
+          <span class="price-currency" id="starter-currency">₹</span>
+          <span class="price-num" id="starter-num">299</span>
         </div>
         <div class="price-period">/ month · locked in forever</div>
-        <div class="price-subtext">₹299 · €5 · billed monthly</div>
+        <div class="price-subtext" id="starter-price-sub">₹299 · billed monthly</div>
         <ul class="price-features">
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>20 documents per month</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>All document formats</li>
@@ -1293,22 +1320,22 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Document history</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Multi-currency support</li>
         </ul>
-        <a href="javascript:void(0);" class="price-btn" onclick="openUserOnboarding('starter')">Start Starter plan</a>
-        <div class="price-india">🇮🇳 ₹299/month · Auto-renews monthly · Cancel anytime</div>
+        <a href="javascript:void(0);" class="price-btn" id="starter-btn" onclick="openUserOnboarding('starter')">Start Starter plan</a>
+        <div class="price-india" id="starter-tagline">🇮🇳 ₹299/month · Auto-renews monthly · Cancel anytime</div>
       </div>
       <!-- Pro -->
       <div class="price-card">
         <div class="price-plan">Pro</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;">$19/mo</span>
+          <span style="font-size:14px;color:rgba(255,255,255,0.35);text-decoration:line-through;" id="pro-strike">₹999/mo</span>
           <span style="background:#10B981;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;">LAUNCH PRICE</span>
         </div>
         <div class="price-amount">
-          <span class="price-currency">$</span>
-          <span class="price-num">10</span>
+          <span class="price-currency" id="pro-currency">₹</span>
+          <span class="price-num" id="pro-num">599</span>
         </div>
         <div class="price-period">/ month · locked in forever</div>
-        <div class="price-subtext">₹599 · €10 · billed monthly</div>
+        <div class="price-subtext" id="pro-price-sub">₹599 · billed monthly</div>
         <ul class="price-features">
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Unlimited documents</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Custom writing styles</li>
@@ -1316,8 +1343,8 @@ footer {
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>API access</li>
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Priority support</li>
         </ul>
-        <a href="javascript:void(0);" class="price-btn" onclick="openUserOnboarding('pro')">Go Pro</a>
-        <div class="price-india">🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime</div>
+        <a href="javascript:void(0);" class="price-btn" id="pro-btn" onclick="openUserOnboarding('pro')">Go Pro</a>
+        <div class="price-india" id="pro-tagline">🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime</div>
       </div>
     </div>
     <div style="text-align:center;margin-top:28px;font-size:13px;color:rgba(255,255,255,0.4);">
@@ -2001,6 +2028,70 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   </script>
+
+<script>
+// ── Currency Toggle ────────────────────────────────────────────────────────
+const LEMON_STARTER = 'https://aadya-proposals.lemonsqueezy.com/checkout/buy/5b27b31c-cf2e-4a7e-b54e-f347cc94bb23';
+const LEMON_PRO     = 'https://aadya-proposals.lemonsqueezy.com/checkout/buy/650a62e2-40a2-49e3-8f4b-670607dc52e5';
+let currentCurrency = 'inr';
+
+function setCurrency(currency) {
+  currentCurrency = currency;
+  document.getElementById('btn-inr').classList.toggle('active', currency === 'inr');
+  document.getElementById('btn-usd').classList.toggle('active', currency === 'usd');
+
+  const starterBtn  = document.getElementById('starter-btn');
+  const proBtn      = document.getElementById('pro-btn');
+  const starterSub  = document.getElementById('starter-price-sub');
+  const proSub      = document.getElementById('pro-price-sub');
+  const starterTag  = document.getElementById('starter-tagline');
+  const proTag      = document.getElementById('pro-tagline');
+
+  if (currency === 'usd') {
+    document.getElementById('free-currency').textContent = '$';
+    document.getElementById('free-num').textContent = '0';
+    document.getElementById('starter-currency').textContent = '$';
+    document.getElementById('starter-num').textContent = '5';
+    document.getElementById('starter-strike').textContent = '$9/mo';
+    document.getElementById('pro-currency').textContent = '$';
+    document.getElementById('pro-num').textContent = '10';
+    document.getElementById('pro-strike').textContent = '$19/mo';
+    starterBtn.href = LEMON_STARTER;
+    starterBtn.setAttribute('target', '_blank');
+    starterBtn.onclick = null;
+    starterBtn.textContent = 'Start Starter — $5/mo';
+    starterSub.textContent = '$5 · billed monthly';
+    starterTag.textContent = '🌍 $5/month · USD · Cancel anytime';
+    proBtn.href = LEMON_PRO;
+    proBtn.setAttribute('target', '_blank');
+    proBtn.onclick = null;
+    proBtn.textContent = 'Go Pro — $10/mo';
+    proSub.textContent = '$10 · billed monthly';
+    proTag.textContent = '🌍 $10/month · USD · Cancel anytime';
+  } else {
+    document.getElementById('free-currency').textContent = '₹';
+    document.getElementById('free-num').textContent = '0';
+    document.getElementById('starter-currency').textContent = '₹';
+    document.getElementById('starter-num').textContent = '299';
+    document.getElementById('starter-strike').textContent = '₹599/mo';
+    document.getElementById('pro-currency').textContent = '₹';
+    document.getElementById('pro-num').textContent = '599';
+    document.getElementById('pro-strike').textContent = '₹999/mo';
+    starterBtn.href = 'javascript:void(0);';
+    starterBtn.removeAttribute('target');
+    starterBtn.onclick = function(){ openUserOnboarding('starter'); };
+    starterBtn.textContent = 'Start Starter plan';
+    starterSub.textContent = '₹299 · billed monthly';
+    starterTag.textContent = '🇮🇳 ₹299/month · Auto-renews monthly · Cancel anytime';
+    proBtn.href = 'javascript:void(0);';
+    proBtn.removeAttribute('target');
+    proBtn.onclick = function(){ openUserOnboarding('pro'); };
+    proBtn.textContent = 'Go Pro';
+    proSub.textContent = '₹599 · billed monthly';
+    proTag.textContent = '🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime';
+  }
+}
+</script>
 </body>
 
 </html>
