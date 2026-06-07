@@ -1190,7 +1190,7 @@ footer {
         <div class="feature-tags">
           <span class="feature-tag">Custom logo</span>
           <span class="feature-tag">Branded sender email</span>
-          <span class="feature-tag">Authorized signatory</span>
+          <span class="feature-tag">Your name on every page</span>
           <span class="feature-tag">Your domain</span>
         </div>
       </div>
@@ -1757,8 +1757,8 @@ async function proceedWithAction(actionType, userEmail) {
   if (actionType === 'free') {
     // Open Fillout form with pre-fill
     const params = new URLSearchParams();
-    params.append('questions[0]', userName);
-    params.append('questions[2]', userEmail);
+    params.append('user_name', userName);
+    params.append('user_email', userEmail);
     const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
     window.open(formUrl, '_blank');
   } else if (actionType === 'starter' || actionType === 'pro') {
