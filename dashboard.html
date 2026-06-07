@@ -669,9 +669,10 @@ async function openFormWithAutoFill() {
       if (userData && userData.name) userName = userData.name;
     } catch(e) { console.warn('Could not fetch user name:', e); }
     
+    // Fillout URL pre-fill — param names must match what's registered in Fillout Settings → URL Parameters
     const params = new URLSearchParams();
-    params.append('questions[0]', userName);
-    params.append('questions[2]', userEmail);
+    params.append('user_name', userName);
+    params.append('user_email', userEmail);
     
     const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
     
@@ -744,8 +745,8 @@ function showSuccessToast(msg) {
 // Open form as guest (pre-filled with guest data)
 function openFormAsGuest(name, email) {
   const params = new URLSearchParams();
-  params.append('questions[0]', name);
-  params.append('questions[2]', email);
+  params.append('user_name', name);
+  params.append('user_email', email);
   
   const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
   window.open(formUrl, '_blank');
@@ -1012,8 +1013,20 @@ async function checkAndHandlePendingAction() {
           window.open(paymentUrl, '_blank');
           return; // Don't ask for name, user is going to pay
         } else if (pendingAction === 'free') {
-          // Open Fillout form
-          window.open('https://forms.fillout.com/t/6wFLHhk2tXus', '_blank');
+          // Open Fillout form with pre-fill (user just logged in, session is available)
+          let userName = userEmail.split('@')[0];
+          try {
+            const { data: userData } = await supabaseClient
+              .from('users')
+              .select('name')
+              .eq('email', userEmail)
+              .maybeSingle();
+            if (userData && userData.name) userName = userData.name;
+          } catch(e) { console.warn('Could not fetch name for pending action:', e); }
+          const pendingParams = new URLSearchParams();
+          pendingParams.append('user_name', userName);
+          pendingParams.append('user_email', userEmail);
+          window.open(`https://forms.fillout.com/t/6wFLHhk2tXus?${pendingParams.toString()}`, '_blank');
           return;
         }
       }
