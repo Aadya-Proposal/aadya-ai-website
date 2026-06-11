@@ -1218,6 +1218,259 @@ footer {
   .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
   .faq-section { padding: 60px 20px; }
+  .video-section { padding: 0 20px 60px; }
+  .play-btn { width: 56px; height: 56px; }
+  .video-screen { padding: 16px 20px; }
+  .video-arrow { width: 32px; font-size: 18px; }
+  .video-duration { bottom: 40px; }
+}
+
+/* ── VIDEO DEMO SECTION ── */
+.video-section {
+  padding: 0 40px 80px;
+  text-align: center;
+}
+.video-section .section-tag,
+.video-section .section-title,
+.video-section .section-sub {
+  max-width: 620px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.video-player {
+  max-width: 880px;
+  margin: 40px auto 0;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(15,45,107,0.22), 0 4px 16px rgba(0,0,0,0.1);
+  border: 1px solid rgba(15,45,107,0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  outline: none;
+}
+.video-player:hover,
+.video-player:focus { transform: translateY(-4px); box-shadow: 0 36px 100px rgba(15,45,107,0.28), 0 4px 20px rgba(0,0,0,0.12); }
+.video-inner {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: linear-gradient(145deg, #071428 0%, #0F2D6B 55%, #1a3d8f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.video-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(59,130,246,0.07) 1px, transparent 1px);
+  background-size: 26px 26px;
+  pointer-events: none;
+}
+/* Decorative form→PDF panels */
+.video-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 32px 72px;
+  pointer-events: none;
+}
+.video-panel {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.video-panel-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.vf-line {
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.12);
+}
+.vf-line.short { width: 52%; }
+.vf-line.medium { width: 74%; }
+.vf-line.full { width: 100%; }
+.vf-line.accent { background: rgba(59,130,246,0.45); }
+.vf-line.accent2 { background: rgba(16,185,129,0.35); }
+.video-arrow {
+  width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(59,130,246,0.7);
+}
+.video-arrow svg { opacity: 0.7; }
+.video-arrow-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: rgba(59,130,246,0.55);
+  text-transform: uppercase;
+}
+/* Play button */
+.play-btn {
+  position: relative;
+  z-index: 2;
+  width: 76px; height: 76px;
+  background: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 10px rgba(255,255,255,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+.video-player:hover .play-btn,
+.video-player:focus .play-btn {
+  transform: scale(1.12);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 14px rgba(255,255,255,0.14);
+}
+.play-btn svg { margin-left: 5px; }
+/* Duration badge */
+.video-duration {
+  position: absolute;
+  bottom: 52px; right: 20px;
+  background: rgba(0,0,0,0.65);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.8px;
+  z-index: 2;
+  font-family: 'DM Sans', monospace;
+}
+/* Bottom label */
+.video-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
+  padding: 28px 24px 16px;
+  text-align: left;
+  z-index: 2;
+}
+.video-label-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 3px;
+}
+.video-label-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.video-label-sub::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: #10B981;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+/* Progress bar */
+.video-progress {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.12);
+  z-index: 3;
+}
+.video-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--blue);
+  border-radius: 0 2px 2px 0;
+}
+/* Video Modal */
+.video-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 9997;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+}
+.video-modal-overlay.open { display: flex; }
+.video-modal-box {
+  background: #071428;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 780px;
+  aspect-ratio: 16/9;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+  animation: modalIn 0.25s ease;
+}
+.video-modal-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: white;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 15px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+  line-height: 1;
+}
+.video-modal-close:hover { background: rgba(255,255,255,0.22); }
+.video-modal-iframe {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.video-modal-placeholder {
+  text-align: center;
+  padding: 32px 40px;
+}
+.video-modal-icon { font-size: 44px; margin-bottom: 14px; }
+.video-modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+}
+.video-modal-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.65;
+  max-width: 360px;
+  margin: 0 auto 24px;
 }
 </style>
 </head>
@@ -1321,6 +1574,105 @@ footer {
         <div class="preview-scope-item"><div class="preview-scope-dot"></div>Integrate order-to-cash data with finance modules</div>
         <div class="preview-scope-item"><div class="preview-scope-dot"></div>Conduct user training and provide UAT support</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO DEMO -->
+<section class="video-section">
+  <div class="section-tag">See it in action</div>
+  <div class="section-title">From form to client inbox<br>in 60 seconds</div>
+  <div class="section-sub">Watch how Aadya AI takes a few details and turns them into a polished, branded PDF — delivered to your client automatically.</div>
+
+  <div class="video-player" onclick="openVideoModal()" role="button" tabindex="0" aria-label="Watch Aadya AI product demo"
+       onkeydown="if(event.key==='Enter'||event.key===' ')openVideoModal()">
+    <div class="video-inner">
+
+      <!-- Decorative form → PDF panels in background -->
+      <div class="video-screen">
+        <div class="video-panel">
+          <div class="video-panel-label">Your form</div>
+          <div class="vf-line full"></div>
+          <div class="vf-line short accent"></div>
+          <div class="vf-line medium"></div>
+          <div class="vf-line full"></div>
+          <div class="vf-line short"></div>
+          <div class="vf-line medium accent"></div>
+          <div class="vf-line full"></div>
+        </div>
+        <div class="video-arrow">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(59,130,246,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+          <div class="video-arrow-label">60s</div>
+        </div>
+        <div class="video-panel">
+          <div class="video-panel-label">Client's PDF</div>
+          <div class="vf-line medium accent2"></div>
+          <div class="vf-line full"></div>
+          <div class="vf-line short"></div>
+          <div class="vf-line medium"></div>
+          <div class="vf-line full"></div>
+          <div class="vf-line short accent"></div>
+          <div class="vf-line medium"></div>
+        </div>
+      </div>
+
+      <!-- Central play button -->
+      <div class="play-btn" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="#0F2D6B" width="26" height="26">
+          <polygon points="6,3 20,12 6,21"/>
+        </svg>
+      </div>
+
+      <!-- Duration badge -->
+      <div class="video-duration">1:00</div>
+
+      <!-- Bottom label bar -->
+      <div class="video-label">
+        <div class="video-label-title">Aadya AI — Watch a proposal get generated in real time</div>
+        <div class="video-label-sub">Click to play · 60 seconds</div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="video-progress"><div class="video-progress-fill"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO MODAL -->
+<div class="video-modal-overlay" id="videoModal" onclick="if(event.target===this)closeVideoModal()">
+  <div class="video-modal-box">
+    <button class="video-modal-close" onclick="closeVideoModal()" aria-label="Close video">✕</button>
+
+    <!--
+      ╔══════════════════════════════════════════════════════════════╗
+      ║  TO WIRE UP THIS VIDEO:                                      ║
+      ║  1. Record your demo and upload to YouTube or Vimeo          ║
+      ║  2. Get the embed URL, e.g.:                                 ║
+      ║       YouTube: https://www.youtube.com/embed/YOUR_VIDEO_ID   ║
+      ║       Vimeo:   https://player.vimeo.com/video/YOUR_VIDEO_ID  ║
+      ║  3. Set that URL as the value of data-src below              ║
+      ║  4. In the CSS, change .video-modal-iframe { display:none }  ║
+      ║     to  .video-modal-iframe { display:block }                ║
+      ║  5. Remove or hide #videoPlaceholder below                   ║
+      ╚══════════════════════════════════════════════════════════════╝
+    -->
+    <iframe
+      class="video-modal-iframe"
+      id="videoIframe"
+      data-src=""
+      src=""
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowfullscreen
+      title="Aadya AI product demo">
+    </iframe>
+
+    <div class="video-modal-placeholder" id="videoPlaceholder">
+      <div class="video-modal-icon">🎬</div>
+      <div class="video-modal-title">Demo video coming soon</div>
+      <div class="video-modal-sub">We're recording the walkthrough. In the meantime, generate your first proposal free — takes under 3 minutes.</div>
+      <a href="#" class="btn-primary" onclick="event.preventDefault();closeVideoModal();openModal()">Generate free proposal →</a>
     </div>
   </div>
 </div>
@@ -2354,6 +2706,31 @@ function closeMobileNav() {
 // Close mobile nav on resize back to desktop
 window.addEventListener('resize', function() {
   if (window.innerWidth > 768) closeMobileNav();
+});
+
+// ── VIDEO DEMO ──────────────────────────────────────────────────────────────
+function openVideoModal() {
+  const modal   = document.getElementById('videoModal');
+  const iframe  = document.getElementById('videoIframe');
+  const holder  = document.getElementById('videoPlaceholder');
+  const src     = iframe.dataset.src;
+  if (src) {
+    iframe.src = src + (src.includes('?') ? '&' : '?') + 'autoplay=1';
+    iframe.style.display = 'block';
+    holder.style.display = 'none';
+  }
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeVideoModal() {
+  const modal  = document.getElementById('videoModal');
+  const iframe = document.getElementById('videoIframe');
+  iframe.src = '';
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeVideoModal(); }
 });
 
 // ── REC 3: FAQ Accordion ────────────────────────────────────────────────────
