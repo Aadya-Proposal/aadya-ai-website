@@ -1045,9 +1045,164 @@ footer {
   border-radius: 100px;
 }
 
+/* ── REC 2: HERO TRUST BADGE ── */
+.hero-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 100px;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.88);
+  margin-bottom: 28px;
+}
+.hero-trust-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+/* ── REC 4: HAMBURGER & MOBILE NAV ── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px 6px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  width: 22px; height: 2px;
+  background: var(--navy);
+  border-radius: 2px;
+  transition: all 0.3s;
+  display: block;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 64px; left: 0; right: 0;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px 24px;
+  z-index: 98;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  flex-direction: column;
+  gap: 0;
+}
+.mobile-nav.open { display: flex; }
+.mobile-nav a {
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  display: block;
+}
+.mobile-nav a:last-child { border-bottom: none; margin-top: 12px; }
+.mobile-nav .mobile-cta {
+  background: var(--navy);
+  color: white !important;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  font-weight: 700 !important;
+}
+
+/* ── REC 1: TESTI COUNTER ── */
+.testi-counter {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.testi-counter strong { color: var(--navy); }
+.testi-counter::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── REC 3: FAQ SECTION ── */
+.faq-section {
+  padding: 80px 40px;
+  background: white;
+}
+.faq-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+.faq-list { text-align: left; margin-top: 48px; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-item:first-child { border-top: 1px solid var(--border); }
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  gap: 16px;
+  user-select: none;
+}
+.faq-q:hover { color: var(--blue); }
+.faq-icon {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--blue);
+  transition: transform 0.25s, background 0.25s;
+  line-height: 1;
+}
+.faq-item.open .faq-icon { transform: rotate(45deg); background: var(--blue); color: white; }
+.faq-a {
+  display: none;
+  padding: 0 0 20px;
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+.faq-item.open .faq-a { display: block; }
+
+/* ── REC 5: GUARANTEE BADGE ── */
+.guarantee-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #10B981;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
 @media (max-width: 768px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
+  .hamburger { display: flex; }
   .hero { padding: 100px 20px 60px; }
   .hero-stats { gap: 24px; flex-wrap: wrap; }
   .preview-section { padding: 0 20px 60px; }
@@ -1062,6 +1217,7 @@ footer {
   .testimonial-grid { grid-template-columns: 1fr; }
   .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+  .faq-section { padding: 60px 20px; }
 }
 </style>
 </head>
@@ -1081,7 +1237,19 @@ footer {
     <a href="#" class="btn-ghost" onclick="event.preventDefault(); openSignIn();">Sign in</a>
     <a href="#" class="btn-primary" onclick="event.preventDefault();openModal()">Start free →</a>
   </div>
+  <button class="hamburger" id="hamburgerBtn" aria-label="Open menu" onclick="toggleMobileNav()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#how" onclick="closeMobileNav()">How it works</a>
+  <a href="#features" onclick="closeMobileNav()">Features</a>
+  <a href="#pricing" onclick="closeMobileNav()">Pricing</a>
+  <a href="#" onclick="event.preventDefault();closeMobileNav();openSignIn();">Sign in</a>
+  <a href="#" class="mobile-cta" onclick="event.preventDefault();closeMobileNav();openModal()">Start free →</a>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -1092,7 +1260,11 @@ footer {
       Now live — The AI Platform for Proposals & Professional Documents
     </div>
     <h1>Win clients with <em>proposals</em> that write themselves</h1>
-    <p>The AI platform for proposals, SOWs and professional documents — generated in seconds, delivered to your client's inbox as a branded PDF.</p>
+    <p>Built for Indian freelancers and consultants — fill a simple form, get a polished, branded PDF in 60 seconds and send it straight to your client's inbox. No writing. No formatting. No templates to chase.</p>
+    <div class="hero-trust-badge">
+      <span class="hero-trust-dot"></span>
+      Trusted by <strong style="color:white;margin:0 3px;">300+</strong> SAP consultants, IT freelancers &amp; agency owners across India, Europe &amp; the US
+    </div>
     <div class="hero-actions">
       <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate your first proposal free →</a>
       <a href="#how" class="btn-outline-lg">See how it works</a>
@@ -1322,6 +1494,10 @@ footer {
         </ul>
         <a href="javascript:void(0);" class="price-btn" id="starter-btn" onclick="openUserOnboarding('starter')">Start Starter plan</a>
         <div class="price-india" id="starter-tagline">🇮🇳 ₹299/month · Auto-renews monthly · Cancel anytime</div>
+        <div class="guarantee-badge">
+          <svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>
+          7-day money-back guarantee
+        </div>
       </div>
       <!-- Pro -->
       <div class="price-card">
@@ -1338,13 +1514,19 @@ footer {
         <div class="price-subtext" id="pro-price-sub">₹599 · billed monthly</div>
         <ul class="price-features">
           <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Unlimited documents</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Custom writing styles</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Client tracking</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>API access</li>
-          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Priority support</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>All document formats &amp; styles</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Custom logo &amp; branding on every doc</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Multi-currency support (₹ $ €)</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>GST invoice for every billing cycle</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Client tracking &amp; document history</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>Priority support (24h response)</li>
         </ul>
         <a href="javascript:void(0);" class="price-btn" id="pro-btn" onclick="openUserOnboarding('pro')">Go Pro</a>
         <div class="price-india" id="pro-tagline">🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime</div>
+        <div class="guarantee-badge">
+          <svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>
+          7-day money-back guarantee · No questions asked
+        </div>
       </div>
     </div>
     <div style="text-align:center;margin-top:28px;font-size:13px;color:rgba(255,255,255,0.4);">
@@ -1355,10 +1537,23 @@ footer {
 
 <!-- TESTIMONIALS -->
 <section class="testimonial-section">
-  <div class="section-tag">Early feedback</div>
+  <div class="section-tag">What users are saying</div>
   <div class="section-title">Freelancers love it</div>
-  <div class="section-sub" style="margin-bottom:40px;">From beta users who tested Aadya AI before launch.</div>
+  <div class="section-sub" style="margin-bottom:16px;">Feedback from early users who've already won clients with Aadya AI.</div>
+  <div class="testi-counter">Join <strong>300+</strong> freelancers already generating proposals with Aadya AI</div>
   <div class="testimonial-grid">
+    <div class="testi-card" style="border:2px solid var(--blue);position:relative;">
+      <div style="position:absolute;top:-11px;left:20px;background:var(--blue);color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;letter-spacing:0.5px;">€50K DEAL WON</div>
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"The PDF quality is outstanding. My European clients actually commented on how polished the scope of work looked. Closed a €50K deal with it."</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#3B82F6;">MJ</div>
+        <div>
+          <div class="testi-name">Manas J.</div>
+          <div class="testi-role">IT Consultant · Germany</div>
+        </div>
+      </div>
+    </div>
     <div class="testi-card">
       <div class="testi-stars">★★★★★</div>
       <div class="testi-text">"I used to spend 2 hours on every proposal. With Aadya it's done in 60 seconds and looks more professional than anything I wrote manually."</div>
@@ -1372,17 +1567,6 @@ footer {
     </div>
     <div class="testi-card">
       <div class="testi-stars">★★★★★</div>
-      <div class="testi-text">"The PDF quality is outstanding. My European clients actually commented on how polished the scope of work looked. Closed a €50K deal with it."</div>
-      <div class="testi-author">
-        <div class="testi-avatar" style="background:#3B82F6;">MJ</div>
-        <div>
-          <div class="testi-name">Manas J.</div>
-          <div class="testi-role">IT Consultant · Germany</div>
-        </div>
-      </div>
-    </div>
-    <div class="testi-card">
-      <div class="testi-stars">★★★★★</div>
       <div class="testi-text">"Finally a tool that understands freelancers. The logo, the signature, the currency — everything just works. This is what I needed."</div>
       <div class="testi-author">
         <div class="testi-avatar" style="background:#10B981;">NM</div>
@@ -1391,6 +1575,66 @@ footer {
           <div class="testi-role">Language Trainer · Mumbai</div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-inner">
+    <div class="section-tag">Got questions?</div>
+    <div class="section-title" style="font-size:clamp(28px,4vw,40px);">Everything you need to know</div>
+    <div class="section-sub">No hidden gotchas. Here are the answers to what every freelancer asks before signing up.</div>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Is my client's data safe? Who can see my proposals?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Your proposals are generated privately and sent directly to your client's inbox. We do not share, sell, or store your client's contact details beyond what's needed to deliver the document. All data is encrypted in transit and at rest via Supabase's enterprise-grade infrastructure.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What happens when I hit the free limit? Can I still access my old documents?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">When you hit the 3-document free limit, you'll be prompted to upgrade to Starter or Pro. All your previously generated documents remain accessible in your dashboard regardless of your plan — we never delete your history.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Can I upload my own logo and use my company name on every document?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Yes — every plan, including the free tier, supports custom logo upload. Your logo appears at the top of every proposal or SOW alongside your name and contact details. The client receives a document that looks like it came directly from your company.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What if the AI writes something incorrect — can I edit the document before it's sent?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Currently, documents are generated and sent automatically based on the details you fill in. The more precisely you fill the form, the more accurate the output. We recommend reviewing the form fields carefully — especially scope, deliverables, and pricing — before submitting. Manual editing before delivery is on our roadmap.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do I get a GST invoice for my subscription? Can I use this as a business expense?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Yes. All paid subscriptions (Starter and Pro) come with a GST-compliant invoice that you can use for business expense claims and tax deductions. Invoices are sent to your registered email after each billing cycle.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Can I cancel my subscription at any time?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Absolutely. Cancel anytime from your dashboard — no phone calls, no forms, no questions asked. Your plan stays active until the end of the billing period you've already paid for, and we offer a 7-day money-back guarantee if you're not satisfied.</div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -2090,6 +2334,38 @@ function setCurrency(currency) {
     proSub.textContent = '₹599 · billed monthly';
     proTag.textContent = '🇮🇳 ₹599/month · Auto-renews monthly · Cancel anytime';
   }
+}
+</script>
+
+<script>
+// ── REC 4: Hamburger / Mobile Nav ──────────────────────────────────────────
+function toggleMobileNav() {
+  const nav = document.getElementById('mobileNav');
+  const btn = document.getElementById('hamburgerBtn');
+  const isOpen = nav.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+function closeMobileNav() {
+  document.getElementById('mobileNav').classList.remove('open');
+  document.getElementById('hamburgerBtn').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// Close mobile nav on resize back to desktop
+window.addEventListener('resize', function() {
+  if (window.innerWidth > 768) closeMobileNav();
+});
+
+// ── REC 3: FAQ Accordion ────────────────────────────────────────────────────
+function toggleFaq(questionEl) {
+  const item = questionEl.parentElement;
+  const isOpen = item.classList.contains('open');
+  // Close all open items
+  document.querySelectorAll('.faq-item.open').forEach(function(el) {
+    el.classList.remove('open');
+  });
+  // Toggle clicked item
+  if (!isOpen) item.classList.add('open');
 }
 </script>
 </body>
