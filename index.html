@@ -1516,7 +1516,7 @@ footer {
     <p>Built for Indian freelancers and consultants — fill a simple form, get a polished, branded PDF in 60 seconds and send it straight to your client's inbox. No writing. No formatting. No templates to chase.</p>
     <div class="hero-trust-badge">
       <span class="hero-trust-dot"></span>
-      Trusted by <strong style="color:white;margin:0 3px;">300+</strong> SAP consultants, IT freelancers &amp; agency owners across India, Europe &amp; the US
+      Trusted by <strong class="proposal-count-live" style="color:white;margin:0 3px;">300+</strong> SAP consultants, IT freelancers &amp; agency owners across India, Europe &amp; the US
     </div>
     <div class="hero-actions">
       <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate your first proposal free →</a>
@@ -1892,7 +1892,7 @@ footer {
   <div class="section-tag">What users are saying</div>
   <div class="section-title">Freelancers love it</div>
   <div class="section-sub" style="margin-bottom:16px;">Feedback from early users who've already won clients with Aadya AI.</div>
-  <div class="testi-counter">Join <strong>300+</strong> freelancers already generating proposals with Aadya AI</div>
+  <div class="testi-counter">Join <strong class="proposal-count-live">300+</strong> freelancers already generating proposals with Aadya AI</div>
   <div class="testimonial-grid">
     <div class="testi-card" style="border:2px solid var(--blue);position:relative;">
       <div style="position:absolute;top:-11px;left:20px;background:var(--blue);color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;letter-spacing:0.5px;">€50K DEAL WON</div>
@@ -2611,6 +2611,46 @@ document.addEventListener('DOMContentLoaded', function() {
     checkPendingPaymentAndAction();
   }, 100);
 });
+
+// ── LIVE PROPOSAL COUNTER ────────────────────────────────────────────────────
+async function loadProposalCount() {
+  try {
+    const { count, error } = await aadyaSupabase
+      .from('proposals')
+      .select('*', { count: 'exact', head: true });
+
+    if (error || count === null) return; // fail silently — static fallback stays
+
+    // Round down to nearest 10, floor at 50 so it never looks sparse
+    const displayNum = Math.max(50, Math.floor(count / 10) * 10);
+
+    document.querySelectorAll('.proposal-count-live').forEach(function(el) {
+      animateProposalCount(el, displayNum, 1400);
+    });
+  } catch (e) {
+    // Network error or RLS blocked — static "300+" fallback stays, no visible change
+  }
+}
+
+function animateProposalCount(el, target, duration) {
+  const startTime = performance.now();
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease-out cubic so it decelerates into the final number
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(eased * target) + '+';
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = target.toLocaleString('en-IN') + '+';
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+// Run once Supabase client is ready
+loadProposalCount();
 </script>
 
 
