@@ -2053,7 +2053,7 @@ footer {
       <button class="modal-close-btn" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-iframe-wrap">
-      <iframe src="https://forms.fillout.com/t/6wFLHhk2tXus" allowfullscreen></iframe>
+      <iframe id="proposalIframe" src="" allowfullscreen></iframe>
     </div>
     <div class="modal-footer">
       <div class="modal-footer-note">No credit card required · Free to try</div>
@@ -2063,13 +2063,36 @@ footer {
 </div>
 
 <script>
-function openModal() {
+async function openModal() {
+  const BASE_URL = 'https://forms.fillout.com/t/6wFLHhk2tXus';
+  const iframe = document.getElementById('proposalIframe');
+
+  // Show modal immediately so the user sees instant feedback
   document.getElementById('proposalModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  try {
+    const { data: { session } } = await aadyaSupabase.auth.getSession();
+    if (session && session.user) {
+      const email = session.user.email;
+      let name = email.split('@')[0];
+      const { data: userData } = await aadyaSupabase
+        .from('users').select('name').eq('email', email).maybeSingle();
+      if (userData && userData.name) name = userData.name;
+      const params = new URLSearchParams({ user_name: name, user_email: email });
+      iframe.src = `${BASE_URL}?${params}`;
+      return;
+    }
+  } catch (e) {
+    // fall through to plain URL
+  }
+
+  iframe.src = BASE_URL;
 }
 function closeModal() {
   document.getElementById('proposalModal').classList.remove('open');
   document.body.style.overflow = '';
+  document.getElementById('proposalIframe').src = '';
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeModal();
