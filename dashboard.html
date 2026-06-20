@@ -799,8 +799,6 @@ async function start() {
         console.log('📝 Creating new user record with plan=free');
         await supabaseClient.from('users').insert({
           email: email,
-          plan: 'free',
-          documents_used: 0,
           created_at: new Date()
         });
         
@@ -948,8 +946,6 @@ async function saveDashboardName(email, name) {
         {
           email: email,
           name: name,
-          plan: 'free',
-          documents_used: 0,
           created_at: new Date()
         },
         { onConflict: 'email' }

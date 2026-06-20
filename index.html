@@ -2585,19 +2585,21 @@ async function saveUserName(email, name) {
     alert('Please enter your name');
     return;
   }
-  
+
   try {
-    // Update user in Supabase
+    const { data: { user } } = await aadyaSupabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const { error } = await aadyaSupabase
       .from('users')
       .update({ name: name.trim() })
-      .eq('email', email);
-    
+      .eq('id', user.id);
+
     if (error) throw error;
-    
+
     // Remove modal
     document.querySelector('div[style*="rgba(15,45,107,0.85)"]').remove();
-    
+
     console.log('Name saved:', name);
   } catch(e) {
     console.error('Save name error:', e);
