@@ -833,15 +833,22 @@ async function start() {
 
     // Load proposal history
     try {
-      const { data: proposals } = await supabaseClient
-        .from('proposals')
-        .select('*')
-        .eq('user_email', email)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      const [{ count: totalCount }, { data: proposals }] = await Promise.all([
+        supabaseClient
+          .from('proposals')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_email', email),
+        supabaseClient
+          .from('proposals')
+          .select('*')
+          .eq('user_email', email)
+          .order('created_at', { ascending: false })
+          .limit(5)
+      ]);
+
+      document.getElementById('totalDocs').textContent = totalCount ?? 0;
 
       if (proposals && proposals.length > 0) {
-        document.getElementById('totalDocs').textContent = proposals.length;
         document.getElementById('historyContainer').innerHTML = proposals.map(p => `
           <div class="history-item">
             <div class="file-icon">📄</div>
@@ -1065,15 +1072,22 @@ async function refreshUserStats() {
     }
 
     // Re-fetch proposal history
-    const { data: proposals } = await supabaseClient
-      .from('proposals')
-      .select('*')
-      .eq('user_email', email)
-      .order('created_at', { ascending: false })
-      .limit(5);
+    const [{ count: totalCount }, { data: proposals }] = await Promise.all([
+      supabaseClient
+        .from('proposals')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_email', email),
+      supabaseClient
+        .from('proposals')
+        .select('*')
+        .eq('user_email', email)
+        .order('created_at', { ascending: false })
+        .limit(5)
+    ]);
+
+    document.getElementById('totalDocs').textContent = totalCount ?? 0;
 
     if (proposals && proposals.length > 0) {
-      document.getElementById('totalDocs').textContent = proposals.length;
       document.getElementById('historyContainer').innerHTML = proposals.map(p => `
         <div class="history-item">
           <div class="file-icon">📄</div>
