@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <!-- Google tag (GA4 + Google Ads) -->
@@ -12,7 +12,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aadya AI â€” Account Settings</title>
+<title>Aadya AI — Account Settings</title>
 <meta name="theme-color" content="#0F2D6B">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -433,8 +433,8 @@ function renderPlanSection(plan, email) {
   const isPro     = plan.includes('pro');
   const isStarter = plan.includes('starter');
   const planLabel = isPro ? 'Pro' : (isStarter ? 'Starter' : 'Free');
-  const planPrice = isPro ? 'â‚¹599 / month' : (isStarter ? 'â‚¹299 / month' : 'Free');
-  const planIcon  = isPro ? 'â­' : (isStarter ? 'ðŸš€' : 'ðŸŒ±');
+  const planPrice = isPro ? '₹599 / month' : (isStarter ? '₹299 / month' : 'Free');
+  const planIcon  = isPro ? '⭐' : (isStarter ? '🚀' : '🌱');
 
   let html = `
     <div class="plan-current">
@@ -450,8 +450,8 @@ function renderPlanSection(plan, email) {
   if (isPro) {
     html += `
       <div class="pro-thank-you">
-        <div class="emoji">ðŸŽ‰</div>
-        <p>You're on the Pro plan â€” thank you!</p>
+        <div class="emoji">🎉</div>
+        <p>You're on the Pro plan — thank you!</p>
       </div>
     `;
   } else if (isStarter) {
@@ -460,7 +460,7 @@ function renderPlanSection(plan, email) {
       <div class="upgrade-grid" style="grid-template-columns:1fr;">
         <div class="upgrade-card">
           <div class="upgrade-card-name">Pro Plan</div>
-          <div class="upgrade-card-price">â‚¹599/month Â· Unlimited proposals</div>
+          <div class="upgrade-card-price">₹599/month · Unlimited proposals</div>
           <button class="upgrade-btn inr" onclick="openRazorpay('pro')">Upgrade with INR â†’</button>
           <a class="upgrade-btn usd" href="${LEMON_PRO}" target="_blank">Upgrade with USD / EUR â†’</a>
         </div>
@@ -472,14 +472,14 @@ function renderPlanSection(plan, email) {
       <div class="upgrade-grid">
         <div class="upgrade-card">
           <div class="upgrade-card-name">Starter</div>
-          <div class="upgrade-card-price">â‚¹299/month</div>
+          <div class="upgrade-card-price">₹299/month</div>
           <button class="upgrade-btn inr" onclick="openRazorpay('starter')">Upgrade with INR â†’</button>
           <a class="upgrade-btn usd" href="${LEMON_STARTER}" target="_blank">Upgrade with USD/EUR â†’</a>
           <div class="upgrade-label">20 proposals / month</div>
         </div>
         <div class="upgrade-card">
           <div class="upgrade-card-name">Pro</div>
-          <div class="upgrade-card-price">â‚¹599/month</div>
+          <div class="upgrade-card-price">₹599/month</div>
           <button class="upgrade-btn inr" onclick="openRazorpay('pro')">Upgrade with INR â†’</button>
           <a class="upgrade-btn usd" href="${LEMON_PRO}" target="_blank">Upgrade with USD/EUR â†’</a>
           <div class="upgrade-label">Unlimited proposals</div>
