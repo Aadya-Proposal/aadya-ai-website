@@ -249,6 +249,9 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
 .upgrade-btn.usd { background:var(--success); }
 .upgrade-btn.usd:hover { filter:brightness(0.9); }
 .upgrade-label { font-size:11px; color:var(--muted); }
+.alt-currency-link { margin-top:10px; text-align:center; }
+.alt-currency-link a { font-size:12px; color:var(--muted); text-decoration:underline; cursor:pointer; }
+.alt-currency-link a:hover { color:var(--text); }
 
 .pro-thank-you {
   text-align:center;
@@ -345,7 +348,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
     </div>
     <div class="save-row">
       <button class="save-btn" onclick="saveName()">Save changes</button>
-      <span class="save-confirm" id="saveConfirm">Saved âœ“</span>
+      <span class="save-confirm" id="saveConfirm">Saved ✓</span>
     </div>
   </div>
 
@@ -436,6 +439,25 @@ function renderPlanSection(plan, email) {
   const planPrice = isPro ? '₹599 / month' : (isStarter ? '₹299 / month' : 'Free');
   const planIcon  = isPro ? '⭐' : (isStarter ? '🚀' : '🌱');
 
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const isIndia = tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta';
+
+  function upgradeButtons(planKey) {
+    const inrBtn = `<button class="upgrade-btn inr" onclick="openRazorpay('${planKey}')">Upgrade with INR →</button>`;
+    const usdHref = planKey === 'starter' ? LEMON_STARTER : LEMON_PRO;
+    const usdLabel = planKey === 'starter' ? 'USD/EUR' : 'USD / EUR';
+    const usdBtn = `<a class="upgrade-btn usd" href="${usdHref}" target="_blank">Upgrade with ${usdLabel} →</a>`;
+    if (isIndia) {
+      return `${inrBtn}
+          <div class="alt-currency-link"><a href="#" onclick="this.closest('.alt-currency-link').nextElementSibling.style.display='block';this.closest('.alt-currency-link').style.display='none';return false;">Paying from outside India? Use USD / EUR instead</a></div>
+          <div style="display:none;">${usdBtn}</div>`;
+    } else {
+      return `${usdBtn}
+          <div class="alt-currency-link"><a href="#" onclick="this.closest('.alt-currency-link').nextElementSibling.style.display='block';this.closest('.alt-currency-link').style.display='none';return false;">Paying from India? Use INR instead</a></div>
+          <div style="display:none;">${inrBtn}</div>`;
+    }
+  }
+
   let html = `
     <div class="plan-current">
       <div class="plan-icon">${planIcon}</div>
@@ -461,8 +483,7 @@ function renderPlanSection(plan, email) {
         <div class="upgrade-card">
           <div class="upgrade-card-name">Pro Plan</div>
           <div class="upgrade-card-price">₹599/month · Unlimited proposals</div>
-          <button class="upgrade-btn inr" onclick="openRazorpay('pro')">Upgrade with INR â†’</button>
-          <a class="upgrade-btn usd" href="${LEMON_PRO}" target="_blank">Upgrade with USD / EUR â†’</a>
+          ${upgradeButtons('pro')}
         </div>
       </div>
     `;
@@ -473,15 +494,13 @@ function renderPlanSection(plan, email) {
         <div class="upgrade-card">
           <div class="upgrade-card-name">Starter</div>
           <div class="upgrade-card-price">₹299/month</div>
-          <button class="upgrade-btn inr" onclick="openRazorpay('starter')">Upgrade with INR â†’</button>
-          <a class="upgrade-btn usd" href="${LEMON_STARTER}" target="_blank">Upgrade with USD/EUR â†’</a>
+          ${upgradeButtons('starter')}
           <div class="upgrade-label">20 proposals / month</div>
         </div>
         <div class="upgrade-card">
           <div class="upgrade-card-name">Pro</div>
           <div class="upgrade-card-price">₹599/month</div>
-          <button class="upgrade-btn inr" onclick="openRazorpay('pro')">Upgrade with INR â†’</button>
-          <a class="upgrade-btn usd" href="${LEMON_PRO}" target="_blank">Upgrade with USD/EUR â†’</a>
+          ${upgradeButtons('pro')}
           <div class="upgrade-label">Unlimited proposals</div>
         </div>
       </div>
