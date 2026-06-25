@@ -1060,6 +1060,19 @@ footer {
 .cmp-y { color: #10B981; font-weight: 700; font-size: 15px; flex-shrink: 0; }
 .cmp-n { color: var(--muted); font-size: 15px; flex-shrink: 0; }
 
+/* ── Roadmap strip ── */
+.roadmap-wrap { position: relative; z-index: 1; padding: 0 40px 80px; max-width: 1100px; margin: 0 auto; }
+.roadmap-card { background: #EEF4FF; border-radius: 20px; padding: 36px 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; border: 1px solid var(--border); }
+.roadmap-text { flex-shrink: 0; }
+.roadmap-eyebrow { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--blue); margin-bottom: 8px; }
+.roadmap-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.roadmap-sub { font-size: 14px; color: var(--muted); }
+.roadmap-tiles { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.roadmap-tile { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; text-align: center; min-width: 110px; }
+.roadmap-tile-emoji { font-size: 20px; margin-bottom: 6px; }
+.roadmap-tile-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+.roadmap-tile-date { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
@@ -1872,30 +1885,30 @@ footer {
 </section>
 
 <!-- COMING SOON STRIP -->
-<div style="position:relative;z-index:1;padding:0 40px 80px;max-width:1100px;margin:0 auto;">
-  <div style="background:#EEF4FF;border-radius:20px;padding:36px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px;border:1px solid var(--border);">
-    <div>
-      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:8px;">Platform roadmap</div>
-      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;">More document types coming soon</div>
-      <div style="font-size:14px;color:var(--muted);">Proposals is just the beginning. Here's what's next on Aadya AI.</div>
+<div class="roadmap-wrap">
+  <div class="roadmap-card">
+    <div class="roadmap-text">
+      <div class="roadmap-eyebrow">Platform roadmap</div>
+      <div class="roadmap-title">More document types coming soon</div>
+      <div class="roadmap-sub">Proposals is just the beginning. Here's what's next on Aadya AI.</div>
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:14px 20px;text-align:center;min-width:110px;">
-        <div style="font-size:20px;margin-bottom:6px;">📄</div>
-        <div style="font-size:13px;font-weight:600;color:var(--navy);">Resume & CV</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Coming Q3 2026</div>
+    <div class="roadmap-tiles">
+      <div class="roadmap-tile">
+        <div class="roadmap-tile-emoji">📄</div>
+        <div class="roadmap-tile-name">Resume & CV</div>
+        <div class="roadmap-tile-date">Coming Q3 2026</div>
       </div>
-      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:14px 20px;text-align:center;min-width:110px;">
-        <div style="font-size:20px;margin-bottom:6px;">📢</div>
-        <div style="font-size:13px;font-weight:600;color:var(--navy);">Media Content</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Coming Q3 2026</div>
+      <div class="roadmap-tile">
+        <div class="roadmap-tile-emoji">📢</div>
+        <div class="roadmap-tile-name">Media Content</div>
+        <div class="roadmap-tile-date">Coming Q3 2026</div>
       </div>
-      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:14px 20px;text-align:center;min-width:110px;">
-        <div style="font-size:20px;margin-bottom:6px;">🤝</div>
-        <div style="font-size:13px;font-weight:600;color:var(--navy);">Contracts & NDA</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Coming Q4 2026</div>
+      <div class="roadmap-tile">
+        <div class="roadmap-tile-emoji">🤝</div>
+        <div class="roadmap-tile-name">Contracts & NDA</div>
+        <div class="roadmap-tile-date">Coming Q4 2026</div>
       </div>
-      <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()" style="align-self:center;">Generate a proposal free →</a>
+      <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate a proposal free →</a>
     </div>
   </div>
 </div>
