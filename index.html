@@ -166,13 +166,26 @@ nav {
 .hero {
   position: relative;
   z-index: 1;
-  min-height: 100vh;
+  min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 120px 40px 80px;
-  text-align: center;
   overflow: hidden;
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  gap: 72px;
+  align-items: center;
+  max-width: 1100px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+.hero-preview {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-glow {
@@ -221,7 +234,7 @@ nav {
   letter-spacing: -2px;
   color: var(--navy);
   max-width: 820px;
-  margin: 0 auto 24px;
+  margin: 0 0 24px;
   animation: fadeUp 0.6s 0.1s ease both;
 }
 
@@ -239,7 +252,7 @@ nav {
   font-weight: 400;
   color: var(--muted);
   max-width: 540px;
-  margin: 0 auto 40px;
+  margin: 0 0 40px;
   line-height: 1.6;
   animation: fadeUp 0.6s 0.2s ease both;
 }
@@ -247,7 +260,7 @@ nav {
 .hero-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 16px;
   flex-wrap: wrap;
   animation: fadeUp 0.6s 0.3s ease both;
@@ -293,7 +306,7 @@ nav {
 .hero-stats {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 48px;
   margin-top: 64px;
   animation: fadeUp 0.6s 0.4s ease both;
@@ -1302,8 +1315,12 @@ footer {
   .nav-logo img { height: 40px; width: auto; }
   .nav-links { display: none; }
   .hamburger { display: flex; }
-  .hero { padding: 100px 20px 60px; }
-  .hero-stats { gap: 24px; flex-wrap: wrap; }
+  .hero { padding: 100px 20px 60px; min-height: auto; }
+  .hero-inner { display: block; text-align: center; }
+  .hero-preview { margin-top: 40px; }
+  .hero-actions { justify-content: center; }
+  .hero-stats { gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .hero h1, .hero p { margin-left: auto; margin-right: auto; }
   .preview-section { padding: 0 20px 60px; }
   .section { padding: 60px 20px; }
   .steps { grid-template-columns: 1fr; }
@@ -1616,76 +1633,79 @@ footer {
 <!-- HERO -->
 <section class="hero">
   <div class="hero-glow"></div>
-  <div>
-    <div class="hero-badge">
-      <span class="hero-badge-dot"></span>
-      Now live — The AI Platform for Proposals & Professional Documents
-    </div>
-    <h1>Win clients with <em>proposals</em> that write themselves</h1>
-    <p>Built for freelancers and consultants — fill a simple form, get a polished, branded PDF in 60 seconds and send it straight to your client's inbox. No writing. No formatting. No templates to chase.</p>
-    <div class="hero-trust-badge">
-      <span class="hero-trust-dot"></span>
-      <strong class="proposal-count-live" style="margin:0 3px;">500+</strong> proposals delivered to clients across India, Europe &amp; the US
-    </div>
-    <div class="hero-actions">
-      <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate your first proposal free →</a>
-      <a href="#how" class="btn-outline-lg">See how it works</a>
-    </div>
-    <div class="hero-stats">
-      <div>
-        <div class="hero-stat-num">60s</div>
-        <div class="hero-stat-label">Average generation time</div>
+  <div class="hero-inner">
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Now live — The AI Platform for Proposals & Professional Documents
       </div>
-      <div class="hero-stat-divider"></div>
-      <div>
-        <div class="hero-stat-num">5 formats</div>
-        <div class="hero-stat-label">Proposals · SOWs · Resumes<br>NDAs · Contracts</div>
+      <h1>Win clients with <em>proposals</em> that write themselves</h1>
+      <p>Built for freelancers and consultants — fill a simple form, get a polished, branded PDF in 60 seconds and send it straight to your client's inbox. No writing. No formatting. No templates to chase.</p>
+      <div class="hero-trust-badge">
+        <span class="hero-trust-dot"></span>
+        <strong class="proposal-count-live" style="margin:0 3px;">500+</strong> proposals delivered to clients across India, Europe &amp; the US
       </div>
-      <div class="hero-stat-divider"></div>
-      <div>
-        <div class="hero-stat-num">IN · EU · US</div>
-        <div class="hero-stat-label">Markets supported</div>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate your first proposal free →</a>
+        <a href="#how" class="btn-outline-lg">See how it works</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">60s</div>
+          <div class="hero-stat-label">Average generation time</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div>
+          <div class="hero-stat-num">5 formats</div>
+          <div class="hero-stat-label">Proposals · SOWs · Resumes<br>NDAs · Contracts</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div>
+          <div class="hero-stat-num">IN · EU · US</div>
+          <div class="hero-stat-label">Markets supported</div>
+        </div>
       </div>
     </div>
+
+    <div class="hero-preview">
+      <div class="preview-card">
+        <div class="preview-bar">
+          <div class="preview-dot"></div>
+          <div class="preview-dot"></div>
+          <div class="preview-dot"></div>
+          <div class="preview-url">aadya-ai.com/generate</div>
+        </div>
+        <div class="preview-doc">
+          <div class="preview-doc-header">
+            <div class="preview-logo-box">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 1 L19 19 H13 L10 11 L7 19 H1 Z" fill="white"/>
+              </svg>
+            </div>
+            <div>
+              <div class="preview-title">Scope of Work for SAP S4 HANA Implementation</div>
+              <div class="preview-subtitle">Prepared for Infosys · 23 May 2026</div>
+            </div>
+            <div class="preview-tag">✓ Sent to client</div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-field"><div class="preview-field-label">Prepared for</div><div class="preview-field-value">Infosys Ltd.</div></div>
+            <div class="preview-field"><div class="preview-field-label">Prepared by</div><div class="preview-field-value">Manjunath M.</div></div>
+            <div class="preview-field"><div class="preview-field-label">Professional fee</div><div class="preview-field-value">₹85,000 / month</div></div>
+          </div>
+          <div class="preview-scope">
+            <div class="preview-scope-title">Scope of Services</div>
+            <div class="preview-scope-item"><div class="preview-scope-dot"></div>Configure revenue recognition as per IFRS 15 guidelines</div>
+            <div class="preview-scope-item"><div class="preview-scope-dot"></div>Integrate order-to-cash data with finance modules</div>
+            <div class="preview-scope-item"><div class="preview-scope-dot"></div>Conduct user training and provide UAT support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
-
-<!-- PREVIEW -->
-<div class="preview-section">
-  <div class="preview-card">
-    <div class="preview-bar">
-      <div class="preview-dot"></div>
-      <div class="preview-dot"></div>
-      <div class="preview-dot"></div>
-      <div class="preview-url">aadya-ai.com/generate</div>
-    </div>
-    <div class="preview-doc">
-      <div class="preview-doc-header">
-        <div class="preview-logo-box">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 1 L19 19 H13 L10 11 L7 19 H1 Z" fill="white"/>
-          </svg>
-        </div>
-        <div>
-          <div class="preview-title">Scope of Work for SAP S4 HANA Implementation</div>
-          <div class="preview-subtitle">Prepared for Infosys · 23 May 2026</div>
-        </div>
-        <div class="preview-tag">✓ Sent to client</div>
-      </div>
-      <div class="preview-body">
-        <div class="preview-field"><div class="preview-field-label">Prepared for</div><div class="preview-field-value">Infosys Ltd.</div></div>
-        <div class="preview-field"><div class="preview-field-label">Prepared by</div><div class="preview-field-value">Manjunath M.</div></div>
-        <div class="preview-field"><div class="preview-field-label">Professional fee</div><div class="preview-field-value">₹85,000 / month</div></div>
-      </div>
-      <div class="preview-scope">
-        <div class="preview-scope-title">Scope of Services</div>
-        <div class="preview-scope-item"><div class="preview-scope-dot"></div>Configure revenue recognition as per IFRS 15 guidelines</div>
-        <div class="preview-scope-item"><div class="preview-scope-dot"></div>Integrate order-to-cash data with finance modules</div>
-        <div class="preview-scope-item"><div class="preview-scope-dot"></div>Conduct user training and provide UAT support</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- VIDEO DEMO -->
 <section class="video-section">
