@@ -1,7 +1,7 @@
 // Aadya AI - Service Worker
 // Version: 1.0.0
 
-const CACHE_NAME = 'aadya-ai-v1';
+const CACHE_NAME = 'aadya-ai-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache on install (app shell)
