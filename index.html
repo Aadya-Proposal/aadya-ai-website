@@ -962,6 +962,89 @@ footer {
   color: rgba(255,255,255,0.5);
 }
 
+/* ── COMPARISON TABLE ── */
+.cmp-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15,45,107,0.04), 0 4px 12px rgba(15,45,107,0.07), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.cmp-grid {
+  display: grid;
+  grid-template-columns: 1.9fr 1fr 1.15fr 1fr;
+  min-width: 580px;
+}
+.cmp-lbl, .cmp-cell, .cmp-head {
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-bottom: 1px solid var(--border);
+}
+.cmp-lbl {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--off-white);
+  padding-right: 20px;
+}
+.cmp-cell {
+  font-size: 13px;
+  color: var(--muted);
+  background: white;
+  border-left: 1px solid var(--border);
+  line-height: 1.5;
+}
+.cmp-cell.aadya {
+  background: var(--blue-pale);
+  color: var(--navy);
+  font-weight: 500;
+}
+.cmp-head {
+  padding: 18px 18px 14px;
+  border-bottom: 2px solid var(--border);
+  border-left: 1px solid var(--border);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  background: white;
+}
+.cmp-head:first-child {
+  background: var(--off-white);
+  border-left: none;
+  border-radius: 16px 0 0 0;
+}
+.cmp-head.aadya {
+  background: var(--blue-pale);
+  border-radius: 0 16px 0 0;
+}
+.cmp-head-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.cmp-badge {
+  display: inline-block;
+  background: #10B981;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 100px;
+}
+.cmp-lbl.last, .cmp-cell.last { border-bottom: none; }
+.cmp-lbl.last { border-radius: 0 0 0 16px; }
+.cmp-cell.aadya.last { border-radius: 0 0 16px 0; }
+.cmp-y { color: #10B981; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+.cmp-n { color: var(--muted); font-size: 15px; flex-shrink: 0; }
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
@@ -1784,6 +1867,66 @@ footer {
     </div>
   </div>
 </div>
+
+<!-- VS COMPARISON -->
+<section class="section" id="compare">
+  <div class="section-tag">The honest comparison</div>
+  <h2 class="section-title">Why not just use ChatGPT?</h2>
+  <div class="section-sub">ChatGPT writes text. Aadya delivers a branded PDF straight to your client's inbox — in 60 seconds. Here's the real difference.</div>
+  <div class="cmp-scroll">
+    <div class="cmp-grid">
+
+      <!-- Header -->
+      <div class="cmp-head"></div>
+      <div class="cmp-head">Manual<span class="cmp-head-sub">Word / Google Docs</span></div>
+      <div class="cmp-head">ChatGPT + Google Docs</div>
+      <div class="cmp-head aadya">Aadya AI<span class="cmp-badge">Best for freelancers</span></div>
+
+      <!-- Row 1: Time -->
+      <div class="cmp-lbl">Time to send a proposal</div>
+      <div class="cmp-cell">2–3 hours</div>
+      <div class="cmp-cell">45–60 min</div>
+      <div class="cmp-cell aadya"><span class="cmp-y">✓</span><strong>60 seconds</strong></div>
+
+      <!-- Row 2: Inbox delivery -->
+      <div class="cmp-lbl">Delivered to client's inbox</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>You send it manually</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>You send it manually</div>
+      <div class="cmp-cell aadya"><span class="cmp-y">✓</span>Automatic — zero steps</div>
+
+      <!-- Row 3: Branded PDF -->
+      <div class="cmp-lbl">Branded PDF with your logo</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>Manual copy-paste into template</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>You format it yourself</div>
+      <div class="cmp-cell aadya"><span class="cmp-y">✓</span>Built-in on every document</div>
+
+      <!-- Row 4: Formatting -->
+      <div class="cmp-lbl">Professional PDF formatting</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>Template hunt required</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>Plain text — you design it</div>
+      <div class="cmp-cell aadya"><span class="cmp-y">✓</span>Polished layout, always</div>
+
+      <!-- Row 5: History -->
+      <div class="cmp-lbl">Proposal history &amp; records</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>Scattered across files &amp; folders</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>No record kept after the chat</div>
+      <div class="cmp-cell aadya"><span class="cmp-y">✓</span>Every document saved to your dashboard</div>
+
+      <!-- Row 6: App switching -->
+      <div class="cmp-lbl">App-switching required</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>4+ tools (Docs, email, PDF, logo…)</div>
+      <div class="cmp-cell"><span class="cmp-n">✗</span>3+ tools (ChatGPT, Docs, email…)</div>
+      <div class="cmp-cell aadya"><span class="cmp-y">✓</span>One form — that's it</div>
+
+      <!-- Row 7: Free to start -->
+      <div class="cmp-lbl last">Free to start</div>
+      <div class="cmp-cell last"><span class="cmp-y">✓</span>Free tools — your time is the real cost</div>
+      <div class="cmp-cell last"><span class="cmp-y">✓</span>Free tier / GPT-4 is $20/mo</div>
+      <div class="cmp-cell aadya last"><span class="cmp-y">✓</span>3 proposals free · no card needed</div>
+
+    </div>
+  </div>
+</section>
 
 <!-- PRICING -->
 <section class="pricing-section" id="pricing">
