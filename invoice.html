@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (GA4 + Google Ads) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W18E4HNGES"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-W18E4HNGES');
+  gtag('config', 'AW-18210872541');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="128x128" href="/icon-128.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F2D6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aadya AI">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>Aadya AI — Generate a Professional Invoice in 60 Seconds</title>
+<meta name="description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try — no account needed to start. Supports INR, USD and EUR.">
+<link rel="canonical" href="https://www.aadya-ai.com/invoice.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.aadya-ai.com/invoice.html">
+<meta property="og:site_name" content="Aadya AI">
+<meta property="og:title" content="Aadya AI — Generate a Professional Invoice in 60 Seconds">
+<meta property="og:description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try — no account needed to start.">
+<meta property="og:image" content="https://www.aadya-ai.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Aadya AI — Generate a Professional Invoice in 60 Seconds">
+<meta name="twitter:description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try.">
+<meta name="twitter:image" content="https://www.aadya-ai.com/icons/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0F2D6B;
+  --blue: #3B82F6;
+  --blue-light: #60A5FA;
+  --blue-pale: #DBEAFE;
+  --white: #ffffff;
+  --off-white: #F8FAFF;
+  --text: #0F1F3D;
+  --muted: #6B7A99;
+  --border: rgba(15,45,107,0.1);
+  --card-bg: rgba(255,255,255,0.7);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--off-white);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 72px;
+  background: rgba(248,250,255,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.nav-logo img { height: 48px; width: auto; }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--navy); }
+.nav-links a.active { color: var(--navy); font-weight: 600; }
+
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-ghost {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.btn-ghost:hover { background: var(--blue-pale); }
+
+.btn-primary {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: var(--blue);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary:hover { background: #2563EB; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,130,246,0.35); }
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  overflow: hidden;
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  gap: 72px;
+  align-items: center;
+  max-width: 1100px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-glow {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 560px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.22) 0%, rgba(99,102,241,0.10) 45%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--blue-pale);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue);
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(38px, 3.6vw, 48px);
+  font-weight: 800;
+  line-height: 1.07;
+  letter-spacing: -2px;
+  color: var(--navy);
+  max-width: 820px;
+  margin: 0 0 24px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, #3B82F6 0%, #818CF8 55%, #60A5FA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--muted);
+  max-width: 500px;
+  margin: 0 0 36px;
+  line-height: 1.65;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+
+.btn-primary-lg {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(180deg, #1D4ED8 0%, #1238A6 100%);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  transition: all 0.25s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 4px rgba(15,45,107,0.3), 0 8px 24px rgba(18,56,166,0.25);
+  min-height: 44px;
+}
+.btn-primary-lg:hover { background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%); transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 32px rgba(37,99,235,0.4); }
+
+.hero-small-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── INVOICE PREVIEW CARD ── */
+.invoice-preview-card {
+  background: white;
+  border: 1px solid rgba(15,45,107,0.08);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(15,45,107,0.05), 0 8px 32px rgba(15,45,107,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+  animation: fadeUp 0.6s 0.5s ease both;
+  position: relative;
+}
+.invoice-preview-card::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: 8px; right: -8px; bottom: 8px;
+  background: rgba(59,130,246,0.08);
+  border-radius: 16px;
+  z-index: -1;
+}
+
+.inv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.inv-logo-box {
+  width: 36px; height: 36px;
+  background: var(--navy);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content:center;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 800;
+}
+.inv-company { font-size: 13px; font-weight: 700; color: var(--navy); margin-top: 6px; }
+.inv-number { font-size: 11px; color: var(--muted); text-align: right; }
+.inv-number strong { display: block; font-size: 15px; font-weight: 800; color: var(--navy); }
+
+.inv-parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.inv-party-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 3px; }
+.inv-party-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+.inv-party-sub { font-size: 11px; color: var(--muted); }
+
+.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+.inv-table th {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.inv-table th:last-child,
+.inv-table td:last-child { text-align: right; }
+.inv-table td {
+  font-size: 12px;
+  color: var(--text);
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(15,45,107,0.05);
+}
+
+.inv-total-row { display: flex; justify-content: flex-end; gap: 32px; padding-top: 10px; border-top: 1.5px solid var(--border); }
+.inv-total-label { font-size: 12px; color: var(--muted); }
+.inv-total-amount { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--navy); }
+
+.inv-status-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #DCFCE7; color: #166534;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 999px;
+  margin-top: 12px;
+}
+.inv-watermark {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── SOCIAL PROOF BAR ── */
+.proof-bar {
+  position: relative;
+  z-index: 1;
+  background: var(--navy);
+  padding: 20px 40px;
+}
+.proof-bar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.proof-text {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+.proof-stats {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.proof-stat { text-align: center; }
+.proof-stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+}
+.proof-stat-label { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+
+/* ── SECTIONS ── */
+.section {
+  position: relative;
+  z-index: 1;
+  padding: 80px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-tag {
+  display: inline-block;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -1.5px;
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+.section-sub {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 48px;
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+/* HOW IT WORKS */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.step-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: 0 2px 16px rgba(15,45,107,0.06);
+  position: relative;
+}
+.step-num {
+  width: 44px; height: 44px;
+  background: var(--blue);
+  color: white;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 800;
+  margin-bottom: 18px;
+}
+.step-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.step-time { font-size: 12px; color: var(--blue); font-weight: 600; margin-top: 10px; }
+
+/* FEATURES */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.feature-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 2px 16px rgba(15,45,107,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(15,45,107,0.12); }
+.feature-icon {
+  width: 48px; height: 48px;
+  background: var(--blue-pale);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+  font-size: 22px;
+}
+.feature-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.feature-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* COMPARISON TABLE */
+.comparison-section {
+  position: relative;
+  z-index: 1;
+  padding: 80px 40px;
+  background: white;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.comparison-inner { max-width: 1100px; margin: 0 auto; }
+
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(15,45,107,0.08);
+  margin-top: 36px;
+}
+.comparison-table thead th {
+  padding: 16px 24px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  background: var(--navy);
+  color: white;
+}
+.comparison-table thead th:first-child { border-radius: 16px 0 0 0; }
+.comparison-table thead th:last-child { border-radius: 0 16px 0 0; text-align: center; }
+.comparison-table thead th:nth-child(2) { text-align: center; color: rgba(255,255,255,0.6); }
+.comparison-table thead th:last-child { background: linear-gradient(135deg, #3B82F6, #6366f1); }
+.comparison-table tbody tr { background: white; }
+.comparison-table tbody tr:nth-child(even) { background: var(--off-white); }
+.comparison-table tbody td {
+  padding: 14px 24px;
+  font-size: 14px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.comparison-table tbody td:nth-child(2),
+.comparison-table tbody td:nth-child(3) { text-align: center; }
+.comparison-table tbody td:nth-child(2) { color: var(--muted); }
+.comparison-table tbody td:nth-child(3) { color: #10B981; font-weight: 600; }
+.comparison-table tbody tr:last-child td { border-bottom: none; }
+.comparison-table tbody tr:last-child td:first-child { border-radius: 0 0 0 16px; }
+.comparison-table tbody tr:last-child td:last-child { border-radius: 0 0 16px 0; }
+
+/* BOTTOM CTA */
+.bottom-cta {
+  position: relative;
+  z-index: 1;
+  padding: 100px 40px;
+  text-align: center;
+}
+.bottom-cta h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(30px, 3vw, 40px);
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -1.5px;
+  margin-bottom: 12px;
+}
+.bottom-cta p { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+.bottom-cta .btn-primary-lg { margin: 0 auto; }
+
+/* FOOTER */
+footer {
+  position: relative;
+  z-index: 1;
+  background: #050E1F;
+  color: rgba(255,255,255,0.5);
+  padding: 40px;
+  text-align: center;
+}
+footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+footer a:hover { color: white; }
+.footer-brand-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+.footer-brand-text span { color: var(--blue-light); }
+.footer-desc { font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 20px; }
+.footer-links-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+.footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 20px 60px; min-height: auto; }
+  .hero-inner { display: block; }
+  .hero h1 { font-size: 34px; letter-spacing: -1px; margin-bottom: 16px; }
+  .hero p { font-size: 16px; margin-bottom: 28px; }
+  .invoice-preview-card { margin-top: 40px; }
+  .proof-bar { padding: 20px; }
+  .proof-bar-inner { flex-direction: column; gap: 16px; text-align: center; }
+  .proof-stats { gap: 24px; }
+  .section { padding: 60px 20px; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .comparison-section { padding: 60px 20px; }
+  .comparison-table thead th,
+  .comparison-table tbody td { padding: 12px 14px; font-size: 13px; }
+  .bottom-cta { padding: 60px 20px; }
+  footer { padding: 32px 20px; }
+}
+@media (max-width: 480px) {
+  .btn-primary-lg { width: 100%; justify-content: center; padding: 14px 20px; }
+  .hero-actions { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="/">
+    <img src="/logo.png" alt="Aadya AI">
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#how">How it works</a></li>
+    <li><a href="/#features">Features</a></li>
+    <li><a href="/#pricing">Pricing</a></li>
+    <li><a href="/invoice.html" class="active">Invoice Generator</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="/dashboard.html" class="btn-ghost">Dashboard</a>
+    <a href="/invoice.html#cta" class="btn-primary">Create Invoice →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        AI-powered · Instant PDF · Dual delivery
+      </div>
+      <h1>Generate a Professional Invoice in <em>60 Seconds</em></h1>
+      <p>AI-powered. Branded PDF. Delivered to your inbox instantly. Free to try — no account needed to start.</p>
+      <div class="hero-actions">
+        <a href="https://forms.fillout.com/t/5wEMqv7uzCus" class="btn-primary-lg" target="_blank" rel="noopener">
+          Create My Invoice →
+        </a>
+        <span class="hero-small-text">Free plan includes 3 invoices/month</span>
+      </div>
+    </div>
+    <div class="hero-preview">
+      <div class="invoice-preview-card">
+        <div class="inv-header">
+          <div>
+            <div class="inv-logo-box">A</div>
+            <div class="inv-company">Arjun Sharma &amp; Co.</div>
+          </div>
+          <div class="inv-number">
+            <span>Invoice</span>
+            <strong>#INV-2026-047</strong>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">Due: 31 Jul 2026</div>
+          </div>
+        </div>
+        <div class="inv-parties">
+          <div>
+            <div class="inv-party-label">From</div>
+            <div class="inv-party-name">Arjun Sharma</div>
+            <div class="inv-party-sub">arjun@sharmadesigns.in</div>
+          </div>
+          <div>
+            <div class="inv-party-label">To</div>
+            <div class="inv-party-name">Nexus Solutions Pvt Ltd</div>
+            <div class="inv-party-sub">accounts@nexussolutions.in</div>
+          </div>
+        </div>
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Brand Identity Design</td>
+              <td>1</td>
+              <td>₹35,000</td>
+              <td>₹35,000</td>
+            </tr>
+            <tr>
+              <td>Website UI/UX (5 pages)</td>
+              <td>1</td>
+              <td>₹45,000</td>
+              <td>₹45,000</td>
+            </tr>
+            <tr>
+              <td>GST @ 18%</td>
+              <td>—</td>
+              <td>—</td>
+              <td>₹14,400</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="inv-total-row">
+          <div>
+            <div class="inv-total-label">Total Due</div>
+            <div class="inv-total-amount">₹94,400</div>
+          </div>
+        </div>
+        <div class="inv-status-badge">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Sent to client automatically
+        </div>
+        <div class="inv-watermark">Generated by Aadya AI — aadya-ai.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF BAR -->
+<div class="proof-bar">
+  <div class="proof-bar-inner">
+    <div class="proof-text">Trusted by freelancers and consultants across India, US and Europe</div>
+    <div class="proof-stats">
+      <div class="proof-stat">
+        <div class="proof-stat-num">60 sec</div>
+        <div class="proof-stat-label">Average generation time</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-num">3 templates</div>
+        <div class="proof-stat-label">Corporate, Creative, Classic</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-num">3 currencies</div>
+        <div class="proof-stat-label">INR, USD, EUR</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section" id="how">
+  <div class="section-tag">How it works</div>
+  <h2 class="section-title">Three steps to a client-ready invoice</h2>
+  <p class="section-sub">No formatting, no calculations, no chasing templates. Fill in your details and let Aadya handle the rest.</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Fill in your details</div>
+      <div class="step-desc">Enter your client's name, service description, amount and currency. Takes about 60 seconds.</div>
+      <div class="step-time">~60 seconds</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">AI generates your invoice</div>
+      <div class="step-desc">Professional branded PDF created instantly with correct calculations, tax lines and formatting.</div>
+      <div class="step-time">~30 seconds</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Delivered to both inboxes</div>
+      <div class="step-desc">You and your client both receive the PDF automatically. No manual email needed.</div>
+      <div class="step-time">Under 2 minutes total</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" id="features" style="padding-top:0;">
+  <div class="section-tag">Features</div>
+  <h2 class="section-title">Everything you need to get paid faster</h2>
+  <p class="section-sub">Built for freelancers and consultants who want to look professional without the admin overhead.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🎨</div>
+      <div class="feature-title">Premium Templates</div>
+      <div class="feature-desc">Corporate, Creative and Classic designs that make you look like a big agency — not a first-time freelancer.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💱</div>
+      <div class="feature-title">Multi-Currency Support</div>
+      <div class="feature-desc">Invoice in INR, USD or EUR with correct symbol formatting. Tax language and payment terms adapt per region.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📬</div>
+      <div class="feature-title">Instant Dual Delivery</div>
+      <div class="feature-desc">PDF automatically sent to you and your client in under 2 minutes. No manual emailing, no attachments.</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARISON TABLE -->
+<div class="comparison-section">
+  <div class="comparison-inner">
+    <div class="section-tag">Why Aadya AI?</div>
+    <h2 class="section-title">Why not just use Word or Excel?</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Word / Excel</th>
+          <th>Aadya AI ✨</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Auto calculations</td>
+          <td>Manual</td>
+          <td>✅ Automatic</td>
+        </tr>
+        <tr>
+          <td>Professional PDF output</td>
+          <td>❌ Hard to get right</td>
+          <td>✅ Instant</td>
+        </tr>
+        <tr>
+          <td>Sent to client automatically</td>
+          <td>Manual email</td>
+          <td>✅ Automatic</td>
+        </tr>
+        <tr>
+          <td>Tax calculation</td>
+          <td>Manual</td>
+          <td>✅ Automatic</td>
+        </tr>
+        <tr>
+          <td>Branded design</td>
+          <td>❌ Basic</td>
+          <td>✅ Premium templates</td>
+        </tr>
+        <tr>
+          <td>Time to create</td>
+          <td>30+ minutes</td>
+          <td>✅ 60 seconds</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta" id="cta">
+  <div class="section-tag" style="margin-bottom:16px;">Get started free</div>
+  <h2>Ready to send your first invoice?</h2>
+  <p>Free to start. No credit card needed.</p>
+  <a href="https://forms.fillout.com/t/5wEMqv7uzCus" class="btn-primary-lg" target="_blank" rel="noopener" style="display:inline-flex;">
+    Generate Invoice Free →
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand-text">Aadya <span>AI</span></div>
+  <div class="footer-desc">The AI platform for professional documents — proposals, invoices and more. Built for freelancers everywhere.</div>
+  <div class="footer-links-row">
+    <a href="/">Home</a>
+    <a href="/#pricing">Pricing</a>
+    <a href="/invoice.html">Invoice Generator</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+  </div>
+  <div class="footer-copy">© 2026 Aadya AI. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
