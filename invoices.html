@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (GA4 + Google Ads) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W18E4HNGES"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-W18E4HNGES');
+  gtag('config', 'AW-18210872541');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aadya AI — Your Invoices</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F2D6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aadya AI">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --navy: #0F2D6B;
+  --blue: #3B82F6;
+  --blue-light: #EEF4FF;
+  --text: #1a1a2e;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --white: #ffffff;
+  --bg: #f5f7fb;
+  --success: #10b981;
+  --danger: #ef4444;
+  --card-shadow: 0 2px 16px rgba(15,45,107,0.07);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* NAVBAR */
+.navbar {
+  background:var(--white);
+  padding:0 40px;
+  height:72px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 1px 8px rgba(0,0,0,0.04);
+}
+.logo img { height:48px; display:block; }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.user-badge {
+  display:flex; align-items:center; gap:8px;
+  background:var(--blue-light); color:var(--navy);
+  padding:8px 16px; border-radius:999px;
+  font-weight:600; font-size:14px;
+  border:none; cursor:pointer; transition:background 0.2s;
+}
+.user-badge:hover { background:#dbeafe; }
+.user-badge .avatar {
+  width:28px; height:28px; background:var(--navy); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  color:white; font-size:12px; font-weight:700;
+}
+.plan-badge {
+  background:var(--navy); color:white;
+  padding:6px 14px; border-radius:999px;
+  font-size:12px; font-weight:700;
+  letter-spacing:0.5px; text-transform:uppercase;
+}
+.plan-badge.pro { background:linear-gradient(135deg,#6366f1,#3B82F6); }
+.logout-btn {
+  background:transparent; color:var(--muted);
+  border:1.5px solid var(--border); padding:8px 16px;
+  border-radius:10px; cursor:pointer;
+  font-weight:600; font-size:13px; transition:all 0.2s;
+}
+.logout-btn:hover { border-color:var(--danger); color:var(--danger); }
+.nav-link-btn {
+  font-size:13px; font-weight:600; color:var(--navy);
+  text-decoration:none; padding:8px 14px;
+  border-radius:10px; border:1.5px solid var(--border);
+  transition:all 0.2s;
+}
+.nav-link-btn:hover { border-color:var(--blue); color:var(--blue); }
+.nav-link-btn.active { border-color:var(--blue); color:var(--blue); background:var(--blue-light); }
+
+/* PAGE HEADER */
+.page-header {
+  background:linear-gradient(135deg, var(--navy) 0%, #1e4db7 100%);
+  padding:40px;
+  color:white;
+  position:relative;
+  overflow:hidden;
+}
+.page-header::before {
+  content:'';
+  position:absolute;
+  top:-40px; right:-60px;
+  width:280px; height:280px;
+  background:rgba(59,130,246,0.15);
+  border-radius:50%;
+}
+.page-header-inner { max-width:1200px; margin:0 auto; position:relative; z-index:1; }
+.page-header h1 { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; margin-bottom:6px; }
+.page-header p { color:rgba(255,255,255,0.7); font-size:15px; }
+
+/* MAIN CONTENT */
+.main-content {
+  max-width:1200px;
+  margin:0 auto;
+  padding:28px 40px 60px;
+}
+
+/* USAGE CARD */
+.usage-card {
+  background:var(--white);
+  border-radius:20px;
+  padding:24px 28px;
+  box-shadow:var(--card-shadow);
+  border:1px solid var(--border);
+  margin-bottom:24px;
+  display:flex;
+  align-items:center;
+  gap:24px;
+  flex-wrap:wrap;
+}
+.usage-info { flex:1; min-width:200px; }
+.usage-title { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+.usage-count { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+.usage-sub { font-size:13px; color:var(--muted); }
+.usage-bar-wrap { flex:2; min-width:180px; }
+.usage-bar {
+  width:100%; height:8px; background:var(--border);
+  border-radius:999px; overflow:hidden; margin-bottom:6px;
+}
+.usage-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--blue), #6366f1);
+  border-radius:999px; transition:width 0.6s ease;
+}
+.usage-bar-label { font-size:12px; color:var(--muted); }
+.usage-plan-badge {
+  background:var(--navy); color:white;
+  padding:5px 14px; border-radius:999px;
+  font-size:12px; font-weight:700;
+  letter-spacing:0.5px; text-transform:uppercase;
+}
+.usage-plan-badge.pro { background:linear-gradient(135deg,#6366f1,#3B82F6); }
+.upgrade-link {
+  font-size:13px; font-weight:600; color:var(--blue);
+  text-decoration:none;
+}
+.upgrade-link:hover { text-decoration:underline; }
+
+/* INVOICES TABLE */
+.invoices-card {
+  background:var(--white);
+  border-radius:20px;
+  box-shadow:var(--card-shadow);
+  border:1px solid var(--border);
+  overflow:hidden;
+}
+.invoices-card-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:22px 28px;
+  border-bottom:1px solid var(--border);
+}
+.invoices-card-header h2 { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; color:var(--navy); }
+.gen-invoice-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--blue); color:white;
+  padding:10px 20px; border-radius:12px;
+  font-weight:700; font-size:14px;
+  text-decoration:none; border:none; cursor:pointer;
+  transition:all 0.2s;
+}
+.gen-invoice-btn:hover { background:var(--navy); transform:translateY(-1px); }
+
+.table-wrap { overflow-x:auto; }
+table.inv-table {
+  width:100%; border-collapse:collapse;
+}
+table.inv-table th {
+  padding:12px 20px;
+  font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.5px;
+  color:var(--muted); background:#fafbfc;
+  border-bottom:1px solid var(--border);
+  text-align:left; white-space:nowrap;
+}
+table.inv-table td {
+  padding:14px 20px;
+  font-size:14px; color:var(--text);
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+table.inv-table tbody tr:last-child td { border-bottom:none; }
+table.inv-table tbody tr:hover { background:#fafbfc; }
+
+/* STATUS BADGES */
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:4px 12px; border-radius:999px;
+  font-size:12px; font-weight:700;
+}
+.badge-sent { background:#EFF6FF; color:#3B82F6; }
+.badge-paid { background:#DCFCE7; color:#166534; }
+.badge-overdue { background:#FEF2F2; color:#991B1B; }
+
+/* MARK PAID BUTTON */
+.mark-paid-btn {
+  background:none; color:var(--success);
+  border:1.5px solid var(--success);
+  padding:6px 14px; border-radius:8px;
+  font-size:12px; font-weight:700;
+  cursor:pointer; transition:all 0.2s;
+  white-space:nowrap;
+}
+.mark-paid-btn:hover { background:var(--success); color:white; }
+.mark-paid-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+/* EMPTY STATE */
+.empty-state {
+  text-align:center;
+  padding:72px 40px;
+}
+.empty-icon { font-size:52px; margin-bottom:16px; }
+.empty-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.empty-sub { font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.6; max-width:360px; margin-left:auto; margin-right:auto; }
+
+/* LOADING */
+.loading-row td { text-align:center; color:var(--muted); padding:40px; font-size:14px; }
+
+/* MOBILE CARDS (hidden by default, shown on small screens) */
+.invoice-cards { display:none; }
+.invoice-card {
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:12px;
+  background:var(--white);
+}
+.inv-card-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.inv-card-num { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--navy); }
+.inv-card-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:2px; }
+.inv-card-value { font-size:14px; color:var(--text); }
+.inv-card-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+.inv-card-actions { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
+
+/* LOADING SCREEN */
+#loadingScreen {
+  position:fixed; inset:0;
+  background:var(--white);
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999;
+  transition:opacity 0.3s;
+}
+#loadingScreen.hidden { opacity:0; pointer-events:none; }
+.spinner {
+  width:36px; height:36px;
+  border:3px solid var(--border);
+  border-top-color:var(--blue);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* RESPONSIVE */
+@media (max-width:768px) {
+  .navbar { padding:0 16px; }
+  .page-header { padding:28px 16px; }
+  .page-header h1 { font-size:24px; }
+  .main-content { padding:20px 16px 60px; }
+  .invoices-card-header { padding:16px; flex-direction:column; align-items:flex-start; gap:12px; }
+  table.inv-table { display:none; }
+  .invoice-cards { display:block; padding:16px; }
+  .usage-card { flex-direction:column; align-items:flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen">
+  <div class="spinner"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo">
+    <a href="/dashboard.html"><img src="/logo.png" alt="Aadya AI"></a>
+  </div>
+  <div class="nav-right">
+    <a href="/dashboard.html" class="nav-link-btn">Dashboard</a>
+    <a href="/invoices.html" class="nav-link-btn active">Invoices</a>
+    <button class="user-badge" onclick="window.location.href='account.html'">
+      <div class="avatar" id="userAvatar">?</div>
+      <span id="userNameDisplay">Loading...</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.55;flex-shrink:0;margin-left:2px;"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <span class="plan-badge" id="planBadge">Free</span>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <h1>Your Invoices</h1>
+    <p>Track and manage all your invoices in one place</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- USAGE CARD -->
+  <div class="usage-card">
+    <div class="usage-info">
+      <div class="usage-title">Invoices This Month</div>
+      <div class="usage-count" id="invUsedCount">0</div>
+      <div class="usage-sub" id="invUsedSub">of 3 invoices used</div>
+    </div>
+    <div class="usage-bar-wrap">
+      <div class="usage-bar"><div class="usage-fill" id="invUsageFill" style="width:0%"></div></div>
+      <div class="usage-bar-label" id="invUsageBarLabel">Loading…</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+      <span class="usage-plan-badge" id="invPlanBadge">Free</span>
+      <a href="/#pricing" class="upgrade-link" id="upgradeLink">Upgrade →</a>
+    </div>
+  </div>
+
+  <!-- INVOICES TABLE CARD -->
+  <div class="invoices-card">
+    <div class="invoices-card-header">
+      <h2>Invoice History</h2>
+      <button class="gen-invoice-btn" onclick="generateInvoice()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="12" y2="15"/></svg>
+        Generate Invoice →
+      </button>
+    </div>
+
+    <!-- DESKTOP TABLE -->
+    <div class="table-wrap">
+      <table class="inv-table" id="invoiceTable">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Client</th>
+            <th>Service</th>
+            <th>Amount</th>
+            <th>Currency</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceTableBody">
+          <tr class="loading-row"><td colspan="8">Loading invoices…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MOBILE CARDS -->
+    <div class="invoice-cards" id="invoiceCards">
+      <p style="text-align:center;color:var(--muted);padding:20px;">Loading invoices…</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const FILLOUT_URL = 'https://forms.fillout.com/t/5wEMqv7uzCus';
+
+function hideLoader() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return '—';
+  const d = new Date(isoStr);
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function formatAmount(amount, currency) {
+  const sym = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₹';
+  return sym + Number(amount || 0).toLocaleString('en-IN');
+}
+
+function statusBadge(status) {
+  const s = (status || 'sent').toLowerCase();
+  if (s === 'paid')    return '<span class="badge badge-paid">✓ Paid</span>';
+  if (s === 'overdue') return '<span class="badge badge-overdue">⚠ Overdue</span>';
+  return '<span class="badge badge-sent">Sent</span>';
+}
+
+function actionCell(invoice) {
+  const s = (invoice.status || 'sent').toLowerCase();
+  if (s === 'paid') return '<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span>';
+  return `<button class="mark-paid-btn" onclick="markPaid('${invoice.id}', this)">Mark as Paid</button>`;
+}
+
+async function markPaid(invoiceId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const { error } = await supabaseClient
+      .from('invoices')
+      .update({ status: 'paid' })
+      .eq('id', invoiceId);
+
+    if (error) throw error;
+
+    // Update badge and button in table row (desktop)
+    const row = btn.closest('tr');
+    if (row) {
+      row.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
+      btn.closest('td').innerHTML = '<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span>';
+    }
+
+    // Update badge in mobile card
+    const card = btn.closest('.invoice-card');
+    if (card) {
+      card.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
+      btn.closest('.inv-card-actions').innerHTML = '<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span>';
+    }
+  } catch(e) {
+    console.error('Mark paid error:', e);
+    btn.disabled = false;
+    btn.textContent = 'Mark as Paid';
+    alert('Error updating invoice. Please try again.');
+  }
+}
+
+function renderTable(invoices) {
+  const tbody = document.getElementById('invoiceTableBody');
+  const mobileDiv = document.getElementById('invoiceCards');
+
+  if (!invoices || invoices.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8">
+          <div class="empty-state">
+            <div class="empty-icon">🧾</div>
+            <div class="empty-title">No invoices yet</div>
+            <div class="empty-sub">Generate your first invoice and it will appear here automatically</div>
+            <button class="gen-invoice-btn" onclick="generateInvoice()">Generate Invoice →</button>
+          </div>
+        </td>
+      </tr>`;
+    mobileDiv.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🧾</div>
+        <div class="empty-title">No invoices yet</div>
+        <div class="empty-sub">Generate your first invoice and it will appear here automatically</div>
+        <button class="gen-invoice-btn" onclick="generateInvoice()">Generate Invoice →</button>
+      </div>`;
+    return;
+  }
+
+  // Desktop table rows
+  tbody.innerHTML = invoices.map(inv => `
+    <tr>
+      <td style="font-weight:600;color:var(--navy);">${inv.invoice_number || '—'}</td>
+      <td>${inv.client_name || '—'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${inv.project_name || '—'}</td>
+      <td style="font-weight:600;">${formatAmount(inv.amount, inv.currency)}</td>
+      <td>${inv.currency || 'INR'}</td>
+      <td data-status-cell>${statusBadge(inv.status)}</td>
+      <td style="color:var(--muted);">${formatDate(inv.created_at)}</td>
+      <td>${actionCell(inv)}</td>
+    </tr>`).join('');
+
+  // Mobile cards
+  mobileDiv.innerHTML = invoices.map(inv => `
+    <div class="invoice-card">
+      <div class="inv-card-row">
+        <div class="inv-card-num">${inv.invoice_number || 'Invoice'}</div>
+        <div data-status-cell>${statusBadge(inv.status)}</div>
+      </div>
+      <div class="inv-card-grid">
+        <div>
+          <div class="inv-card-label">Client</div>
+          <div class="inv-card-value">${inv.client_name || '—'}</div>
+        </div>
+        <div>
+          <div class="inv-card-label">Amount</div>
+          <div class="inv-card-value" style="font-weight:600;">${formatAmount(inv.amount, inv.currency)}</div>
+        </div>
+        <div>
+          <div class="inv-card-label">Service</div>
+          <div class="inv-card-value">${inv.project_name || '—'}</div>
+        </div>
+        <div>
+          <div class="inv-card-label">Date</div>
+          <div class="inv-card-value">${formatDate(inv.created_at)}</div>
+        </div>
+      </div>
+      <div class="inv-card-actions">${actionCell(inv)}</div>
+    </div>`).join('');
+}
+
+async function loadUsage(email, plan) {
+  const isPro = plan.includes('pro');
+  const isStarter = plan.includes('starter');
+  const limit = isPro ? 999999 : (isStarter ? 10 : 3);
+
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  const { count } = await supabaseClient
+    .from('invoices')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_email', email)
+    .gte('created_at', monthStart);
+
+  const used = count || 0;
+  const planLabel = isPro ? 'Pro' : (isStarter ? 'Starter' : 'Free');
+
+  document.getElementById('invUsedCount').textContent = used;
+  document.getElementById('invUsedSub').textContent = isPro
+    ? 'Unlimited invoices on Pro'
+    : `of ${limit} invoices this month`;
+  document.getElementById('invUsageFill').style.width = isPro ? '10%' : Math.min((used / limit) * 100, 100) + '%';
+  document.getElementById('invUsageBarLabel').textContent = isPro
+    ? `${used} invoices sent this month`
+    : `${used} of ${limit} used`;
+
+  const planBadgeEl = document.getElementById('invPlanBadge');
+  planBadgeEl.textContent = planLabel;
+  if (isPro) planBadgeEl.classList.add('pro');
+
+  const upgradeLink = document.getElementById('upgradeLink');
+  if (isPro) upgradeLink.style.display = 'none';
+}
+
+async function generateInvoice() {
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session || !session.user) {
+      window.location.href = 'https://aadya-ai.com';
+      return;
+    }
+    const email = session.user.email;
+
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('plan')
+      .eq('email', email)
+      .maybeSingle();
+
+    const plan = ((userData && userData.plan) || 'free').toLowerCase();
+    const isPro = plan.includes('pro');
+    const isStarter = plan.includes('starter');
+    const invoiceLimit = isPro ? Infinity : (isStarter ? 10 : 3);
+
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    const { count } = await supabaseClient
+      .from('invoices')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_email', email)
+      .gte('created_at', monthStart);
+
+    const used = count || 0;
+
+    if (used >= invoiceLimit) {
+      showInvoiceLimitModal(invoiceLimit, plan);
+      return;
+    }
+
+    window.location.href = FILLOUT_URL;
+  } catch(e) {
+    console.error('Generate invoice error:', e);
+    window.location.href = FILLOUT_URL;
+  }
+}
+
+function showInvoiceLimitModal(limit, plan) {
+  const existing = document.getElementById('invoiceLimitModal');
+  if (existing) existing.remove();
+
+  const isStarter = plan.includes('starter');
+  const nextPlan = isStarter ? 'Pro' : 'Starter';
+  const nextPrice = isStarter ? '₹599/month' : '₹299/month';
+  const nextCount = isStarter ? 'unlimited' : '10';
+
+  const modal = document.createElement('div');
+  modal.id = 'invoiceLimitModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="font-size:48px;margin-bottom:16px;">📄</div>
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've used all ${limit} invoice${limit === 1 ? '' : 's'} this month!</h2>
+      <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
+        Upgrade to <strong>${nextPlan}</strong> for just <strong>${nextPrice}</strong> and generate up to ${nextCount} invoices every month.
+      </p>
+      <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
+        <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">${nextPlan} Plan — ${nextPrice}</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;${nextCount} invoices per month</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Professional branded PDFs</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to you &amp; your client</div>
+        <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
+      </div>
+      <a href="https://aadya-ai.com/#pricing" target="_blank"
+         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
+        Upgrade to ${nextPlan} →
+      </a>
+      <button onclick="document.getElementById('invoiceLimitModal').remove()"
+              style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
+        Maybe later
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = 'https://aadya-ai.com';
+}
+
+async function start() {
+  try {
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+    if (!session || !session.user) {
+      window.location.href = 'https://aadya-ai.com';
+      return;
+    }
+
+    hideLoader();
+
+    const email = session.user.email;
+    const firstName = email.split('@')[0].charAt(0).toUpperCase();
+    document.getElementById('userAvatar').textContent = firstName;
+    document.getElementById('userNameDisplay').textContent = email.split('@')[0];
+
+    // Load user plan
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('plan, name')
+      .eq('email', email)
+      .maybeSingle();
+
+    const plan = ((userData && userData.plan) || 'free').toLowerCase();
+    const isPro = plan.includes('pro');
+    const planLabel = isPro ? 'Pro' : (plan.includes('starter') ? 'Starter' : 'Free');
+
+    document.getElementById('planBadge').textContent = planLabel;
+    if (isPro) document.getElementById('planBadge').classList.add('pro');
+
+    if (userData && userData.name) {
+      document.getElementById('userNameDisplay').textContent = userData.name;
+    }
+
+    // Load usage stats
+    await loadUsage(email, plan);
+
+    // Load invoices
+    const { data: invoices, error: invErr } = await supabaseClient
+      .from('invoices')
+      .select('*')
+      .eq('user_email', email)
+      .order('created_at', { ascending: false });
+
+    if (invErr) throw invErr;
+
+    renderTable(invoices);
+
+  } catch(e) {
+    console.error('Invoices page error:', e);
+    hideLoader();
+  }
+}
+
+start();
+</script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+}
+</script>
+
+</body>
+</html>
