@@ -606,6 +606,9 @@ function openInvoicePopup(email, name) {
   overlay.id = 'invoicePopupOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.85);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
 
+  console.log('Invoice popup URL:', formUrl);
+  console.log('Invoice email value:', email);
+  console.log('Invoice name value:', name);
   overlay.innerHTML = `
     <div style="background:white;border-radius:16px;width:100%;max-width:860px;height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.35);">
       <div style="background:#0F2D6B;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
@@ -870,6 +873,9 @@ function openProposalPopup(email, name) {
   overlay.id = 'proposalPopupOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.85);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
 
+  console.log('Proposal popup URL:', formUrl);
+  console.log('Proposal email value:', email);
+  console.log('Proposal name value:', name);
   overlay.innerHTML = `
     <div style="background:white;border-radius:16px;width:100%;max-width:860px;height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.35);">
       <div style="background:#0F2D6B;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
