@@ -377,12 +377,11 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
 
 </div>
 
+<script src="/js/invoice-popup.js"></script>
 <script>
 const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const FILLOUT_URL = 'https://forms.fillout.com/t/5wEMqv7uzCus';
 
 function hideLoader() {
   document.getElementById('loadingScreen').classList.add('hidden');
@@ -557,7 +556,7 @@ async function generateInvoice() {
 
     const { data: userData } = await supabaseClient
       .from('users')
-      .select('plan')
+      .select('plan, name')
       .eq('email', email)
       .maybeSingle();
 
@@ -565,6 +564,7 @@ async function generateInvoice() {
     const isPro = plan.includes('pro');
     const isStarter = plan.includes('starter');
     const invoiceLimit = isPro ? Infinity : (isStarter ? 10 : 3);
+    const userName = (userData && userData.name) ? userData.name : email.split('@')[0];
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -582,10 +582,10 @@ async function generateInvoice() {
       return;
     }
 
-    window.location.href = FILLOUT_URL;
+    openInvoicePopup(email, userName, start);
   } catch(e) {
     console.error('Generate invoice error:', e);
-    window.location.href = FILLOUT_URL;
+    openInvoicePopup('', '', start);
   }
 }
 
