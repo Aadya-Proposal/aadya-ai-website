@@ -34,7 +34,8 @@
 <meta name="twitter:image" content="https://www.aadya-ai.com/icons/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"></noscript>
 <style>
 :root {
   --navy: #0F2D6B;
@@ -1331,6 +1332,7 @@ footer {
   .nav-links { display: none; }
   .hamburger { display: flex; }
   .hero { padding: 100px 20px 60px; min-height: auto; }
+  .hero-glow { top: 310px; }
   .hero-inner { display: block; text-align: center; }
   .hero-preview { margin-top: 40px; }
   .hero-actions { justify-content: center; }
