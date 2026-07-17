@@ -273,17 +273,19 @@ nav {
   color: var(--muted);
 }
 
-/* ── INVOICE PREVIEW CARD ── */
-.invoice-preview-card {
-  background: white;
-  border: 1px solid rgba(15,45,107,0.08);
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 2px 4px rgba(15,45,107,0.05), 0 8px 32px rgba(15,45,107,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+/* ── HERO INVOICE CAROUSEL ── */
+.hero-preview {
+  display: flex;
+  justify-content: center;
   animation: fadeUp 0.6s 0.5s ease both;
-  position: relative;
 }
-.invoice-preview-card::before {
+.hero-invoice-frame {
+  position: relative;
+  height: clamp(360px, 42vw, 560px);
+  aspect-ratio: 900 / 1271;
+  width: auto;
+}
+.hero-invoice-frame::before {
   content: '';
   position: absolute;
   top: -8px; left: 8px; right: -8px; bottom: 8px;
@@ -291,76 +293,37 @@ nav {
   border-radius: 16px;
   z-index: -1;
 }
+.hero-invoice-carousel {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(15,45,107,0.05), 0 8px 32px rgba(15,45,107,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.hero-invoice-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation: heroInvoiceFade 13.8s ease-in-out infinite;
+}
+.hero-invoice-img--corporate { animation-delay: 0s; }
+.hero-invoice-img--creative  { animation-delay: 4.6s; }
+.hero-invoice-img--classic   { animation-delay: 9.2s; }
 
-.inv-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-.inv-logo-box {
-  width: 36px; height: 36px;
-  background: var(--navy);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content:center;
-  color: white;
-  font-family: 'Syne', sans-serif;
-  font-size: 14px; font-weight: 800;
-}
-.inv-company { font-size: 13px; font-weight: 700; color: var(--navy); margin-top: 6px; }
-.inv-number { font-size: 11px; color: var(--muted); text-align: right; }
-.inv-number strong { display: block; font-size: 15px; font-weight: 800; color: var(--navy); }
-
-.inv-parties {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.inv-party-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 3px; }
-.inv-party-name { font-size: 13px; font-weight: 600; color: var(--navy); }
-.inv-party-sub { font-size: 11px; color: var(--muted); }
-
-.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-.inv-table th {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--muted);
-  padding: 6px 4px;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-}
-.inv-table th:last-child,
-.inv-table td:last-child { text-align: right; }
-.inv-table td {
-  font-size: 12px;
-  color: var(--text);
-  padding: 8px 4px;
-  border-bottom: 1px solid rgba(15,45,107,0.05);
+@keyframes heroInvoiceFade {
+  0%     { opacity: 0; }
+  4.35%  { opacity: 1; }
+  33.33% { opacity: 1; }
+  37.68% { opacity: 0; }
+  100%   { opacity: 0; }
 }
 
-.inv-total-row { display: flex; justify-content: flex-end; gap: 32px; padding-top: 10px; border-top: 1.5px solid var(--border); }
-.inv-total-label { font-size: 12px; color: var(--muted); }
-.inv-total-amount { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--navy); }
-
-.inv-status-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: #DCFCE7; color: #166534;
-  font-size: 11px; font-weight: 700;
-  padding: 4px 10px; border-radius: 999px;
-  margin-top: 12px;
-}
-.inv-watermark {
-  font-size: 10px;
-  color: var(--muted);
-  text-align: center;
-  margin-top: 16px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+@media (prefers-reduced-motion: reduce) {
+  .hero-invoice-img { animation: none; opacity: 0; }
+  .hero-invoice-img--corporate { opacity: 1; }
 }
 
 /* ── SOCIAL PROOF BAR ── */
@@ -594,7 +557,8 @@ footer a:hover { color: white; }
   .hero-inner { display: block; }
   .hero h1 { font-size: 34px; letter-spacing: -1px; margin-bottom: 16px; }
   .hero p { font-size: 16px; margin-bottom: 28px; }
-  .invoice-preview-card { margin-top: 40px; }
+  .hero-preview { margin-top: 40px; }
+  .hero-invoice-frame { height: clamp(300px, 58vw, 420px); }
   .proof-bar { padding: 20px; }
   .proof-bar-inner { flex-direction: column; gap: 16px; text-align: center; }
   .proof-stats { gap: 24px; }
@@ -737,71 +701,12 @@ footer a:hover { color: white; }
       </div>
     </div>
     <div class="hero-preview">
-      <div class="invoice-preview-card">
-        <div class="inv-header">
-          <div>
-            <div class="inv-logo-box">A</div>
-            <div class="inv-company">Arjun Sharma &amp; Co.</div>
-          </div>
-          <div class="inv-number">
-            <span>Invoice</span>
-            <strong>#INV-2026-047</strong>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px;">Due: 31 Jul 2026</div>
-          </div>
+      <div class="hero-invoice-frame">
+        <div class="hero-invoice-carousel">
+          <img class="hero-invoice-img hero-invoice-img--corporate" src="/images/invoice-hero-corporate.png" alt="Corporate-style invoice template with a clean navy header, itemized services table, GST breakdown and total due">
+          <img class="hero-invoice-img hero-invoice-img--creative" src="/images/invoice-hero-creative.png" alt="Creative-style invoice template with bold branded colors, itemized services table, GST breakdown and total due">
+          <img class="hero-invoice-img hero-invoice-img--classic" src="/images/invoice-hero-classic.png" alt="Classic-style invoice template with a traditional layout, itemized services table, GST breakdown and total due">
         </div>
-        <div class="inv-parties">
-          <div>
-            <div class="inv-party-label">From</div>
-            <div class="inv-party-name">Arjun Sharma</div>
-            <div class="inv-party-sub">arjun@sharmadesigns.in</div>
-          </div>
-          <div>
-            <div class="inv-party-label">To</div>
-            <div class="inv-party-name">Nexus Solutions Pvt Ltd</div>
-            <div class="inv-party-sub">accounts@nexussolutions.in</div>
-          </div>
-        </div>
-        <table class="inv-table">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Qty</th>
-              <th>Rate</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Brand Identity Design</td>
-              <td>1</td>
-              <td>₹35,000</td>
-              <td>₹35,000</td>
-            </tr>
-            <tr>
-              <td>Website UI/UX (5 pages)</td>
-              <td>1</td>
-              <td>₹45,000</td>
-              <td>₹45,000</td>
-            </tr>
-            <tr>
-              <td>GST @ 18%</td>
-              <td>—</td>
-              <td>—</td>
-              <td>₹14,400</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="inv-total-row">
-          <div>
-            <div class="inv-total-label">Total Due</div>
-            <div class="inv-total-amount">₹94,400</div>
-          </div>
-        </div>
-        <div class="inv-status-badge">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Sent to client automatically
-        </div>
-        <div class="inv-watermark">Generated by Aadya AI — aadya-ai.com</div>
       </div>
     </div>
   </div>
