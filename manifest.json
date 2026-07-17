@@ -2,7 +2,7 @@
   "name": "Aadya AI",
   "short_name": "Aadya AI",
   "description": "Generate professional proposals and SOWs in seconds",
-  "start_url": "/dashboard.html",
+  "start_url": "/dashboard",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0F2D6B",

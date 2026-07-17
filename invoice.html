@@ -21,9 +21,9 @@
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>Aadya AI — Generate a Professional Invoice in 60 Seconds</title>
 <meta name="description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try — no account needed to start. Supports INR, USD and EUR.">
-<link rel="canonical" href="https://www.aadya-ai.com/invoice.html">
+<link rel="canonical" href="https://www.aadya-ai.com/invoice">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.aadya-ai.com/invoice.html">
+<meta property="og:url" content="https://www.aadya-ai.com/invoice">
 <meta property="og:site_name" content="Aadya AI">
 <meta property="og:title" content="Aadya AI — Generate a Professional Invoice in 60 Seconds">
 <meta property="og:description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try — no account needed to start.">
@@ -710,11 +710,11 @@ footer a:hover { color: white; }
     <li><a href="/#how">How it works</a></li>
     <li><a href="/#features">Features</a></li>
     <li><a href="/#pricing">Pricing</a></li>
-    <li><a href="/invoice.html" class="active">Invoice Generator</a></li>
+    <li><a href="/invoice" class="active">Invoice Generator</a></li>
   </ul>
   <div class="nav-cta">
-    <a href="/dashboard.html" class="btn-ghost">Dashboard</a>
-    <a href="/invoice.html#cta" class="btn-primary">Create Invoice →</a>
+    <a href="/dashboard" class="btn-ghost">Dashboard</a>
+    <a href="/invoice#cta" class="btn-primary">Create Invoice →</a>
   </div>
 </nav>
 
@@ -945,9 +945,9 @@ footer a:hover { color: white; }
   <div class="footer-links-row">
     <a href="/">Home</a>
     <a href="/#pricing">Pricing</a>
-    <a href="/invoice.html">Invoice Generator</a>
-    <a href="/privacy.html">Privacy</a>
-    <a href="/terms.html">Terms</a>
+    <a href="/invoice">Invoice Generator</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
   </div>
   <div class="footer-copy">© 2026 Aadya AI. All rights reserved.</div>
 </footer>
@@ -1027,7 +1027,7 @@ function _showInvoicePageThankYou(isLoggedIn) {
     '<div style="font-size:56px;margin-bottom:20px;">✅</div>' +
     '<h2 style="font-family:\'Syne\',sans-serif;font-size:24px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Your invoice is on its way!</h2>' +
     '<p style="font-size:16px;color:#64748b;margin-bottom:28px;line-height:1.6;">Check your inbox in 2 minutes.</p>' +
-    (isLoggedIn ? '<a href="/invoices.html" style="display:inline-flex;align-items:center;gap:8px;background:#0F2D6B;color:white;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;">View My Invoices →</a>' : '') +
+    (isLoggedIn ? '<a href="/invoices" style="display:inline-flex;align-items:center;gap:8px;background:#0F2D6B;color:white;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;">View My Invoices →</a>' : '') +
     '<p style="font-size:12px;color:#94a3b8;margin-top:20px;">This window closes automatically in 5 seconds</p>';
   wrap.appendChild(div);
   setTimeout(closeInvoiceModal, 5000);

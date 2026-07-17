@@ -9,35 +9,28 @@
   </url>
 
   <url>
-    <loc>https://www.aadya-ai.com/index.html</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-
-  <url>
-    <loc>https://www.aadya-ai.com/dashboard.html</loc>
+    <loc>https://www.aadya-ai.com/dashboard</loc>
     <lastmod>2026-05-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://www.aadya-ai.com/privacy.html</loc>
+    <loc>https://www.aadya-ai.com/privacy</loc>
     <lastmod>2026-05-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://www.aadya-ai.com/terms.html</loc>
+    <loc>https://www.aadya-ai.com/terms</loc>
     <lastmod>2026-05-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://www.aadya-ai.com/refund.html</loc>
+    <loc>https://www.aadya-ai.com/refund</loc>
     <lastmod>2026-05-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
