@@ -278,6 +278,12 @@ nav {
   animation: fadeUp 0.6s 0.3s ease both;
 }
 
+.hero-actions-primary {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .btn-primary-lg {
   font-family: 'DM Sans', sans-serif;
   font-size: 16px;
@@ -1675,8 +1681,10 @@ footer {
         <strong class="proposal-count-live" style="margin:0 3px;">500+</strong> proposals &amp; invoices delivered to clients across India, Europe &amp; the US
       </div>
       <div class="hero-actions">
-        <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate a proposal free →</a>
-        <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openInvoicePopup()">Generate an invoice free →</a>
+        <div class="hero-actions-primary">
+          <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openModal()">Generate a proposal free →</a>
+          <a href="#" class="btn-primary-lg" onclick="event.preventDefault();openInvoicePopup()">Generate an invoice free →</a>
+        </div>
         <a href="#how" class="btn-outline-lg">See how it works</a>
       </div>
       <div class="hero-stats">
