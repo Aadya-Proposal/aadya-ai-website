@@ -197,7 +197,8 @@ nav {
   height: auto;
   display: block;
   margin: 0 auto;
-  animation: fadeUp 0.6s 0.5s ease both;
+  animation: fadeUp 0.6s 0.5s ease both, gentleFloat 5s ease-in-out infinite;
+  animation-delay: 0s, 1.1s;
 }
 
 .hero-glow {
@@ -295,13 +296,13 @@ nav {
   text-decoration: none;
   padding: 16px 20px;
   border-radius: 12px;
-  transition: all 0.25s;
+  transition: all 0.25s, box-shadow 0.35s ease;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 4px rgba(15,45,107,0.3), 0 8px 24px rgba(18,56,166,0.25);
 }
-.btn-primary-lg:hover { background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%); transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 32px rgba(37,99,235,0.4); }
+.btn-primary-lg:hover { background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%); transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 32px rgba(37,99,235,0.4), 0 0 24px 4px rgba(37,99,235,0.25); }
 
 .btn-outline-lg {
   font-family: 'DM Sans', sans-serif;
@@ -342,6 +343,17 @@ nav {
   width: 1px;
   height: 36px;
   background: var(--border);
+}
+
+.hero-stat-num, .hero-stat-label {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.hero-stats.in-view .hero-stat-num,
+.hero-stats.in-view .hero-stat-label {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── PREVIEW CARD ── */
@@ -1091,6 +1103,11 @@ footer {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
 /* ── RESPONSIVE ── */
 /* ── MODAL ── */
 .modal-overlay {
@@ -1686,12 +1703,12 @@ footer {
       </div>
       <div class="hero-stats">
         <div>
-          <div class="hero-stat-num">60s</div>
+          <div class="hero-stat-num" data-count-to="60" data-suffix="s">60s</div>
           <div class="hero-stat-label">Average generation time</div>
         </div>
         <div class="hero-stat-divider"></div>
         <div>
-          <div class="hero-stat-num">2 formats</div>
+          <div class="hero-stat-num" data-count-to="2" data-suffix=" formats">2 formats</div>
           <div class="hero-stat-label">Proposals &amp; SOWs</div>
         </div>
         <div class="hero-stat-divider"></div>
@@ -3031,6 +3048,41 @@ function toggleFaq(questionEl) {
   // Toggle clicked item
   if (!isOpen) item.classList.add('open');
 }
+</script>
+<script>
+(function() {
+  const statsRow = document.querySelector('.hero-stats');
+  if (!statsRow) return;
+
+  function animateCount(el) {
+    const target = parseInt(el.dataset.countTo, 10);
+    const suffix = el.dataset.suffix || '';
+    const duration = 900;
+    const start = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const current = Math.round(target * eased);
+      el.textContent = current + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+      else el.textContent = target + suffix; // exact final value
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        statsRow.classList.add('in-view');
+        statsRow.querySelectorAll('[data-count-to]').forEach(animateCount);
+        observer.disconnect(); // only run once
+      }
+    });
+  }, { threshold: 0.4 });
+
+  observer.observe(statsRow);
+})();
 </script>
 </body>
 
