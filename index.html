@@ -344,6 +344,17 @@ nav {
   background: var(--border);
 }
 
+.hero-stat-num, .hero-stat-label {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.hero-stats.in-view .hero-stat-num,
+.hero-stats.in-view .hero-stat-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ── PREVIEW CARD ── */
 .preview-section {
   position: relative;
@@ -1686,12 +1697,12 @@ footer {
       </div>
       <div class="hero-stats">
         <div>
-          <div class="hero-stat-num">60s</div>
+          <div class="hero-stat-num" data-count-to="60" data-suffix="s">60s</div>
           <div class="hero-stat-label">Average generation time</div>
         </div>
         <div class="hero-stat-divider"></div>
         <div>
-          <div class="hero-stat-num">2 formats</div>
+          <div class="hero-stat-num" data-count-to="2" data-suffix=" formats">2 formats</div>
           <div class="hero-stat-label">Proposals &amp; SOWs</div>
         </div>
         <div class="hero-stat-divider"></div>
@@ -3031,6 +3042,41 @@ function toggleFaq(questionEl) {
   // Toggle clicked item
   if (!isOpen) item.classList.add('open');
 }
+</script>
+<script>
+(function() {
+  const statsRow = document.querySelector('.hero-stats');
+  if (!statsRow) return;
+
+  function animateCount(el) {
+    const target = parseInt(el.dataset.countTo, 10);
+    const suffix = el.dataset.suffix || '';
+    const duration = 900;
+    const start = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const current = Math.round(target * eased);
+      el.textContent = current + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+      else el.textContent = target + suffix; // exact final value
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        statsRow.classList.add('in-view');
+        statsRow.querySelectorAll('[data-count-to]').forEach(animateCount);
+        observer.disconnect(); // only run once
+      }
+    });
+  }, { threshold: 0.4 });
+
+  observer.observe(statsRow);
+})();
 </script>
 </body>
 
