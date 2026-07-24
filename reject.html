@@ -129,12 +129,11 @@
   <div id="content-with-token" style="display:none;">
     <h1>Flag for changes</h1>
     <p class="subtitle">
-      This holds <strong id="proposal-title">—</strong> for <strong id="client-name">—</strong>
-      — it won't be sent until you regenerate it from the form.
+      This holds the <strong id="doc-type">document</strong> for <strong id="client-name">—</strong>
+      — it won't be sent to your client. We'll take you to a fresh form so you can redo it with your changes.
     </p>
-    <textarea id="note" placeholder="Optional: note what needs fixing, for your own reference later"></textarea>
     <button class="btn-flag" id="reject-btn" onclick="rejectProposal()">
-      Hold this proposal
+      Hold this document
     </button>
     <br>
     <a class="btn-secondary" id="approve-link" href="#">Actually, it's fine — approve &amp; send</a>
@@ -163,7 +162,9 @@
   if (token) {
     document.getElementById('content-with-token').style.display = 'block';
     document.getElementById('client-name').textContent = client ? decodeURIComponent(client) : 'your client';
-    document.getElementById('proposal-title').textContent = title ? decodeURIComponent(title) : 'this proposal';
+    // Use the document type ("Proposal" / "Scope of Work") from the title param
+    const docType = title ? decodeURIComponent(title) : 'document';
+    document.getElementById('doc-type').textContent = docType;
     document.getElementById('approve-link').href = 'approve.html?' + params.toString();
   } else {
     document.getElementById('content-no-token').style.display = 'block';
@@ -172,7 +173,6 @@
   async function rejectProposal() {
     const btn = document.getElementById('reject-btn');
     const status = document.getElementById('status');
-    const note = document.getElementById('note').value;
     btn.disabled = true;
     btn.textContent = 'Saving…';
 
@@ -180,14 +180,19 @@
       const res = await fetch(REJECT_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token, action: 'reject', note: note })
+        body: JSON.stringify({ token: token, action: 'reject' })
       });
 
       if (!res.ok) throw new Error('Request failed');
 
-      status.textContent = "Held. Head back to the form whenever you're ready to regenerate it.";
+      status.textContent = "Held — this won't be sent. Taking you to a fresh form so you can redo it…";
       status.className = 'status show success';
       btn.textContent = 'Held ✓';
+
+      // Redirect to the homepage and auto-open the proposal form (see index.html ?generate=1 handler)
+      setTimeout(function() {
+        window.location.href = 'https://aadya-ai.com/?generate=1';
+      }, 2500);
     } catch (err) {
       status.textContent = "Something went wrong. It hasn't been sent, but please try again to record this.";
       status.className = 'status show error';

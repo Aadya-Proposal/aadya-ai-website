@@ -2908,6 +2908,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }, 100);
 });
 
+// Auto-open the proposal form when arriving from a rejection ("redo it" flow)
+// Triggered by reject.html redirecting to /?generate=1
+document.addEventListener('DOMContentLoaded', function() {
+  const wantsGenerate = new URLSearchParams(window.location.search).get('generate');
+  if (wantsGenerate === '1' && typeof openModal === 'function') {
+    // Small delay so the Supabase session is ready for prefill inside openModal()
+    setTimeout(() => {
+      openModal();
+      // Clean the param out of the URL so a refresh doesn't reopen the form
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }, 400);
+  }
+});
+
 // ── LIVE PROPOSAL COUNTER ────────────────────────────────────────────────────
 async function loadProposalCount() {
   try {

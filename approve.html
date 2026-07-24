@@ -121,9 +121,9 @@
   </div>
 
   <div id="content-with-token" style="display:none;">
-    <h1>Approve this proposal?</h1>
+    <h1 id="approve-heading">Approve this document?</h1>
     <p class="subtitle">
-      You're about to send the proposal <strong id="proposal-title">—</strong>
+      You're about to send this <strong id="doc-type">document</strong>
       to <strong id="client-name">—</strong>. This will email the final PDF straight to their inbox.
     </p>
     <button class="btn-approve" id="approve-btn" onclick="approveProposal()">
@@ -156,7 +156,10 @@
   if (token) {
     document.getElementById('content-with-token').style.display = 'block';
     document.getElementById('client-name').textContent = client ? decodeURIComponent(client) : 'your client';
-    document.getElementById('proposal-title').textContent = title ? decodeURIComponent(title) : 'this proposal';
+    // Use the document type ("Proposal" / "Scope of Work") from the title param
+    const docType = title ? decodeURIComponent(title) : 'document';
+    document.getElementById('doc-type').textContent = docType;
+    document.getElementById('approve-heading').textContent = 'Approve this ' + docType + '?';
     // Carry the token through to the reject page too
     document.getElementById('reject-link').href = 'reject.html?' + params.toString();
   } else {
@@ -181,6 +184,11 @@
       status.textContent = "Sent — the client will receive it shortly.";
       status.className = 'status show success';
       btn.textContent = 'Sent ✓';
+
+      // Redirect to dashboard after 2.5s (dashboard bounces to homepage if not logged in)
+      setTimeout(function() {
+        window.location.href = 'https://aadya-ai.com/dashboard';
+      }, 2500);
     } catch (err) {
       status.textContent = "Something went wrong. Please try again, or send it manually from your dashboard.";
       status.className = 'status show error';
