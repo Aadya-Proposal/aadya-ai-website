@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flag Proposal for Changes — Aadya AI</title>
+<title>Approve Proposal — Aadya AI</title>
 <meta name="robots" content="noindex, nofollow">
 <style>
   @font-face {
@@ -14,6 +14,7 @@
     --navy: #1B3A6B;
     --navy-dark: #0F2444;
     --gold: #C48014;
+    --gold-light: #F5A623;
     --off-white: #F7F8FA;
     --border: #E5E9F0;
     --muted: #6B7280;
@@ -63,27 +64,13 @@
   .subtitle {
     font-size: 14px;
     color: var(--muted);
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     line-height: 1.5;
   }
   .subtitle strong { color: var(--text); font-weight: 600; }
-  textarea {
+  .btn-approve {
     width: 100%;
-    min-height: 80px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-family: inherit;
-    font-size: 14px;
-    color: var(--text);
-    resize: vertical;
-    margin-bottom: 16px;
-  }
-  textarea:focus { outline: none; border-color: var(--navy); }
-  textarea::placeholder { color: #9CA3AF; }
-  .btn-flag {
-    width: 100%;
-    background: linear-gradient(180deg, var(--gold) 0%, #A8690F 100%);
+    background: linear-gradient(180deg, #16A34A 0%, #0F7C38 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -93,9 +80,13 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(15,45,107,0.15);
   }
-  .btn-flag:hover:not(:disabled) { transform: translateY(-1px); }
-  .btn-flag:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-approve:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(22,163,74,0.3);
+  }
+  .btn-approve:disabled { opacity: 0.6; cursor: not-allowed; }
   .btn-secondary {
     display: inline-block;
     margin-top: 14px;
@@ -116,7 +107,10 @@
   .status.show { display: block; }
   .status.success { background: var(--success-bg); color: var(--success); }
   .status.error { background: var(--error-bg); color: var(--error); }
-  .missing-token { font-size: 14px; color: var(--muted); }
+  .missing-token {
+    font-size: 14px;
+    color: var(--muted);
+  }
 </style>
 </head>
 <body>
@@ -127,24 +121,23 @@
   </div>
 
   <div id="content-with-token" style="display:none;">
-    <h1>Flag for changes</h1>
+    <h1 id="approve-heading">Approve this document?</h1>
     <p class="subtitle">
-      This holds <strong id="proposal-title">—</strong> for <strong id="client-name">—</strong>
-      — it won't be sent until you regenerate it from the form.
+      You're about to send this <strong id="doc-type">document</strong>
+      to <strong id="client-name">—</strong>. This will email the final PDF straight to their inbox.
     </p>
-    <textarea id="note" placeholder="Optional: note what needs fixing, for your own reference later"></textarea>
-    <button class="btn-flag" id="reject-btn" onclick="rejectProposal()">
-      Hold this proposal
+    <button class="btn-approve" id="approve-btn" onclick="approveProposal()">
+      Approve &amp; send to client
     </button>
     <br>
-    <a class="btn-secondary" id="approve-link" href="#">Actually, it's fine — approve &amp; send</a>
+    <a class="btn-secondary" id="reject-link" href="#">Something's off — flag for changes instead</a>
     <div class="status" id="status"></div>
   </div>
 
   <div id="content-no-token" style="display:none;">
     <h1>Link incomplete</h1>
     <p class="missing-token">
-      This link is missing some information. Please open it directly from
+      This approval link is missing some information. Please open it directly from
       the review email rather than a forwarded or copied link.
     </p>
   </div>
@@ -153,7 +146,7 @@
 <script>
   // ── CONFIG ──
   // Replace with the real Make.com webhook URL once the approval scenario is built.
-  const REJECT_WEBHOOK_URL = "https://hook.eu1.make.com/8k2a16wdfzcioptm3lqx7hq675755nb3";
+  const APPROVE_WEBHOOK_URL = "https://hook.eu1.make.com/8k2a16wdfzcioptm3lqx7hq675755nb3";
 
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
@@ -163,24 +156,27 @@
   if (token) {
     document.getElementById('content-with-token').style.display = 'block';
     document.getElementById('client-name').textContent = client ? decodeURIComponent(client) : 'your client';
-    document.getElementById('proposal-title').textContent = title ? decodeURIComponent(title) : 'this proposal';
-    document.getElementById('approve-link').href = 'approve.html?' + params.toString();
+    // Use the document type ("Proposal" / "Scope of Work") from the title param
+    const docType = title ? decodeURIComponent(title) : 'document';
+    document.getElementById('doc-type').textContent = docType;
+    document.getElementById('approve-heading').textContent = 'Approve this ' + docType + '?';
+    // Carry the token through to the reject page too
+    document.getElementById('reject-link').href = 'reject.html?' + params.toString();
   } else {
     document.getElementById('content-no-token').style.display = 'block';
   }
 
-  async function rejectProposal() {
-    const btn = document.getElementById('reject-btn');
+  async function approveProposal() {
+    const btn = document.getElementById('approve-btn');
     const status = document.getElementById('status');
-    const note = document.getElementById('note').value;
     btn.disabled = true;
-    btn.textContent = 'Saving…';
+    btn.textContent = 'Sending…';
 
     try {
-      const res = await fetch(REJECT_WEBHOOK_URL, {
+      const res = await fetch(APPROVE_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token, action: 'reject', note: note })
+        body: JSON.stringify({ token: token, action: 'approve' })
       });
 
       if (!res.ok) throw new Error('Request failed');
@@ -190,12 +186,12 @@
       try { data = await res.json(); } catch (e) { data = {}; }
 
       if (data.result === 'already_handled') {
-        // Already approved or already held — do NOT claim a fresh hold.
+        // This proposal was already approved or held — do NOT claim success.
         const already = data.status === 'approved'
-          ? "This proposal was already approved and sent, so it can't be held now."
+          ? "This proposal was already approved and sent."
           : (data.status === 'held'
-              ? "This proposal is already held. Head back to the form to regenerate it whenever you're ready."
-              : "This proposal has already been handled.");
+              ? "This proposal was flagged for changes earlier. To send it, regenerate it from the form first."
+              : "This proposal has already been handled. To send it again, regenerate it from the form.");
         status.textContent = already;
         status.className = 'status show error';
         btn.textContent = 'Already handled';
@@ -204,19 +200,23 @@
       }
 
       if (data.result === 'success') {
-        status.textContent = "Held. Head back to the form whenever you're ready to regenerate it.";
+        status.textContent = "Sent — the client will receive it shortly.";
         status.className = 'status show success';
-        btn.textContent = 'Held ✓';
+        btn.textContent = 'Sent ✓';
+        // Redirect to dashboard after 2.5s (dashboard bounces to homepage if not logged in)
+        setTimeout(function() {
+          window.location.href = 'https://aadya-ai.com/dashboard';
+        }, 2500);
         return;
       }
 
       // Unexpected response shape — treat as an error rather than a false success.
       throw new Error('Unexpected response');
     } catch (err) {
-      status.textContent = "Something went wrong. It hasn't been sent, but please try again to record this.";
+      status.textContent = "Something went wrong. Please try again, or send it manually from your dashboard.";
       status.className = 'status show error';
       btn.disabled = false;
-      btn.textContent = 'Hold this proposal';
+      btn.textContent = 'Approve & send to client';
     }
   }
 </script>
