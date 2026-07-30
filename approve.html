@@ -181,14 +181,37 @@
 
       if (!res.ok) throw new Error('Request failed');
 
-      status.textContent = "Sent — the client will receive it shortly.";
-      status.className = 'status show success';
-      btn.textContent = 'Sent ✓';
+      // Read the real outcome from the scenario's response.
+      let data = {};
+      try { data = await res.json(); } catch (e) { data = {}; }
 
-      // Redirect to dashboard after 2.5s (dashboard bounces to homepage if not logged in)
-      setTimeout(function() {
-        window.location.href = 'https://aadya-ai.com/dashboard';
-      }, 2500);
+      if (data.result === 'already_handled') {
+        // This proposal was already approved or held — do NOT claim success.
+        const already = data.status === 'approved'
+          ? "This proposal was already approved and sent."
+          : (data.status === 'held'
+              ? "This proposal was flagged for changes earlier. To send it, regenerate it from the form first."
+              : "This proposal has already been handled. To send it again, regenerate it from the form.");
+        status.textContent = already;
+        status.className = 'status show error';
+        btn.textContent = 'Already handled';
+        // Button stays disabled — nothing more to do on this stale link.
+        return;
+      }
+
+      if (data.result === 'success') {
+        status.textContent = "Sent — the client will receive it shortly.";
+        status.className = 'status show success';
+        btn.textContent = 'Sent ✓';
+        // Redirect to dashboard after 2.5s (dashboard bounces to homepage if not logged in)
+        setTimeout(function() {
+          window.location.href = 'https://aadya-ai.com/dashboard';
+        }, 2500);
+        return;
+      }
+
+      // Unexpected response shape — treat as an error rather than a false success.
+      throw new Error('Unexpected response');
     } catch (err) {
       status.textContent = "Something went wrong. Please try again, or send it manually from your dashboard.";
       status.className = 'status show error';
