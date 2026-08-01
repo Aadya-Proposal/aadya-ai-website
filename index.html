@@ -1434,6 +1434,29 @@ footer {
   margin-left: auto;
   margin-right: auto;
 }
+.demo-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: rgba(15,45,107,0.06);
+  border-radius: 10px;
+  padding: 4px;
+  margin: 40px auto 0;
+}
+.demo-tab {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+  background: transparent;
+}
+.demo-tab:hover:not(.active) { color: var(--navy); }
+.demo-tab.active { background: var(--navy); color: white; }
+.demo-tabs + .video-player { margin-top: 16px; }
 .video-player {
   max-width: 880px;
   margin: 40px auto 0;
@@ -1763,6 +1786,11 @@ footer {
   <h2 class="section-title">From form to client inbox<br>in 60 seconds</h2>
   <div class="section-sub">Watch how Aadya AI takes a few details and turns them into a polished, branded PDF — delivered to your client automatically.</div>
 
+  <div class="demo-tabs" role="tablist" aria-label="Choose which demo to watch">
+    <button type="button" class="demo-tab active" role="tab" aria-selected="true" data-demo="proposal" onclick="switchDemoTab('proposal')">Proposal</button>
+    <button type="button" class="demo-tab" role="tab" aria-selected="false" data-demo="invoice" onclick="switchDemoTab('invoice')">Invoice</button>
+  </div>
+
   <div class="video-player" onclick="openVideoModal()" role="button" tabindex="0" aria-label="Watch Aadya AI product demo"
        onkeydown="if(event.key==='Enter'||event.key===' ')openVideoModal()">
     <div class="video-inner">
@@ -1809,7 +1837,7 @@ footer {
 
       <!-- Bottom label bar -->
       <div class="video-label">
-        <div class="video-label-title">Aadya AI — Watch a proposal get generated in real time</div>
+        <div class="video-label-title">Aadya AI — <span id="videoCaption">Watch a proposal get generated in real time</span></div>
         <div class="video-label-sub">Click to play · 60 seconds</div>
       </div>
 
@@ -2189,7 +2217,7 @@ footer {
           What if the AI writes something incorrect — can I edit the document before it's sent?
           <span class="faq-icon">+</span>
         </div>
-        <div class="faq-a">Currently, documents are generated and sent automatically based on the details you fill in. The more precisely you fill the form, the more accurate the output. We recommend reviewing the form fields carefully — especially scope, deliverables, and pricing — before submitting. Manual editing before delivery is on our roadmap.</div>
+        <div class="faq-a">Every proposal goes through an approve/reject step before final delivery — you'll get a link to review it and approve or hold the document before it reaches your client, so nothing goes out without your review. This review step currently applies to proposals; invoice delivery is instant.</div>
       </div>
 
       <div class="faq-item">
@@ -3061,6 +3089,32 @@ window.addEventListener('resize', function() {
 });
 
 // ── VIDEO DEMO ──────────────────────────────────────────────────────────────
+const demoConfig = {
+  proposal: { src: 'videos/demo.mp4', caption: 'Watch a proposal get generated in real time' },
+  invoice:  { src: 'videos/invoice-demo.mp4', caption: 'Watch an invoice get generated in real time' }
+};
+let currentDemo = 'proposal';
+function switchDemoTab(demo) {
+  if (demo === currentDemo || !demoConfig[demo]) return;
+  currentDemo = demo;
+
+  document.querySelectorAll('.demo-tab').forEach(function(btn) {
+    const isActive = btn.dataset.demo === demo;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+
+  document.getElementById('videoCaption').textContent = demoConfig[demo].caption;
+
+  const video = document.getElementById('videoPlayer');
+  video.src = demoConfig[demo].src;
+  video.load();
+
+  const modal = document.getElementById('videoModal');
+  if (modal.classList.contains('open')) {
+    video.play();
+  }
+}
 function openVideoModal() {
   const modal = document.getElementById('videoModal');
   const video = document.getElementById('videoPlayer');
