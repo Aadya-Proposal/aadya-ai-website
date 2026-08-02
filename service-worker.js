@@ -42,7 +42,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ─── FETCH: Network-first for API calls, Cache-first for assets ──────────────
+// ─── FETCH: Network-first for HTML, stale-while-revalidate for assets ────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -82,20 +82,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For fonts, CSS, JS, images — Cache first, network fallback
+  // For fonts, CSS, JS, images — stale-while-revalidate: serve cached copy
+  // immediately, but always refetch in the background to update the cache
+  // for next time.
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response.ok) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-        }
-        return response;
-      }).catch(() => {
-        // Return nothing for non-critical assets
-        return new Response('', { status: 408 });
-      });
-    })
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.match(request).then((cached) => {
+        const networkFetch = fetch(request)
+          .then((response) => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+          })
+          .catch(() => {
+            // Return nothing for non-critical assets
+            return cached || new Response('', { status: 408 });
+          });
+
+        return cached || networkFetch;
+      })
+    )
   );
 });
