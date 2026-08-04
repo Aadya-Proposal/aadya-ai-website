@@ -639,6 +639,120 @@ nav {
   border: 1px solid rgba(59,130,246,0.3);
 }
 
+/* ── PICK YOUR STYLE / TEMPLATES ── */
+.template-group { margin-top: 48px; }
+.template-group:first-of-type { margin-top: 0; }
+.template-group-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #112D64;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+.template-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.template-card {
+  background: white;
+  border: 1px solid rgba(15,45,107,0.07);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 1px 2px rgba(15,45,107,0.04), 0 4px 12px rgba(15,45,107,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.template-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(79,125,243,0.35);
+  box-shadow: 0 1px 2px rgba(15,45,107,0.04), 0 8px 24px rgba(79,125,243,0.12), 0 20px 40px rgba(79,125,243,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.template-card-img-wrap {
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  background: #F4F6FB;
+}
+.template-card-img-wrap img {
+  width: 100%;
+  display: block;
+  transition: transform 0.35s ease;
+}
+.template-card:hover .template-card-img-wrap img { transform: scale(1.08); }
+.template-card-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #112D64;
+}
+.template-card-hint {
+  font-size: 12px;
+  color: #4F7DF3;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: all 0.25s;
+  margin-top: 4px;
+}
+.template-card:hover .template-card-hint { opacity: 1; transform: translateY(0); }
+
+.template-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(17,45,100,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9997;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.template-modal-overlay.open { display: flex; }
+.template-modal-box {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  position: relative;
+  text-align: center;
+  animation: modalIn 0.25s ease;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.4);
+}
+.template-modal-box img {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+}
+.template-modal-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #112D64;
+  margin-top: 16px;
+}
+.template-modal-close {
+  position: absolute;
+  top: -14px; right: -14px;
+  background: #112D64;
+  border: none;
+  color: white;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 15px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+.template-modal-close:hover { background: #4F7DF3; }
+
 /* ── PRICING ── */
 .pricing-section {
   position: relative;
@@ -1391,6 +1505,7 @@ footer {
   .steps::before { display: none; }
   .features-grid { grid-template-columns: 1fr; }
   .feature-card.featured { grid-column: span 1; grid-template-columns: 1fr; }
+  .template-row { grid-template-columns: repeat(2, 1fr); }
   .pricing-section { padding: 60px 20px; }
   .pricing-grid { grid-template-columns: 1fr; }
   .testimonial-section { padding: 60px 20px; }
@@ -1413,6 +1528,7 @@ footer {
   .preview-body { grid-template-columns: 1fr; }
   .hero-stats { flex-direction: column; align-items: center; gap: 12px; }
   .footer-top { grid-template-columns: 1fr; }
+  .template-row { grid-template-columns: 1fr; }
 }
 
 /* ── VIDEO DEMO SECTION ── */
@@ -1959,6 +2075,76 @@ footer {
     </div>
   </div>
 </section>
+
+<!-- PICK YOUR STYLE -->
+<section class="section" id="templates">
+  <div class="section-tag" style="color:#4F7DF3;">Pick your style</div>
+  <h2 class="section-title">3 proposal templates · 3 invoice templates</h2>
+  <div class="section-sub">Every document ships branded and polished, whichever style fits your business. Click any thumbnail for a closer look.</div>
+
+  <div class="template-group">
+    <div class="template-group-label">Proposals</div>
+    <div class="template-row">
+      <div class="template-card" tabindex="0" role="button" aria-label="View Corporate proposal template, click to zoom" onclick="openTemplateModal('/images/template-proposal_corporate.png','Corporate')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-proposal_corporate.png','Corporate')}">
+        <div class="template-card-img-wrap">
+          <img src="/images/template-proposal_corporate.png" alt="Corporate proposal template" width="500" height="388" loading="lazy">
+        </div>
+        <div class="template-card-name">Corporate</div>
+        <div class="template-card-hint">Click to zoom</div>
+      </div>
+      <div class="template-card" tabindex="0" role="button" aria-label="View Modern proposal template, click to zoom" onclick="openTemplateModal('/images/template-proposal_modern.png','Modern')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-proposal_modern.png','Modern')}">
+        <div class="template-card-img-wrap">
+          <img src="/images/template-proposal_modern.png" alt="Modern proposal template" width="500" height="388" loading="lazy">
+        </div>
+        <div class="template-card-name">Modern</div>
+        <div class="template-card-hint">Click to zoom</div>
+      </div>
+      <div class="template-card" tabindex="0" role="button" aria-label="View Minimal proposal template, click to zoom" onclick="openTemplateModal('/images/template-proposal_minimal.png','Minimal')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-proposal_minimal.png','Minimal')}">
+        <div class="template-card-img-wrap">
+          <img src="/images/template-proposal_minimal.png" alt="Minimal proposal template" width="500" height="388" loading="lazy">
+        </div>
+        <div class="template-card-name">Minimal</div>
+        <div class="template-card-hint">Click to zoom</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="template-group">
+    <div class="template-group-label">Invoices</div>
+    <div class="template-row">
+      <div class="template-card" tabindex="0" role="button" aria-label="View Corporate invoice template, click to zoom" onclick="openTemplateModal('/images/template-invoice_corporate.png','Corporate')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-invoice_corporate.png','Corporate')}">
+        <div class="template-card-img-wrap">
+          <img src="/images/template-invoice_corporate.png" alt="Corporate invoice template" width="500" height="435" loading="lazy">
+        </div>
+        <div class="template-card-name">Corporate</div>
+        <div class="template-card-hint">Click to zoom</div>
+      </div>
+      <div class="template-card" tabindex="0" role="button" aria-label="View Creative invoice template, click to zoom" onclick="openTemplateModal('/images/template-invoice_creative.png','Creative')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-invoice_creative.png','Creative')}">
+        <div class="template-card-img-wrap">
+          <img src="/images/template-invoice_creative.png" alt="Creative invoice template" width="500" height="436" loading="lazy">
+        </div>
+        <div class="template-card-name">Creative</div>
+        <div class="template-card-hint">Click to zoom</div>
+      </div>
+      <div class="template-card" tabindex="0" role="button" aria-label="View Classic invoice template, click to zoom" onclick="openTemplateModal('/images/template-invoice_classic.png','Classic')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-invoice_classic.png','Classic')}">
+        <div class="template-card-img-wrap">
+          <img src="/images/template-invoice_classic.png" alt="Classic invoice template" width="500" height="436" loading="lazy">
+        </div>
+        <div class="template-card-name">Classic</div>
+        <div class="template-card-hint">Click to zoom</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEMPLATE LIGHTBOX -->
+<div class="template-modal-overlay" id="templateModal" onclick="if(event.target===this)closeTemplateModal()">
+  <div class="template-modal-box">
+    <button class="template-modal-close" onclick="closeTemplateModal()" aria-label="Close">✕</button>
+    <img id="templateModalImg" src="" alt="">
+    <div class="template-modal-label" id="templateModalLabel"></div>
+  </div>
+</div>
 
 <!-- COMING SOON STRIP -->
 <div class="roadmap-wrap">
@@ -3154,6 +3340,21 @@ function closeVideoModal() {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeVideoModal(); }
+});
+
+function openTemplateModal(src, name) {
+  document.getElementById('templateModalImg').src = src;
+  document.getElementById('templateModalImg').alt = name + ' template';
+  document.getElementById('templateModalLabel').textContent = name;
+  document.getElementById('templateModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTemplateModal() {
+  document.getElementById('templateModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeTemplateModal(); }
 });
 
 // ── REC 3: FAQ Accordion ────────────────────────────────────────────────────
