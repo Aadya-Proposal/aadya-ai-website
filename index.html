@@ -6,6 +6,24 @@
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+
+  // Consent Mode: default to denied until the visitor accepts the cookie banner
+  // (or immediately re-grant if they already chose Accept on a previous visit).
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied'
+  });
+  if (localStorage.getItem('aadyaCookieConsent') === 'granted') {
+    gtag('consent', 'update', {
+      'ad_storage': 'granted',
+      'ad_user_data': 'granted',
+      'ad_personalization': 'granted',
+      'analytics_storage': 'granted'
+    });
+  }
+
   gtag('js', new Date());
   gtag('config', 'G-W18E4HNGES');
   gtag('config', 'AW-18210872541');
@@ -1804,6 +1822,41 @@ footer {
 </style>
 </head>
 <body>
+<!-- Cookie consent banner -->
+<div id="aadyaCookieBanner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#0F2D6B;color:#fff;padding:16px 20px;box-shadow:0 -2px 12px rgba(0,0,0,0.15);">
+  <div style="max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="font-size:14px;line-height:1.5;flex:1;min-width:240px;">
+      We use cookies for analytics and ads. <a href="/privacy" style="color:#93C5FD;text-decoration:underline;">Privacy Policy</a>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button onclick="aadyaCookieDecline()" style="background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Decline</button>
+      <button onclick="aadyaCookieAccept()" style="background:#fff;color:#0F2D6B;border:none;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Accept</button>
+    </div>
+  </div>
+</div>
+<script>
+  (function() {
+    if (!localStorage.getItem('aadyaCookieConsent')) {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('aadyaCookieBanner').style.display = 'block';
+      });
+    }
+  })();
+  function aadyaCookieAccept() {
+    localStorage.setItem('aadyaCookieConsent', 'granted');
+    gtag('consent', 'update', {
+      'ad_storage': 'granted',
+      'ad_user_data': 'granted',
+      'ad_personalization': 'granted',
+      'analytics_storage': 'granted'
+    });
+    document.getElementById('aadyaCookieBanner').style.display = 'none';
+  }
+  function aadyaCookieDecline() {
+    localStorage.setItem('aadyaCookieConsent', 'denied');
+    document.getElementById('aadyaCookieBanner').style.display = 'none';
+  }
+</script>
 
 <!-- NAV -->
 <nav>
@@ -2841,7 +2894,20 @@ async function proceedWithEmailCapture(actionType) {
     }
     
     console.log('✅ User record created');
-    
+
+    // Fire Google Ads signup conversion — ONLY for a genuine new account.
+    // authError === null means auth.signUp() above created a brand-new user
+    // (the 'already registered' branch never reaches here with authError still set).
+    // TODO: once Supabase's "email enumeration protection" setting is confirmed,
+    // also require authData.user.identities.length > 0 — with that protection
+    // enabled, signUp() can return authError === null for an email that already
+    // exists, which would over-count this conversion.
+    if (!authError && typeof gtag === 'function') {
+      gtag('event', 'conversion', {
+        'send_to': 'AW-18210872541/zSUUCNyR4LocEN25z-tD'
+      });
+    }
+
     // Close modal
     const modal = document.getElementById('emailCaptureModal');
     if (modal) modal.remove();
