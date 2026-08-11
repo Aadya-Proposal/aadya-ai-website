@@ -511,6 +511,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
 </div>
 
 <script src="/js/invoice-popup.js"></script>
+<script src="/checkout-links.js"></script>
 <script>
 const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
@@ -571,7 +572,7 @@ async function openGenerateForm() {
 
       if (docsUsed >= limit) {
         // Block — show upgrade wall
-        showUpgradeWall(plan, docsUsed, limit);
+        showUpgradeWall(plan, docsUsed, limit, email);
         return;
       }
     }
@@ -585,9 +586,11 @@ async function openGenerateForm() {
   }
 }
 
-function showUpgradeWall(plan, docsUsed, limit) {
+function showUpgradeWall(plan, docsUsed, limit, email) {
   const existing = document.getElementById('upgradeWallModal');
   if (existing) existing.remove();
+
+  const nextTier = plan.includes('starter') ? 'pro' : 'starter';
 
   const modal = document.createElement('div');
   modal.id = 'upgradeWallModal';
@@ -608,10 +611,10 @@ function showUpgradeWall(plan, docsUsed, limit) {
         <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
       </div>
 
-      <a href="/account"
-         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
+      <button id="upgradeWallCtaBtn"
+         style="display:block;width:100%;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;border:none;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;cursor:pointer;">
         Upgrade to continue →
-      </a>
+      </button>
       <button onclick="document.getElementById('upgradeWallModal').remove()"
               style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
         Maybe later
@@ -619,6 +622,10 @@ function showUpgradeWall(plan, docsUsed, limit) {
     </div>
   `;
   document.body.appendChild(modal);
+
+  document.getElementById('upgradeWallCtaBtn').addEventListener('click', function() {
+    window.open(getCheckoutUrl(nextTier, detectIsIndia() ? 'inr' : 'usd', email), '_blank');
+  });
 }
 
 // ── INVOICE LIMIT CHECK ──────────────────────────────────────────────────────
@@ -642,7 +649,7 @@ async function openInvoiceForm() {
     const userName = (userData && userData.name) ? userData.name : email.split('@')[0];
 
     if (docsUsed >= limit) {
-      showInvoiceUpgradeModal(limit, plan);
+      showInvoiceUpgradeModal(limit, plan, email);
       return;
     }
 
@@ -653,11 +660,12 @@ async function openInvoiceForm() {
   }
 }
 
-function showInvoiceUpgradeModal(limit, plan) {
+function showInvoiceUpgradeModal(limit, plan, email) {
   const existing = document.getElementById('invoiceUpgradeModal');
   if (existing) existing.remove();
 
   const isStarter = plan.includes('starter');
+  const nextTier = isStarter ? 'pro' : 'starter';
   const nextPlan = isStarter ? 'Pro' : 'Starter';
   const nextPrice = isStarter ? '₹599/month' : '₹299/month';
   const nextCount = isStarter ? 'unlimited' : PLAN_LIMITS.starter;
@@ -679,10 +687,10 @@ function showInvoiceUpgradeModal(limit, plan) {
         <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to you &amp; your client</div>
         <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
       </div>
-      <a href="https://aadya-ai.com/#pricing" target="_blank"
-         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
+      <button id="invoiceUpgradeCtaBtn"
+         style="display:block;width:100%;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;border:none;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;cursor:pointer;">
         Upgrade to continue →
-      </a>
+      </button>
       <button onclick="document.getElementById('invoiceUpgradeModal').remove()"
               style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
         Maybe later
@@ -690,6 +698,10 @@ function showInvoiceUpgradeModal(limit, plan) {
     </div>
   `;
   document.body.appendChild(modal);
+
+  document.getElementById('invoiceUpgradeCtaBtn').addEventListener('click', function() {
+    window.open(getCheckoutUrl(nextTier, detectIsIndia() ? 'inr' : 'usd', email), '_blank');
+  });
 }
 
 async function loadInvoiceUsage() {
