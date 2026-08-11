@@ -241,6 +241,8 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   flex-shrink:0;
 }
 .generate-btn:hover { background:var(--navy); transform:translateY(-1px); box-shadow:0 4px 16px rgba(59,130,246,0.3); }
+.generate-btn:disabled { background:#94a3b8; cursor:not-allowed; opacity:0.7; }
+.generate-btn:disabled:hover { background:#94a3b8; transform:none; box-shadow:none; }
 .generate-btn svg { width:18px; height:18px; }
 
 /* HISTORY */
@@ -515,6 +517,35 @@ const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Single source of truth for plan document limits.
+// documents_used is a combined counter for BOTH proposals and invoices.
+const PLAN_LIMITS = { free: 3, starter: 20, pro: Infinity };
+function getPlanLimit(plan) {
+  const p = (plan || 'free').toLowerCase();
+  if (p.includes('pro')) return PLAN_LIMITS.pro;
+  if (p.includes('starter')) return PLAN_LIMITS.starter;
+  return PLAN_LIMITS.free;
+}
+
+const GENERATE_BTN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
+const INVOICE_BTN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="12" y2="15"/></svg>';
+
+// Render-time gate: reflects real usage on the buttons themselves, not just at click-time.
+function applyUsageGateUI(docsUsed, limit) {
+  const overLimit = docsUsed >= limit;
+  const generateBtn = document.getElementById('generateFormBtn');
+  const invoiceBtn = document.getElementById('invoiceFormBtn');
+
+  if (generateBtn) {
+    generateBtn.disabled = overLimit;
+    generateBtn.innerHTML = overLimit ? 'Upgrade to continue' : `${GENERATE_BTN_ICON}Generate Proposal →`;
+  }
+  if (invoiceBtn) {
+    invoiceBtn.disabled = overLimit;
+    invoiceBtn.innerHTML = overLimit ? 'Upgrade to continue' : `${INVOICE_BTN_ICON}Generate Invoice →`;
+  }
+}
+
 function hideLoader() {
   document.getElementById('loadingScreen').classList.add('hidden');
 }
@@ -542,9 +573,7 @@ async function openGenerateForm() {
     if (userData) {
       const plan = (userData.plan || 'free').toLowerCase();
       const docsUsed = userData.documents_used || 0;
-      const isPro = plan.includes('pro');
-      const isStarter = plan.includes('starter');
-      const limit = isPro ? Infinity : (isStarter ? 20 : 3);
+      const limit = getPlanLimit(plan);
 
       if (docsUsed >= limit) {
         // Block — show upgrade wall
@@ -613,29 +642,17 @@ async function openInvoiceForm() {
     const email = session.user.email;
     const { data: userData } = await supabaseClient
       .from('users')
-      .select('plan, name')
+      .select('plan, name, documents_used')
       .eq('email', email)
       .maybeSingle();
 
     const plan = ((userData && userData.plan) || 'free').toLowerCase();
-    const isPro = plan.includes('pro');
-    const isStarter = plan.includes('starter');
-    const invoiceLimit = isPro ? Infinity : (isStarter ? 10 : 3);
+    const limit = getPlanLimit(plan);
+    const docsUsed = (userData && userData.documents_used) || 0;
     const userName = (userData && userData.name) ? userData.name : email.split('@')[0];
 
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-    const { count } = await supabaseClient
-      .from('invoices')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_email', email)
-      .gte('created_at', monthStart);
-
-    const used = count || 0;
-
-    if (used >= invoiceLimit) {
-      showInvoiceUpgradeModal(invoiceLimit, plan);
+    if (docsUsed >= limit) {
+      showInvoiceUpgradeModal(limit, plan);
       return;
     }
 
@@ -693,30 +710,20 @@ async function loadInvoiceUsage() {
 
     const { data: userData } = await supabaseClient
       .from('users')
-      .select('plan')
+      .select('plan, documents_used')
       .eq('email', email)
       .maybeSingle();
 
     const plan = ((userData && userData.plan) || 'free').toLowerCase();
     const isPro = plan.includes('pro');
-    const isStarter = plan.includes('starter');
-    const invoiceLimit = isPro ? 999999 : (isStarter ? 10 : 3);
+    const limit = getPlanLimit(plan);
+    const docsUsed = (userData && userData.documents_used) || 0;
 
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-    const { count } = await supabaseClient
-      .from('invoices')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_email', email)
-      .gte('created_at', monthStart);
-
-    const used = count || 0;
     const el = document.getElementById('invoiceUsageText');
     if (el) {
       el.textContent = isPro
-        ? `${used} invoices sent this month — Unlimited on Pro`
-        : `${used} of ${invoiceLimit} invoices used this month`;
+        ? `${docsUsed} documents generated — Unlimited on Pro`
+        : `${docsUsed} of ${limit} documents used`;
     }
   } catch(e) {
     console.warn('Invoice usage load failed:', e);
@@ -1078,7 +1085,7 @@ async function start() {
         const plan = userData.data.plan || 'free';  // Default to 'free', not 'starter'
         const isPro = plan.toLowerCase().includes('pro');
         const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
-        const planLimit = isPro ? 9999 : (plan === 'free' ? 3 : 20);
+        const planLimit = getPlanLimit(plan);
         const planPrice = isPro ? '₹599 / month' : (plan === 'free' ? 'Free' : '₹299 / month');
         const docsUsed = userData.data.documents_used || 0;
         const displayName = userData.data.name || email.split('@')[0];
@@ -1092,6 +1099,7 @@ async function start() {
         document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${planLimit} included in ${planLabel}`;
         const pct = isPro ? 0 : Math.min((docsUsed / planLimit) * 100, 100);
         document.getElementById('usageFill').style.width = pct + '%';
+        applyUsageGateUI(docsUsed, planLimit);
       }
     } catch(e) { console.warn('User plan load failed:', e); }
 
@@ -1327,13 +1335,14 @@ async function refreshUserStats() {
       const plan = userData.plan || 'free';
       const isPro = plan.toLowerCase().includes('pro');
       const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
-      const planLimit = isPro ? 9999 : (plan === 'free' ? 3 : 20);
+      const planLimit = getPlanLimit(plan);
       const docsUsed = userData.documents_used || 0;
 
       document.getElementById('docsUsed').textContent = docsUsed;
       document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${planLimit} included in ${planLabel}`;
       const pct = isPro ? 0 : Math.min((docsUsed / planLimit) * 100, 100);
       document.getElementById('usageFill').style.width = pct + '%';
+      applyUsageGateUI(docsUsed, planLimit);
     }
 
     // Re-fetch proposal history
