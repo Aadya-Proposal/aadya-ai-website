@@ -660,7 +660,7 @@ function showInvoiceUpgradeModal(limit, plan) {
   const isStarter = plan.includes('starter');
   const nextPlan = isStarter ? 'Pro' : 'Starter';
   const nextPrice = isStarter ? '₹599/month' : '₹299/month';
-  const nextCount = isStarter ? 'unlimited' : '10';
+  const nextCount = isStarter ? 'unlimited' : PLAN_LIMITS.starter;
 
   const modal = document.createElement('div');
   modal.id = 'invoiceUpgradeModal';
@@ -668,20 +668,20 @@ function showInvoiceUpgradeModal(limit, plan) {
   modal.innerHTML = `
     <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
       <div style="font-size:48px;margin-bottom:16px;">📄</div>
-      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've used all ${limit} invoice${limit === 1 ? '' : 's'} this month!</h2>
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've reached your plan's limit!</h2>
       <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
-        Upgrade to <strong>${nextPlan}</strong> for just <strong>${nextPrice}</strong> and generate up to ${nextCount} invoices every month.
+        You've used all ${limit} documents included in your current plan. Upgrade to keep generating proposals and invoices for your clients.
       </p>
       <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
         <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">${nextPlan} Plan — ${nextPrice}</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;${nextCount} invoices per month</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;${nextCount} documents per month</div>
         <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Professional branded PDFs</div>
         <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to you &amp; your client</div>
         <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
       </div>
       <a href="https://aadya-ai.com/#pricing" target="_blank"
          style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
-        Upgrade to ${nextPlan} →
+        Upgrade to continue →
       </a>
       <button onclick="document.getElementById('invoiceUpgradeModal').remove()"
               style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
