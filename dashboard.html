@@ -241,8 +241,8 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   flex-shrink:0;
 }
 .generate-btn:hover { background:var(--navy); transform:translateY(-1px); box-shadow:0 4px 16px rgba(59,130,246,0.3); }
-.generate-btn:disabled { background:#94a3b8; cursor:not-allowed; opacity:0.7; }
-.generate-btn:disabled:hover { background:#94a3b8; transform:none; box-shadow:none; }
+.generate-btn.upgrade-mode { background:#94a3b8; cursor:pointer; opacity:0.7; }
+.generate-btn.upgrade-mode:hover { background:#7c8ba1; transform:none; box-shadow:none; }
 .invoice-btn { background:var(--navy); }
 .generate-btn svg { width:18px; height:18px; }
 
@@ -538,11 +538,13 @@ function applyUsageGateUI(docsUsed, limit) {
   const invoiceBtn = document.getElementById('invoiceFormBtn');
 
   if (generateBtn) {
-    generateBtn.disabled = overLimit;
+    generateBtn.classList.toggle('upgrade-mode', overLimit);
+    generateBtn.onclick = overLimit ? () => { window.location.href = '/account'; } : openGenerateForm;
     generateBtn.innerHTML = overLimit ? 'Upgrade to continue' : `${GENERATE_BTN_ICON}Generate Proposal →`;
   }
   if (invoiceBtn) {
-    invoiceBtn.disabled = overLimit;
+    invoiceBtn.classList.toggle('upgrade-mode', overLimit);
+    invoiceBtn.onclick = overLimit ? () => { window.location.href = '/account'; } : openInvoiceForm;
     invoiceBtn.innerHTML = overLimit ? 'Upgrade to continue' : `${INVOICE_BTN_ICON}Generate Invoice →`;
   }
 }
@@ -602,26 +604,22 @@ function showUpgradeWall(plan, docsUsed, limit) {
   modal.innerHTML = `
     <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
       <div style="font-size:48px;margin-bottom:16px;">🚀</div>
-      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've used all ${limit} free proposals!</h2>
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've reached your plan's limit!</h2>
       <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
-        Your clients deserve more. Upgrade to <strong>Starter</strong> for just <strong>₹299/month</strong> and generate up to 20 proposals every month.
+        You've used all ${limit} documents included in your current plan. Upgrade to keep generating proposals and invoices for your clients.
       </p>
 
       <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
-        <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Starter Plan — ₹299/month</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;20 proposals per month</div>
+        <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Why upgrade?</div>
+        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;More documents every month</div>
         <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;AI-generated branded PDFs</div>
         <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to client inbox</div>
         <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
       </div>
 
-      <a href="https://rzp.io/rzp/W8Loh6g" target="_blank"
-         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:10px;">
-        Upgrade for ₹299 →
-      </a>
-      <a href="https://aadya-proposals.lemonsqueezy.com/checkout/buy/e5077d64-76bb-474e-8313-cf7d3693affc" target="_blank"
-         style="display:block;background:#10b981;color:#ffffff;text-decoration:none;padding:13px 32px;border-radius:50px;font-size:15px;font-weight:700;margin-bottom:12px;">
-        Upgrade for $5 USD / EUR →
+      <a href="/account"
+         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
+        Upgrade to continue →
       </a>
       <button onclick="document.getElementById('upgradeWallModal').remove()"
               style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
