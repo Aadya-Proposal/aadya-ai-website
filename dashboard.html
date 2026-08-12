@@ -623,8 +623,25 @@ function showUpgradeWall(plan, docsUsed, limit, email) {
   `;
   document.body.appendChild(modal);
 
-  document.getElementById('upgradeWallCtaBtn').addEventListener('click', function() {
-    window.open(getCheckoutUrl(nextTier, detectIsIndia() ? 'inr' : 'usd', email), '_blank');
+  document.getElementById('upgradeWallCtaBtn').addEventListener('click', async function() {
+    const btn = this;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'wait';
+    btn.textContent = 'Loading...';
+    try {
+      const url = await getSubscriptionCheckoutUrl(nextTier, email);
+      window.open(url, '_blank');
+    } catch(e) {
+      console.error('Subscription checkout error:', e);
+      alert('Something went wrong starting checkout. Please try again or contact support@aadya-ai.com.');
+    } finally {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.textContent = originalText;
+    }
   });
 }
 
@@ -699,8 +716,25 @@ function showInvoiceUpgradeModal(limit, plan, email) {
   `;
   document.body.appendChild(modal);
 
-  document.getElementById('invoiceUpgradeCtaBtn').addEventListener('click', function() {
-    window.open(getCheckoutUrl(nextTier, detectIsIndia() ? 'inr' : 'usd', email), '_blank');
+  document.getElementById('invoiceUpgradeCtaBtn').addEventListener('click', async function() {
+    const btn = this;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'wait';
+    btn.textContent = 'Loading...';
+    try {
+      const url = await getSubscriptionCheckoutUrl(nextTier, email);
+      window.open(url, '_blank');
+    } catch(e) {
+      console.error('Subscription checkout error:', e);
+      alert('Something went wrong starting checkout. Please try again or contact support@aadya-ai.com.');
+    } finally {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.textContent = originalText;
+    }
   });
 }
 

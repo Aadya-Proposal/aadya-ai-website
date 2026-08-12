@@ -20,3 +20,16 @@ function getCheckoutUrl(tier, currency, email) {
   }
   return LEMON_CHECKOUT_LINKS[tier];
 }
+
+const SUBSCRIPTION_CHECKOUT_WEBHOOK = 'https://hook.eu1.make.com/7bozgktjwj1u7b03r4qhlgg10zd9e26p';
+
+async function getSubscriptionCheckoutUrl(tier, email) {
+  const response = await fetch(SUBSCRIPTION_CHECKOUT_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tier, email })
+  });
+  if (!response.ok) throw new Error('Failed to create subscription checkout');
+  const data = await response.json();
+  return data.checkout_url;
+}
