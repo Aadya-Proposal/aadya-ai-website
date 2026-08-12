@@ -586,6 +586,63 @@ async function openGenerateForm() {
   }
 }
 
+let _lastKnownPlan = null;
+let _planCheckInFlight = false;
+let _upgradeModalPollInterval = null;
+
+function closeActiveUpgradeModals() {
+  const w = document.getElementById('upgradeWallModal');
+  if (w) w.remove();
+  const i = document.getElementById('invoiceUpgradeModal');
+  if (i) i.remove();
+}
+
+function startUpgradeModalPolling() {
+  stopUpgradeModalPolling();
+  _upgradeModalPollInterval = setInterval(checkPlanAndHandleUpgrade, 5000);
+}
+
+function stopUpgradeModalPolling() {
+  if (_upgradeModalPollInterval) {
+    clearInterval(_upgradeModalPollInterval);
+    _upgradeModalPollInterval = null;
+  }
+}
+
+// Called by both the visibilitychange/focus listeners and the modal-open
+// polling interval — guarded so a change is only ever reported once even
+// if both detection paths fire close together.
+async function checkPlanAndHandleUpgrade() {
+  if (_planCheckInFlight) return;
+  _planCheckInFlight = true;
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session || !session.user) return;
+    const { data: userData } = await supabaseClient
+      .from('users')
+      .select('plan')
+      .eq('email', session.user.email)
+      .maybeSingle();
+    if (!userData) return;
+
+    const newPlan = (userData.plan || 'free').toLowerCase();
+    const changed = _lastKnownPlan && newPlan !== _lastKnownPlan;
+    _lastKnownPlan = newPlan;
+
+    if (changed) {
+      closeActiveUpgradeModals();
+      stopUpgradeModalPolling();
+      await refreshUserStats();
+      const planLabel = newPlan.includes('pro') ? 'Pro' : (newPlan.includes('starter') ? 'Starter' : 'Free');
+      showSuccessToast(`🎉 You're now on the ${planLabel} plan!`);
+    }
+  } catch(e) {
+    console.warn('Plan check failed:', e);
+  } finally {
+    _planCheckInFlight = false;
+  }
+}
+
 function showUpgradeWall(plan, docsUsed, limit, email) {
   const existing = document.getElementById('upgradeWallModal');
   if (existing) existing.remove();
@@ -615,13 +672,16 @@ function showUpgradeWall(plan, docsUsed, limit, email) {
          style="display:block;width:100%;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;border:none;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;cursor:pointer;">
         Upgrade to continue →
       </button>
-      <button onclick="document.getElementById('upgradeWallModal').remove()"
+      <button onclick="document.getElementById('upgradeWallModal').remove(); stopUpgradeModalPolling();"
               style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
         Maybe later
       </button>
     </div>
   `;
   document.body.appendChild(modal);
+
+  _lastKnownPlan = plan;
+  startUpgradeModalPolling();
 
   document.getElementById('upgradeWallCtaBtn').addEventListener('click', async function() {
     const btn = this;
@@ -708,13 +768,16 @@ function showInvoiceUpgradeModal(limit, plan, email) {
          style="display:block;width:100%;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;border:none;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;cursor:pointer;">
         Upgrade to continue →
       </button>
-      <button onclick="document.getElementById('invoiceUpgradeModal').remove()"
+      <button onclick="document.getElementById('invoiceUpgradeModal').remove(); stopUpgradeModalPolling();"
               style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
         Maybe later
       </button>
     </div>
   `;
   document.body.appendChild(modal);
+
+  _lastKnownPlan = plan;
+  startUpgradeModalPolling();
 
   document.getElementById('invoiceUpgradeCtaBtn').addEventListener('click', async function() {
     const btn = this;
@@ -1131,6 +1194,7 @@ async function start() {
         document.getElementById('planName').textContent = `${planLabel} Plan`;
         document.querySelector('.stat-card:nth-child(2) .stat-sub').textContent = planPrice;
         updateUsageStats(plan, docsUsed);
+        _lastKnownPlan = plan.toLowerCase();
       }
     } catch(e) { console.warn('User plan load failed:', e); }
 
@@ -1350,9 +1414,10 @@ setTimeout(checkAndHandlePendingAction, 1000);
 // We re-fetch documents_used + proposals so the count updates automatically.
 
 async function refreshUserStats() {
+  let plan = null;
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) return;
+    if (!session || !session.user) return plan;
     const email = session.user.email;
 
     // Re-fetch user stats
@@ -1363,7 +1428,7 @@ async function refreshUserStats() {
       .maybeSingle();
 
     if (userData) {
-      const plan = userData.plan || 'free';
+      plan = (userData.plan || 'free').toLowerCase();
       const docsUsed = userData.documents_used || 0;
       updateUsageStats(plan, docsUsed);
     }
@@ -1399,12 +1464,14 @@ async function refreshUserStats() {
   } catch(e) {
     console.warn('Stats refresh failed:', e);
   }
+  return plan;
 }
 
 // Refresh when user switches back to this tab (returns from Fillout)
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'visible') {
     refreshUserStats();
+    checkPlanAndHandleUpgrade();
     loadInvoiceUsage();
   }
 });
@@ -1412,6 +1479,7 @@ document.addEventListener('visibilitychange', function() {
 // Refresh when the browser window regains focus
 window.addEventListener('focus', function() {
   refreshUserStats();
+  checkPlanAndHandleUpgrade();
   loadInvoiceUsage();
 });
 </script>
