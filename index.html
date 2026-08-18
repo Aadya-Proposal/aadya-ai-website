@@ -743,6 +743,11 @@ nav {
   animation: modalIn 0.25s ease;
   box-shadow: 0 40px 120px rgba(0,0,0,0.4);
 }
+.template-modal-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 .template-modal-box img {
   width: auto;
   max-width: 100%;
@@ -752,6 +757,14 @@ nav {
   border-radius: 10px;
   display: block;
   margin: 0 auto;
+}
+.template-modal-pages img { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.template-modal-page-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+  letter-spacing: 0.3px;
 }
 .template-modal-label {
   font-family: 'Syne', sans-serif;
@@ -2145,21 +2158,21 @@ footer {
   <div class="template-group">
     <div class="template-group-label">Proposals</div>
     <div class="template-row">
-      <div class="template-card" tabindex="0" role="button" aria-label="View Corporate proposal template, click to zoom" onclick="openTemplateModal('/images/template-proposal_corporate_lg.png','Corporate')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-proposal_corporate_lg.png','Corporate')}">
+      <div class="template-card" tabindex="0" role="button" aria-label="View Corporate proposal template, click to zoom" onclick="openTemplateModal(['/images/Corporate-Meridian-page1.png','/images/Corporate-Meridian-page2.png','/images/Corporate-Meridian-page3.png'],'Corporate')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal(['/images/Corporate-Meridian-page1.png','/images/Corporate-Meridian-page2.png','/images/Corporate-Meridian-page3.png'],'Corporate')}">
         <div class="template-card-img-wrap">
           <img src="/images/template-proposal_corporate.png" alt="Corporate proposal template" width="500" height="388" loading="lazy">
         </div>
         <div class="template-card-name">Corporate</div>
         <div class="template-card-hint">Click to zoom</div>
       </div>
-      <div class="template-card" tabindex="0" role="button" aria-label="View Modern proposal template, click to zoom" onclick="openTemplateModal('/images/template-proposal_modern_lg.png','Modern')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-proposal_modern_lg.png','Modern')}">
+      <div class="template-card" tabindex="0" role="button" aria-label="View Modern proposal template, click to zoom" onclick="openTemplateModal(['/images/Modern-Samal-page1.png','/images/Modern-Samal-page2.png','/images/Modern-Samal-page3.png'],'Modern')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal(['/images/Modern-Samal-page1.png','/images/Modern-Samal-page2.png','/images/Modern-Samal-page3.png'],'Modern')}">
         <div class="template-card-img-wrap">
           <img src="/images/template-proposal_modern.png" alt="Modern proposal template" width="500" height="388" loading="lazy">
         </div>
         <div class="template-card-name">Modern</div>
         <div class="template-card-hint">Click to zoom</div>
       </div>
-      <div class="template-card" tabindex="0" role="button" aria-label="View Minimal proposal template, click to zoom" onclick="openTemplateModal('/images/template-proposal_minimal_lg.png','Minimal')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal('/images/template-proposal_minimal_lg.png','Minimal')}">
+      <div class="template-card" tabindex="0" role="button" aria-label="View Minimal proposal template, click to zoom" onclick="openTemplateModal(['/images/Minimal-Northbridge-page1.png','/images/Minimal-Northbridge-page2.png','/images/Minimal-Northbridge-page3.png'],'Minimal')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTemplateModal(['/images/Minimal-Northbridge-page1.png','/images/Minimal-Northbridge-page2.png','/images/Minimal-Northbridge-page3.png'],'Minimal')}">
         <div class="template-card-img-wrap">
           <img src="/images/template-proposal_minimal.png" alt="Minimal proposal template" width="500" height="388" loading="lazy">
         </div>
@@ -2201,7 +2214,7 @@ footer {
 <div class="template-modal-overlay" id="templateModal" onclick="if(event.target===this)closeTemplateModal()">
   <div class="template-modal-box">
     <button class="template-modal-close" onclick="closeTemplateModal()" aria-label="Close">✕</button>
-    <img id="templateModalImg" src="" alt="">
+    <div class="template-modal-pages" id="templateModalPages"></div>
     <div class="template-modal-label" id="templateModalLabel"></div>
   </div>
 </div>
@@ -3416,11 +3429,25 @@ document.addEventListener('keydown', function(e) {
 });
 
 function openTemplateModal(src, name) {
-  document.getElementById('templateModalImg').src = src;
-  document.getElementById('templateModalImg').alt = name + ' template';
+  const srcs = Array.isArray(src) ? src : [src];
+  const pagesEl = document.getElementById('templateModalPages');
+  pagesEl.innerHTML = '';
+  srcs.forEach(function(s, i) {
+    if (srcs.length > 1) {
+      const pageNum = document.createElement('div');
+      pageNum.className = 'template-modal-page-num';
+      pageNum.textContent = 'Page ' + (i + 1) + ' of ' + srcs.length;
+      pagesEl.appendChild(pageNum);
+    }
+    const img = document.createElement('img');
+    img.src = s;
+    img.alt = name + ' template' + (srcs.length > 1 ? ' — page ' + (i + 1) : '');
+    pagesEl.appendChild(img);
+  });
   document.getElementById('templateModalLabel').textContent = name;
   document.getElementById('templateModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  document.querySelector('.template-modal-box').scrollTop = 0;
 }
 function closeTemplateModal() {
   document.getElementById('templateModal').classList.remove('open');
