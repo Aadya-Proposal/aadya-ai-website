@@ -736,15 +736,22 @@ nav {
   padding: 24px;
   max-width: 600px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
   text-align: center;
   animation: modalIn 0.25s ease;
   box-shadow: 0 40px 120px rgba(0,0,0,0.4);
 }
 .template-modal-box img {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(90vh - 96px);
+  object-fit: contain;
   border-radius: 10px;
   display: block;
+  margin: 0 auto;
 }
 .template-modal-label {
   font-family: 'Syne', sans-serif;
