@@ -37,18 +37,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Aadya AI">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
-<title>Aadya AI — Generate a Professional Invoice in 60 Seconds</title>
-<meta name="description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try — no account needed to start. Supports INR, USD and EUR.">
+<title>Free Invoice Generator — GST, USD & EUR Supported | Aadya AI</title>
+<meta name="description" content="Generate professional invoices in seconds — GST-compliant (CGST/SGST/IGST + HSN) for India, or standard invoicing in USD/EUR for international clients. Free to start.">
 <link rel="canonical" href="https://www.aadya-ai.com/invoice">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.aadya-ai.com/invoice">
 <meta property="og:site_name" content="Aadya AI">
-<meta property="og:title" content="Aadya AI — Generate a Professional Invoice in 60 Seconds">
-<meta property="og:description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try — no account needed to start.">
+<meta property="og:title" content="Free Invoice Generator — GST, USD & EUR Supported">
+<meta property="og:description" content="Generate professional invoices in seconds — GST-compliant (CGST/SGST/IGST + HSN) for India, or standard invoicing in USD/EUR for international clients. Free to start.">
 <meta property="og:image" content="https://www.aadya-ai.com/icons/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Aadya AI — Generate a Professional Invoice in 60 Seconds">
-<meta name="twitter:description" content="AI-powered invoice generator. Branded PDF delivered to your inbox instantly. Free to try.">
+<meta name="twitter:title" content="Free Invoice Generator — GST, USD & EUR Supported">
+<meta name="twitter:description" content="Generate professional invoices in seconds — GST-compliant (CGST/SGST/IGST + HSN) for India, or standard invoicing in USD/EUR for international clients. Free to start.">
 <meta name="twitter:image" content="https://www.aadya-ai.com/icons/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -518,6 +518,30 @@ nav {
 .comparison-table tbody tr:last-child td:first-child { border-radius: 0 0 0 16px; }
 .comparison-table tbody tr:last-child td:last-child { border-radius: 0 0 16px 0; }
 
+/* GST SECTION */
+.gst-section-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+  margin-top: 8px;
+}
+.gst-features-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.gst-visual img {
+  width: 100%;
+  display: block;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(15,45,107,0.05), 0 8px 32px rgba(15,45,107,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.gst-prompt { font-size: 14px; color: var(--muted); }
+.gst-prompt a { color: var(--blue); font-weight: 600; text-decoration: none; }
+.gst-prompt a:hover { text-decoration: underline; }
+
 /* BOTTOM CTA */
 .bottom-cta {
   position: relative;
@@ -586,6 +610,8 @@ footer a:hover { color: white; }
   .comparison-section { padding: 60px 20px; }
   .comparison-table thead th,
   .comparison-table tbody td { padding: 12px 14px; font-size: 13px; }
+  .gst-section-grid { grid-template-columns: 1fr; }
+  .gst-features-list { grid-template-columns: 1fr; }
   .bottom-cta { padding: 60px 20px; }
   footer { padding: 32px 20px; }
 }
@@ -757,7 +783,7 @@ footer a:hover { color: white; }
       <div class="hero-invoice-frame">
         <div class="hero-invoice-carousel">
           <img class="hero-invoice-img hero-invoice-img--corporate" src="/images/invoice-hero-corporate.png" alt="Corporate-style invoice template with a clean navy header, itemized services table, GST breakdown and total due">
-          <img class="hero-invoice-img hero-invoice-img--creative" src="/images/invoice-hero-creative.png" alt="Creative-style invoice template with bold branded colors, itemized services table, GST breakdown and total due">
+          <img class="hero-invoice-img hero-invoice-img--creative" src="/images/invoice-hero-gst.png" alt="Creative-style invoice template with bold branded colors, GSTIN fields, HSN code and IGST breakdown">
           <img class="hero-invoice-img hero-invoice-img--classic" src="/images/invoice-hero-classic.png" alt="Classic-style invoice template with a traditional layout, itemized services table, GST breakdown and total due">
         </div>
       </div>
@@ -885,6 +911,43 @@ footer a:hover { color: white; }
     </table>
   </div>
 </div>
+
+<!-- GST -->
+<section class="section" id="gst">
+  <div class="section-tag">GST</div>
+  <h2 class="section-title">GST-ready, when you need it.</h2>
+  <p class="section-sub">CGST, SGST, and IGST calculated automatically. HSN/SAC codes filled in for you. GSTIN fields built in. Or leave it off entirely and invoice in USD or EUR — same tool, either way.</p>
+  <div class="gst-section-grid">
+    <div>
+      <div class="gst-features-list">
+        <div class="feature-card">
+          <div class="feature-icon">🧮</div>
+          <div class="feature-title">Automatic tax split</div>
+          <div class="feature-desc">CGST/SGST for same-state, IGST for inter-state, calculated from your and your client's state automatically.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏷️</div>
+          <div class="feature-title">HSN/SAC lookup</div>
+          <div class="feature-desc">Pick a category from 32 common options and the code + rate (0%, 3%, 5%, or 18%) fill in automatically. Or enter your own.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🪪</div>
+          <div class="feature-title">GSTIN built in</div>
+          <div class="feature-desc">Dedicated fields for both parties, shown correctly on the invoice.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <div class="feature-title">GST optional</div>
+          <div class="feature-desc">Not registered, or billing internationally? Leave it off and invoice in USD or EUR exactly as before.</div>
+        </div>
+      </div>
+      <p class="gst-prompt">Toggle GST on when you generate your invoice below — <a href="#" onclick="event.preventDefault(); openInvoiceModal()">generate my invoice →</a></p>
+    </div>
+    <div class="gst-visual">
+      <img src="/images/invoice-hero-gst.png" alt="GST invoice sample with GSTIN fields for both parties, HSN code, and IGST breakdown">
+    </div>
+  </div>
+</section>
 
 <!-- BOTTOM CTA -->
 <div class="bottom-cta" id="cta">

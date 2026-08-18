@@ -1,3 +1,7 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/gst-invoice-generator", "destination": "/invoice#gst", "permanent": true },
+    { "source": "/gst-invoice-generator.html", "destination": "/invoice#gst", "permanent": true }
+  ]
 }
