@@ -2974,10 +2974,32 @@ async function proceedWithAction(actionType, userEmail) {
     const formUrl = `https://forms.fillout.com/t/6wFLHhk2tXus?${params.toString()}`;
     window.open(formUrl, '_blank');
   } else if (actionType === 'starter' || actionType === 'pro') {
-    // Open Razorpay payment
-    const razorpayId = actionType === 'starter' ? 'vVWB1lQ' : 'bEQTH8N';
-    const paymentUrl = `https://rzp.io/rzp/${razorpayId}?customer_email=${encodeURIComponent(userEmail)}`;
-    window.open(paymentUrl, '_blank');
+    // Fresh Razorpay Subscription checkout via the Make.com webhook (checkout-links.js).
+    // Do NOT go back to a static https://rzp.io/rzp/{vVWB1lQ|bEQTH8N} Payment Link here:
+    // those are single-use, so once the first customer pays, every later visitor is shown
+    // that same link's old "Paid" receipt and is never charged (this happened to Starter's
+    // vVWB1lQ link on 2026-08-11). getSubscriptionCheckoutUrl() returns a unique checkout_url
+    // per call instead.
+    const btn = document.getElementById(actionType + '-btn');
+    const originalBtnText = btn ? btn.textContent : null;
+    if (btn) {
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.6';
+      btn.textContent = 'Loading...';
+    }
+    try {
+      const paymentUrl = await getSubscriptionCheckoutUrl(actionType, userEmail);
+      window.open(paymentUrl, '_blank');
+    } catch (e) {
+      console.error('Subscription checkout error:', e);
+      alert('Something went wrong starting checkout. Please try again or contact support@aadya-ai.com.');
+    } finally {
+      if (btn) {
+        btn.style.pointerEvents = '';
+        btn.style.opacity = '';
+        btn.textContent = originalBtnText;
+      }
+    }
   } else if (actionType === 'signin') {
     // Just close the modal, user is now logged in
     window.location.reload();
@@ -3059,6 +3081,7 @@ document.getElementById('payment-overlay').addEventListener('click', function(e)
 
 <!-- SUPABASE AUTH -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/checkout-links.js"></script>
 
 <script>
 const supabaseUrl = 'https://rscpsmwqtkduahhaejtv.supabase.co';

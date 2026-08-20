@@ -34,6 +34,7 @@
 <meta name="theme-color" content="#0F2D6B">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/checkout-links.js"></script>
 <style>
 :root {
   --navy: #0F2D6B;
@@ -501,7 +502,7 @@ function renderPlanSection(plan, email, subscriptionStatus) {
   const isIndia = tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta';
 
   function upgradeButtons(planKey) {
-    const inrBtn = `<button class="upgrade-btn inr" onclick="openRazorpay('${planKey}')">Upgrade with INR →</button>`;
+    const inrBtn = `<button class="upgrade-btn inr" onclick="openRazorpay('${planKey}', this)">Upgrade with INR →</button>`;
     const usdHref = planKey === 'starter' ? LEMON_STARTER : LEMON_PRO;
     const usdLabel = planKey === 'starter' ? 'USD/EUR' : 'USD / EUR';
     const usdBtn = `<a class="upgrade-btn usd" href="${usdHref}" target="_blank">Upgrade with ${usdLabel} →</a>`;
@@ -582,10 +583,32 @@ function renderPlanSection(plan, email, subscriptionStatus) {
   document.getElementById('planSection').innerHTML = html;
 }
 
-function openRazorpay(plan) {
-  const razorpayId = plan === 'starter' ? 'vVWB1lQ' : 'bEQTH8N';
-  const paymentUrl = `https://rzp.io/rzp/${razorpayId}?customer_email=${encodeURIComponent(currentUserEmail)}`;
-  window.open(paymentUrl, '_blank');
+async function openRazorpay(plan, btn) {
+  // Fresh Razorpay Subscription checkout via the Make.com webhook (checkout-links.js).
+  // Do NOT go back to a static https://rzp.io/rzp/{vVWB1lQ|bEQTH8N} Payment Link here:
+  // those are single-use, so once the first customer pays, every later visitor is shown
+  // that same link's old "Paid" receipt and is never charged (this happened to Starter's
+  // vVWB1lQ link on 2026-08-11). getSubscriptionCheckoutUrl() returns a unique checkout_url
+  // per call instead.
+  const originalBtnText = btn ? btn.textContent : null;
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.textContent = 'Loading...';
+  }
+  try {
+    const paymentUrl = await getSubscriptionCheckoutUrl(plan, currentUserEmail);
+    window.open(paymentUrl, '_blank');
+  } catch (e) {
+    console.error('Subscription checkout error:', e);
+    alert('Something went wrong starting checkout. Please try again or contact support@aadya-ai.com.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.textContent = originalBtnText;
+    }
+  }
 }
 
 async function saveName() {

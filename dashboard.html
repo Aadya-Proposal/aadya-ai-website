@@ -1371,10 +1371,20 @@ async function checkAndHandlePendingAction() {
         
         // Open Razorpay
         if (pendingAction === 'starter' || pendingAction === 'pro') {
-          const razorpayId = pendingAction === 'starter' ? 'vVWB1lQ' : 'bEQTH8N';
-          const paymentUrl = `https://rzp.io/rzp/${razorpayId}?customer_email=${encodeURIComponent(userEmail)}`;
-          console.log('💳 Opening Razorpay:', pendingAction);
-          window.open(paymentUrl, '_blank');
+          // Fresh Razorpay Subscription checkout via the Make.com webhook (checkout-links.js).
+          // Do NOT go back to a static https://rzp.io/rzp/{vVWB1lQ|bEQTH8N} Payment Link here:
+          // those are single-use, so once the first customer pays, every later visitor is shown
+          // that same link's old "Paid" receipt and is never charged (this happened to Starter's
+          // vVWB1lQ link on 2026-08-11). getSubscriptionCheckoutUrl() returns a unique checkout_url
+          // per call instead.
+          try {
+            const paymentUrl = await getSubscriptionCheckoutUrl(pendingAction, userEmail);
+            console.log('💳 Opening Razorpay checkout:', pendingAction);
+            window.open(paymentUrl, '_blank');
+          } catch (e) {
+            console.error('Subscription checkout error:', e);
+            alert('Something went wrong starting checkout. Please try again or contact support@aadya-ai.com.');
+          }
           return; // Don't ask for name, user is going to pay
         } else if (pendingAction === 'free') {
           // Open Fillout form with pre-fill (user just logged in, session is available)
