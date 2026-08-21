@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Confirmed — Aadya AI</title>
+<meta name="theme-color" content="#0F2D6B">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F2D6B;
+    --blue: #3B82F6;
+    --blue-light: #EEF4FF;
+    --text: #1a1a2e;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #EEF4FF, #ffffff);
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    color: var(--text);
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 40px 36px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(15,45,107,0.15);
+  }
+  .emoji { font-size: 48px; margin-bottom: 16px; }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--navy);
+    margin: 0 0 8px;
+  }
+  .plan-line {
+    font-size: 15px;
+    color: var(--muted);
+    margin: 0 0 24px;
+    line-height: 1.6;
+  }
+  .plan-line strong { color: var(--navy); }
+  .status-box {
+    background: var(--blue-light);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+    font-size: 14px;
+    color: var(--navy);
+    line-height: 1.6;
+  }
+  .status-box.error { background: #FEF2F2; color: #991B1B; }
+  .email-highlight { font-weight: 700; word-break: break-all; }
+  #resendForm { display: none; margin-top: 16px; }
+  #resendForm input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  #resendBtn {
+    width: 100%;
+    background: var(--navy);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+  }
+  #resendBtn:disabled { opacity: 0.6; cursor: wait; }
+  .support-line {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 20px;
+  }
+  .support-line a { color: var(--blue); text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">🎉</div>
+    <h1>Payment confirmed!</h1>
+    <p class="plan-line">You're now on the <strong id="planLabel">Aadya AI</strong> plan.</p>
+
+    <div class="status-box" id="statusBox">Sending your login link...</div>
+
+    <div id="resendForm">
+      <input type="email" id="resendEmail" placeholder="Your email address">
+      <button id="resendBtn" onclick="sendMagicLink(true)">Resend login link</button>
+    </div>
+
+    <p class="support-line">Trouble logging in? Email <a href="mailto:support@aadya-ai.com">support@aadya-ai.com</a></p>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseUrl = 'https://rscpsmwqtkduahhaejtv.supabase.co';
+const supabaseKey = 'sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA';
+const welcomeSupabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+const params = new URLSearchParams(window.location.search);
+const plan = params.get('plan');
+const email = (params.get('email') || '').trim();
+
+const planNames = { starter: 'Starter', pro: 'Pro' };
+document.getElementById('planLabel').textContent = planNames[plan] || 'Aadya AI';
+
+// Let dashboard.html's mismatch check (and its own auto-create-on-first-login
+// logic) know which email this browser just paid with.
+if (email) localStorage.setItem('lastCheckoutEmail', email);
+
+async function sendMagicLink(isResend) {
+  const targetEmail = isResend ? document.getElementById('resendEmail').value.trim() : email;
+  const statusBox = document.getElementById('statusBox');
+  const resendForm = document.getElementById('resendForm');
+  const resendBtn = document.getElementById('resendBtn');
+
+  if (!targetEmail || !targetEmail.includes('@')) {
+    statusBox.className = 'status-box error';
+    statusBox.textContent = 'Please enter the email you paid with.';
+    resendForm.style.display = 'block';
+    return;
+  }
+
+  if (isResend) {
+    resendBtn.disabled = true;
+    resendBtn.textContent = 'Sending...';
+  }
+
+  const { error } = await welcomeSupabase.auth.signInWithOtp({
+    email: targetEmail,
+    options: { emailRedirectTo: 'https://aadya-ai.com/dashboard.html' }
+  });
+
+  if (error) {
+    statusBox.className = 'status-box error';
+    statusBox.textContent = 'Could not send login link: ' + error.message;
+    resendForm.style.display = 'block';
+    if (isResend) {
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Resend login link';
+    }
+    return;
+  }
+
+  localStorage.setItem('lastCheckoutEmail', targetEmail);
+  statusBox.className = 'status-box';
+  statusBox.innerHTML = `Check <span class="email-highlight">${targetEmail}</span> for a login link to access your dashboard.`;
+  resendForm.style.display = 'none';
+}
+
+if (email) {
+  sendMagicLink(false);
+} else {
+  // No email in the URL (e.g. page opened directly) — ask for it instead of guessing.
+  document.getElementById('statusBox').textContent = 'Enter the email you paid with to get your login link.';
+  document.getElementById('resendForm').style.display = 'block';
+}
+</script>
+</body>
+</html>

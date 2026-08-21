@@ -35,6 +35,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/checkout-links.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
 :root {
   --navy: #0F2D6B;
@@ -584,12 +585,12 @@ function renderPlanSection(plan, email, subscriptionStatus) {
 }
 
 async function openRazorpay(plan, btn) {
-  // Fresh Razorpay Subscription checkout via the Make.com webhook (checkout-links.js).
-  // Do NOT go back to a static https://rzp.io/rzp/{vVWB1lQ|bEQTH8N} Payment Link here:
-  // those are single-use, so once the first customer pays, every later visitor is shown
-  // that same link's old "Paid" receipt and is never charged (this happened to Starter's
-  // vVWB1lQ link on 2026-08-11). getSubscriptionCheckoutUrl() returns a unique checkout_url
-  // per call instead.
+  // Razorpay Checkout.js opened in-page (checkout-links.js), not a static or hosted
+  // redirect link. A hosted https://rzp.io/rzp/{id} link either gets reused across
+  // customers (single-use, breaks after the first payment — the 2026-08-20 bug) or,
+  // even dynamically generated per user, strands a brand-new visitor on Razorpay's own
+  // confirmation page with no way back into the Aadya AI dashboard. Checkout.js keeps
+  // the user on aadya-ai.com and hands off to /welcome.html on success.
   const originalBtnText = btn ? btn.textContent : null;
   if (btn) {
     btn.disabled = true;
@@ -597,8 +598,8 @@ async function openRazorpay(plan, btn) {
     btn.textContent = 'Loading...';
   }
   try {
-    const paymentUrl = await getSubscriptionCheckoutUrl(plan, currentUserEmail);
-    window.open(paymentUrl, '_blank');
+    const { subscription_id } = await createSubscriptionCheckout(plan, currentUserEmail);
+    openSubscriptionCheckout({ subscriptionId: subscription_id, tier: plan, email: currentUserEmail });
   } catch (e) {
     console.error('Subscription checkout error:', e);
     alert('Something went wrong starting checkout. Please try again or contact support@aadya-ai.com.');

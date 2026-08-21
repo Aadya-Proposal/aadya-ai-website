@@ -22,14 +22,42 @@ function getCheckoutUrl(tier, currency, email) {
 }
 
 const SUBSCRIPTION_CHECKOUT_WEBHOOK = 'https://hook.eu1.make.com/7bozgktjwj1u7b03r4qhlgg10zd9e26p';
+const RAZORPAY_KEY_ID = 'rzp_live_TOYtX79aLJs8QF';
 
-async function getSubscriptionCheckoutUrl(tier, email) {
+// Calls the Make.com webhook, which creates a fresh Razorpay Subscription
+// server-side and returns { checkout_url, subscription_id } for it.
+async function createSubscriptionCheckout(tier, email) {
   const response = await fetch(SUBSCRIPTION_CHECKOUT_WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ tier, email })
   });
   if (!response.ok) throw new Error('Failed to create subscription checkout');
-  const data = await response.json();
+  return response.json();
+}
+
+// Back-compat wrapper for callers that only want the hosted checkout_url
+// (e.g. dashboard.html's in-app upgrade-wall modals, opened in a new tab).
+async function getSubscriptionCheckoutUrl(tier, email) {
+  const data = await createSubscriptionCheckout(tier, email);
   return data.checkout_url;
+}
+
+// Opens Razorpay Checkout.js in-page for a subscription created via
+// createSubscriptionCheckout(), so payment success stays on aadya-ai.com
+// (redirected to /welcome.html) instead of stranding the user on Razorpay's
+// own hosted confirmation page with no way back into the dashboard.
+function openSubscriptionCheckout({ subscriptionId, tier, email }) {
+  const rzp = new Razorpay({
+    key: RAZORPAY_KEY_ID,
+    subscription_id: subscriptionId,
+    name: 'Aadya AI',
+    description: `${tier === 'pro' ? 'Pro' : 'Starter'} Plan`,
+    prefill: { email: email },
+    theme: { color: '#0F2D6B' },
+    handler: function () {
+      window.location.href = `/welcome.html?plan=${encodeURIComponent(tier)}&email=${encodeURIComponent(email)}`;
+    }
+  });
+  rzp.open();
 }

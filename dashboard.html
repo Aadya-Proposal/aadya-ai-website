@@ -405,6 +405,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   <div class="hero-inner">
     <h1 id="heroGreeting">Welcome back 👋</h1>
     <p>Generate professional proposals and SOWs — delivered to your client's inbox in seconds.</p>
+    <div id="planSupportNotice" style="display:none;margin-top:14px;padding:10px 16px;background:#FFF7ED;border:1.5px solid #FDE68A;border-radius:10px;font-size:13px;color:#92400e;max-width:600px;"></div>
   </div>
 </div>
 
@@ -512,6 +513,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
 
 <script src="/js/invoice-popup.js"></script>
 <script src="/checkout-links.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
@@ -1151,36 +1153,60 @@ async function start() {
         .eq('email', email)
         .maybeSingle();
 
-      // If user doesn't exist in database, create a record with plan='free'
+      // If this session's email has no matching row, it's either a genuine first
+      // visit (create a free row, as before) or — if this browser recently paid via
+      // checkout under a DIFFERENT email (see welcome.html) — this is a paid user who
+      // signed in with the wrong email. Skip the auto-insert in that case so we don't
+      // silently create a duplicate free-tier row for someone who already has a paid
+      // account under another address.
+      const notice = document.getElementById('planSupportNotice');
+      let emailMismatch = false;
+      const lastCheckoutEmail = localStorage.getItem('lastCheckoutEmail');
+
       if (!userData.data) {
-        console.log('📝 Creating new user record with plan=free');
-        const { error: insertError } = await supabaseClient.from('users').insert({
-          email: email,
-          created_at: new Date()
-        });
-
-        // Fire Google Ads signup conversion — ONLY for a genuine new account,
-        // gated on the insert actually succeeding. This covers magic-link and
-        // Google OAuth signups, which never go through proceedWithEmailCapture()
-        // in index.html (that path creates its own users row before the user
-        // ever reaches this page). The two paths can't double-fire: both key
-        // off the same `email` column, so whichever one creates the row first
-        // is the only one that ever sees userData.data empty.
-        if (!insertError && typeof gtag === 'function') {
-          gtag('event', 'conversion', {
-            'send_to': 'AW-18210872541/zSUUCNyR4LocEN25z-tD'
+        if (lastCheckoutEmail && lastCheckoutEmail.toLowerCase() !== email.toLowerCase()) {
+          emailMismatch = true;
+        } else {
+          console.log('📝 Creating new user record with plan=free');
+          const { error: insertError } = await supabaseClient.from('users').insert({
+            email: email,
+            created_at: new Date()
           });
-        }
 
-        // Re-fetch the user data
-        userData = await supabaseClient
-          .from('users')
-          .select('*')
-          .eq('email', email)
-          .maybeSingle();
+          // Fire Google Ads signup conversion — ONLY for a genuine new account,
+          // gated on the insert actually succeeding. This covers magic-link and
+          // Google OAuth signups, which never go through proceedWithEmailCapture()
+          // in index.html (that path creates its own users row before the user
+          // ever reaches this page). The two paths can't double-fire: both key
+          // off the same `email` column, so whichever one creates the row first
+          // is the only one that ever sees userData.data empty.
+          if (!insertError && typeof gtag === 'function') {
+            gtag('event', 'conversion', {
+              'send_to': 'AW-18210872541/zSUUCNyR4LocEN25z-tD'
+            });
+          }
+
+          // Re-fetch the user data
+          userData = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+        }
+      } else {
+        // Row found for this exact session email — clear the checkout-email flag so
+        // it can't misfire against an unrelated future signup on this browser.
+        localStorage.removeItem('lastCheckoutEmail');
       }
 
-      if (userData.data) {
+      if (emailMismatch) {
+        document.getElementById('planBadge').textContent = '—';
+        document.getElementById('planName').textContent = 'No plan found';
+        if (notice) {
+          notice.textContent = `We couldn't find an account for ${email}. If you paid using a different email (e.g. ${lastCheckoutEmail}), contact support@aadya-ai.com to get access.`;
+          notice.style.display = 'block';
+        }
+      } else if (userData.data) {
         const plan = userData.data.plan || 'free';  // Default to 'free', not 'starter'
         const isPro = plan.toLowerCase().includes('pro');
         const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
@@ -1195,6 +1221,19 @@ async function start() {
         document.querySelector('.stat-card:nth-child(2) .stat-sub').textContent = planPrice;
         updateUsageStats(plan, docsUsed);
         _lastKnownPlan = plan.toLowerCase();
+
+        // Cross-device safety net: a free-tier user who actually paid under a
+        // different email on another device leaves no local signal we can detect,
+        // so show a quiet, self-qualifying notice to every free-plan user instead
+        // of leaving that case with zero signal.
+        if (notice) {
+          if (plan.toLowerCase() === 'free') {
+            notice.textContent = `Don't see your plan? If you paid with a different email, contact support@aadya-ai.com.`;
+            notice.style.display = 'block';
+          } else {
+            notice.style.display = 'none';
+          }
+        }
       }
     } catch(e) { console.warn('User plan load failed:', e); }
 
@@ -1371,16 +1410,16 @@ async function checkAndHandlePendingAction() {
         
         // Open Razorpay
         if (pendingAction === 'starter' || pendingAction === 'pro') {
-          // Fresh Razorpay Subscription checkout via the Make.com webhook (checkout-links.js).
-          // Do NOT go back to a static https://rzp.io/rzp/{vVWB1lQ|bEQTH8N} Payment Link here:
-          // those are single-use, so once the first customer pays, every later visitor is shown
-          // that same link's old "Paid" receipt and is never charged (this happened to Starter's
-          // vVWB1lQ link on 2026-08-11). getSubscriptionCheckoutUrl() returns a unique checkout_url
-          // per call instead.
+          // Razorpay Checkout.js opened in-page (checkout-links.js), not a static or hosted
+          // redirect link. A hosted https://rzp.io/rzp/{id} link either gets reused across
+          // customers (single-use, breaks after the first payment — the 2026-08-20 bug) or,
+          // even dynamically generated per user, strands a brand-new visitor on Razorpay's own
+          // confirmation page with no way back into the Aadya AI dashboard. Checkout.js keeps
+          // the user on aadya-ai.com and hands off to /welcome.html on success.
           try {
-            const paymentUrl = await getSubscriptionCheckoutUrl(pendingAction, userEmail);
+            const { subscription_id } = await createSubscriptionCheckout(pendingAction, userEmail);
             console.log('💳 Opening Razorpay checkout:', pendingAction);
-            window.open(paymentUrl, '_blank');
+            openSubscriptionCheckout({ subscriptionId: subscription_id, tier: pendingAction, email: userEmail });
           } catch (e) {
             console.error('Subscription checkout error:', e);
             alert('Something went wrong starting checkout. Please try again or contact support@aadya-ai.com.');
