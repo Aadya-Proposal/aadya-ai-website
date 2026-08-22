@@ -3,10 +3,12 @@
 // one-click upgrades without duplicating the Razorpay/Lemon Squeezy link logic.
 
 const RAZORPAY_CHECKOUT_IDS = { starter: 'vVWB1lQ', pro: 'bEQTH8N' };
+const RAZORPAY_PLAN_PRICES_INR = { starter: 299, pro: 599 };
 const LEMON_CHECKOUT_LINKS = {
   starter: 'https://aadya-proposals.lemonsqueezy.com/checkout/buy/e5077d64-76bb-474e-8313-cf7d3693affc',
   pro: 'https://aadya-proposals.lemonsqueezy.com/checkout/buy/36b1b71e-e345-4e59-a988-267c99ec1dd2'
 };
+const LEMON_PLAN_PRICES = { starter: 5, pro: 10 };
 
 function detectIsIndia() {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -48,6 +50,17 @@ async function getSubscriptionCheckoutUrl(tier, email) {
 // (redirected to /welcome.html) instead of stranding the user on Razorpay's
 // own hosted confirmation page with no way back into the dashboard.
 function openSubscriptionCheckout({ subscriptionId, tier, email }) {
+  // GA4: checkout is starting. This path is Razorpay-only (INR) — non-Indian
+  // buyers never reach this function, see the LemonSqueezy click handlers
+  // in index.html/account.html instead.
+  if (typeof gtag === 'function') {
+    gtag('event', 'begin_checkout', {
+      value: RAZORPAY_PLAN_PRICES_INR[tier],
+      currency: 'INR',
+      tier: tier
+    });
+  }
+
   const rzp = new Razorpay({
     key: RAZORPAY_KEY_ID,
     subscription_id: subscriptionId,
@@ -55,7 +68,15 @@ function openSubscriptionCheckout({ subscriptionId, tier, email }) {
     description: `${tier === 'pro' ? 'Pro' : 'Starter'} Plan`,
     prefill: { email: email },
     theme: { color: '#0F2D6B' },
-    handler: function () {
+    handler: function (response) {
+      if (typeof gtag === 'function') {
+        gtag('event', 'purchase', {
+          transaction_id: response.razorpay_subscription_id || subscriptionId,
+          value: RAZORPAY_PLAN_PRICES_INR[tier],
+          currency: 'INR',
+          tier: tier
+        });
+      }
       window.location.href = `/welcome.html?plan=${encodeURIComponent(tier)}&email=${encodeURIComponent(email)}`;
     }
   });

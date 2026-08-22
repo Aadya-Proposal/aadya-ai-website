@@ -2926,6 +2926,7 @@ async function proceedWithEmailCapture(actionType) {
       gtag('event', 'conversion', {
         'send_to': 'AW-18210872541/zSUUCNyR4LocEN25z-tD'
       });
+      gtag('event', 'sign_up');
     }
 
     // Close modal
@@ -3352,13 +3353,24 @@ function setCurrency(currency) {
     document.getElementById('pro-strike').textContent = '$19/mo';
     starterBtn.href = LEMON_STARTER;
     starterBtn.setAttribute('target', '_blank');
-    starterBtn.onclick = null;
+    // LemonSqueezy checkout is a plain hosted-page redirect (new tab, no embed
+    // SDK, no return path to aadya-ai.com) — this click is the only moment we
+    // can observe before the user leaves the site, so begin_checkout fires here.
+    starterBtn.onclick = function () {
+      if (typeof gtag === 'function') {
+        gtag('event', 'begin_checkout', { value: LEMON_PLAN_PRICES.starter, currency: 'USD', tier: 'starter' });
+      }
+    };
     starterBtn.textContent = 'Start Starter — $5/mo';
     starterSub.textContent = '$5 · billed monthly';
     starterTag.textContent = '🌍 $5/month · USD · Cancel anytime';
     proBtn.href = LEMON_PRO;
     proBtn.setAttribute('target', '_blank');
-    proBtn.onclick = null;
+    proBtn.onclick = function () {
+      if (typeof gtag === 'function') {
+        gtag('event', 'begin_checkout', { value: LEMON_PLAN_PRICES.pro, currency: 'USD', tier: 'pro' });
+      }
+    };
     proBtn.textContent = 'Go Pro — $10/mo';
     proSub.textContent = '$10 · billed monthly';
     proTag.textContent = '🌍 $10/month · USD · Cancel anytime';

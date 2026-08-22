@@ -506,7 +506,10 @@ function renderPlanSection(plan, email, subscriptionStatus) {
     const inrBtn = `<button class="upgrade-btn inr" onclick="openRazorpay('${planKey}', this)">Upgrade with INR →</button>`;
     const usdHref = planKey === 'starter' ? LEMON_STARTER : LEMON_PRO;
     const usdLabel = planKey === 'starter' ? 'USD/EUR' : 'USD / EUR';
-    const usdBtn = `<a class="upgrade-btn usd" href="${usdHref}" target="_blank">Upgrade with ${usdLabel} →</a>`;
+    // LemonSqueezy checkout is a plain hosted-page redirect (new tab, no embed
+    // SDK, no return path to aadya-ai.com) — this click is the only moment we
+    // can observe before the user leaves the site, so begin_checkout fires here.
+    const usdBtn = `<a class="upgrade-btn usd" href="${usdHref}" target="_blank" onclick="if (typeof gtag === 'function') { gtag('event', 'begin_checkout', { value: LEMON_PLAN_PRICES.${planKey}, currency: 'USD', tier: '${planKey}' }); }">Upgrade with ${usdLabel} →</a>`;
     if (isIndia) {
       return `${inrBtn}
           <div class="alt-currency-link"><a href="#" onclick="this.closest('.alt-currency-link').nextElementSibling.style.display='block';this.closest('.alt-currency-link').style.display='none';return false;">Paying from outside India? Use USD / EUR instead</a></div>
