@@ -32,278 +32,646 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aadya AI — Your Invoices</title>
+<link rel="icon" type="image/png" sizes="128x128" href="/icon-128.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0F2D6B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Aadya AI">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Free Receipt Generator — Payment Receipt Maker | Aadya AI</title>
+<meta name="description" content="Free receipt generator for freelancers and consultants. Create a professional payment receipt template in seconds — INR, USD or EUR. Confirm a payment your client already made.">
+<link rel="canonical" href="https://www.aadya-ai.com/receipt">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.aadya-ai.com/receipt">
+<meta property="og:site_name" content="Aadya AI">
+<meta property="og:title" content="Free Receipt Generator — Payment Receipt Maker">
+<meta property="og:description" content="Free receipt generator for freelancers and consultants. Create a professional payment receipt template in seconds — INR, USD or EUR.">
+<meta property="og:image" content="https://www.aadya-ai.com/icons/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free Receipt Generator — Payment Receipt Maker">
+<meta name="twitter:description" content="Free receipt generator for freelancers and consultants. Create a professional payment receipt template in seconds — INR, USD or EUR.">
+<meta name="twitter:image" content="https://www.aadya-ai.com/icons/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
 :root {
   --navy: #0F2D6B;
   --blue: #3B82F6;
-  --blue-light: #EEF4FF;
-  --text: #1a1a2e;
-  --muted: #64748b;
-  --border: #e2e8f0;
+  --blue-light: #60A5FA;
+  --blue-pale: #DBEAFE;
   --white: #ffffff;
-  --bg: #f5f7fb;
-  --success: #10b981;
-  --danger: #ef4444;
-  --card-shadow: 0 2px 16px rgba(15,45,107,0.07);
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-
-/* NAVBAR */
-.navbar {
-  background:var(--white);
-  padding:0 40px;
-  height:72px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid var(--border);
-  position:sticky;
-  top:0;
-  z-index:100;
-  box-shadow:0 1px 8px rgba(0,0,0,0.04);
-}
-.logo { display:flex; align-items:center; flex-shrink:0; }
-.logo img { height:48px; width:auto; }
-.nav-right { display:flex; align-items:center; gap:12px; }
-.user-badge {
-  display:flex; align-items:center; gap:8px;
-  background:var(--blue-light); color:var(--navy);
-  padding:8px 16px; border-radius:999px;
-  font-weight:600; font-size:14px;
-  border:none; cursor:pointer; transition:background 0.2s;
-}
-.user-badge:hover { background:#dbeafe; }
-.user-badge .avatar {
-  width:28px; height:28px; background:var(--navy); border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  color:white; font-size:12px; font-weight:700;
-}
-.plan-badge {
-  background:var(--navy); color:white;
-  padding:6px 14px; border-radius:999px;
-  font-size:12px; font-weight:700;
-  letter-spacing:0.5px; text-transform:uppercase;
-}
-.plan-badge.pro { background:linear-gradient(135deg,#6366f1,#3B82F6); }
-.logout-btn {
-  background:transparent; color:var(--muted);
-  border:1.5px solid var(--border); padding:8px 16px;
-  border-radius:10px; cursor:pointer;
-  font-weight:600; font-size:13px; transition:all 0.2s;
-}
-.logout-btn:hover { border-color:var(--danger); color:var(--danger); }
-.nav-link-btn {
-  font-size:13px; font-weight:600; color:var(--navy);
-  text-decoration:none; padding:8px 14px;
-  border-radius:10px; border:1.5px solid var(--border);
-  transition:all 0.2s;
-}
-.nav-link-btn:hover { border-color:var(--blue); color:var(--blue); }
-.nav-link-btn.active { border-color:var(--blue); color:var(--blue); background:var(--blue-light); }
-
-/* PAGE HEADER */
-.page-header {
-  background:linear-gradient(135deg, var(--navy) 0%, #1e4db7 100%);
-  padding:40px;
-  color:white;
-  position:relative;
-  overflow:hidden;
-}
-.page-header::before {
-  content:'';
-  position:absolute;
-  top:-40px; right:-60px;
-  width:280px; height:280px;
-  background:rgba(59,130,246,0.15);
-  border-radius:50%;
-}
-.page-header-inner { max-width:1200px; margin:0 auto; position:relative; z-index:1; }
-.page-header h1 { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; margin-bottom:6px; }
-.page-header p { color:rgba(255,255,255,0.7); font-size:15px; }
-
-/* MAIN CONTENT */
-.main-content {
-  max-width:1200px;
-  margin:0 auto;
-  padding:28px 40px 60px;
+  --off-white: #F8FAFF;
+  --text: #0F1F3D;
+  --muted: #6B7A99;
+  --border: rgba(15,45,107,0.1);
+  --card-bg: rgba(255,255,255,0.7);
 }
 
-/* USAGE CARD */
-.usage-card {
-  background:var(--white);
-  border-radius:20px;
-  padding:24px 28px;
-  box-shadow:var(--card-shadow);
-  border:1px solid var(--border);
-  margin-bottom:24px;
-  display:flex;
-  align-items:center;
-  gap:24px;
-  flex-wrap:wrap;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--off-white);
+  color: var(--text);
+  overflow-x: hidden;
 }
-.usage-info { flex:1; min-width:200px; }
-.usage-title { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
-.usage-count { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; color:var(--navy); margin-bottom:4px; }
-.usage-sub { font-size:13px; color:var(--muted); }
-.usage-bar-wrap { flex:2; min-width:180px; }
-.usage-bar {
-  width:100%; height:8px; background:var(--border);
-  border-radius:999px; overflow:hidden; margin-bottom:6px;
-}
-.usage-fill {
-  height:100%;
-  background:linear-gradient(90deg, var(--blue), #6366f1);
-  border-radius:999px; transition:width 0.6s ease;
-}
-.usage-bar-label { font-size:12px; color:var(--muted); }
-.usage-plan-badge {
-  background:var(--navy); color:white;
-  padding:5px 14px; border-radius:999px;
-  font-size:12px; font-weight:700;
-  letter-spacing:0.5px; text-transform:uppercase;
-}
-.usage-plan-badge.pro { background:linear-gradient(135deg,#6366f1,#3B82F6); }
-.upgrade-link {
-  font-size:13px; font-weight:600; color:var(--blue);
-  text-decoration:none;
-}
-.upgrade-link:hover { text-decoration:underline; }
 
-/* INVOICES TABLE */
-.invoices-card {
-  background:var(--white);
-  border-radius:20px;
-  box-shadow:var(--card-shadow);
-  border:1px solid var(--border);
-  overflow:hidden;
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
 }
-.invoices-card-header {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:22px 28px;
-  border-bottom:1px solid var(--border);
-}
-.invoices-card-header h2 { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; color:var(--navy); }
-.gen-invoice-btn {
-  display:inline-flex; align-items:center; gap:8px;
-  background:var(--blue); color:white;
-  padding:10px 20px; border-radius:12px;
-  font-weight:700; font-size:14px;
-  text-decoration:none; border:none; cursor:pointer;
-  transition:all 0.2s;
-}
-.gen-invoice-btn:hover { background:var(--navy); transform:translateY(-1px); }
 
-.table-wrap { overflow-x:auto; }
-table.inv-table {
-  width:100%; border-collapse:collapse;
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 72px;
+  background: rgba(248,250,255,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
 }
-table.inv-table th {
-  padding:12px 20px;
-  font-size:11px; font-weight:700;
-  text-transform:uppercase; letter-spacing:0.5px;
-  color:var(--muted); background:#fafbfc;
-  border-bottom:1px solid var(--border);
-  text-align:left; white-space:nowrap;
-}
-table.inv-table td {
-  padding:14px 20px;
-  font-size:14px; color:var(--text);
-  border-bottom:1px solid var(--border);
-  vertical-align:middle;
-}
-table.inv-table tbody tr:last-child td { border-bottom:none; }
-table.inv-table tbody tr:hover { background:#fafbfc; }
 
-/* STATUS BADGES */
-.badge {
-  display:inline-flex; align-items:center; gap:4px;
-  padding:4px 12px; border-radius:999px;
-  font-size:12px; font-weight:700;
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
 }
-.badge-sent { background:#EFF6FF; color:#3B82F6; }
-.badge-paid { background:#DCFCE7; color:#166534; }
-.badge-overdue { background:#FEF2F2; color:#991B1B; }
+.nav-logo img { height: 48px; width: auto; }
 
-/* MARK PAID BUTTON */
-.mark-paid-btn {
-  background:none; color:var(--success);
-  border:1.5px solid var(--success);
-  padding:6px 14px; border-radius:8px;
-  font-size:12px; font-weight:700;
-  cursor:pointer; transition:all 0.2s;
-  white-space:nowrap;
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
 }
-.mark-paid-btn:hover { background:var(--success); color:white; }
-.mark-paid-btn:disabled { opacity:0.5; cursor:not-allowed; }
-
-/* EMPTY STATE */
-.empty-state {
-  text-align:center;
-  padding:72px 40px;
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
 }
-.empty-icon { font-size:52px; margin-bottom:16px; }
-.empty-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; color:var(--navy); margin-bottom:8px; }
-.empty-sub { font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.6; max-width:360px; margin-left:auto; margin-right:auto; }
+.nav-links a:hover { color: var(--navy); }
+.nav-links a.active { color: var(--navy); font-weight: 600; }
 
-/* LOADING */
-.loading-row td { text-align:center; color:var(--muted); padding:40px; font-size:14px; }
-
-/* MOBILE CARDS (hidden by default, shown on small screens) */
-.invoice-cards { display:none; }
-.invoice-card {
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:18px;
-  margin-bottom:12px;
-  background:var(--white);
+.nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.inv-card-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
-.inv-card-num { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--navy); }
-.inv-card-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:2px; }
-.inv-card-value { font-size:14px; color:var(--text); }
-.inv-card-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
-.inv-card-actions { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; }
 
-/* LOADING SCREEN */
-#loadingScreen {
-  position:fixed; inset:0;
-  background:var(--white);
-  display:flex; align-items:center; justify-content:center;
-  z-index:9999;
-  transition:opacity 0.3s;
+.btn-ghost {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.2s;
 }
-#loadingScreen.hidden { opacity:0; pointer-events:none; }
-.spinner {
-  width:36px; height:36px;
-  border:3px solid var(--border);
-  border-top-color:var(--blue);
-  border-radius:50%;
-  animation:spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
+.btn-ghost:hover { background: var(--blue-pale); }
 
-/* RESPONSIVE */
-@media (max-width:768px) {
-  .navbar { padding:0 16px; }
-  .page-header { padding:28px 16px; }
-  .page-header h1 { font-size:24px; }
-  .main-content { padding:20px 16px 60px; }
-  .invoices-card-header { padding:16px; flex-direction:column; align-items:flex-start; gap:12px; }
-  table.inv-table { display:none; }
-  .invoice-cards { display:block; padding:16px; }
-  .usage-card { flex-direction:column; align-items:flex-start; }
+.btn-primary {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: var(--blue);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary:hover { background: #2563EB; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,130,246,0.35); }
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  overflow: hidden;
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  gap: 72px;
+  align-items: center;
+  max-width: 1100px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-glow {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 560px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.22) 0%, rgba(99,102,241,0.10) 45%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--blue-pale);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue);
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(38px, 3.6vw, 48px);
+  font-weight: 800;
+  line-height: 1.07;
+  letter-spacing: -2px;
+  color: var(--navy);
+  max-width: 820px;
+  margin: 0 0 24px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, #3B82F6 0%, #818CF8 55%, #60A5FA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--muted);
+  max-width: 500px;
+  margin: 0 0 36px;
+  line-height: 1.65;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+
+.btn-primary-lg {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(180deg, #1D4ED8 0%, #1238A6 100%);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  transition: all 0.25s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 2px 4px rgba(15,45,107,0.3), 0 8px 24px rgba(18,56,166,0.25);
+  min-height: 44px;
+}
+.btn-primary-lg:hover { background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%); transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 32px rgba(37,99,235,0.4); }
+
+.hero-small-text {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── HERO INVOICE CAROUSEL ── */
+.hero-preview {
+  display: flex;
+  justify-content: center;
+  animation: fadeUp 0.6s 0.5s ease both;
+}
+.hero-invoice-frame {
+  position: relative;
+  height: clamp(360px, 42vw, 560px);
+  aspect-ratio: 900 / 1271;
+  width: auto;
+}
+.hero-invoice-frame::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: 8px; right: -8px; bottom: 8px;
+  background: rgba(59,130,246,0.08);
+  border-radius: 16px;
+  z-index: -1;
+}
+.hero-invoice-carousel {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(15,45,107,0.05), 0 8px 32px rgba(15,45,107,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.hero-invoice-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation: heroInvoiceFade 13.8s ease-in-out infinite;
+}
+.hero-invoice-img--corporate { animation-delay: 0s; }
+.hero-invoice-img--creative  { animation-delay: 4.6s; }
+.hero-invoice-img--classic   { animation-delay: 9.2s; }
+
+@keyframes heroInvoiceFade {
+  0%     { opacity: 0; }
+  4.35%  { opacity: 1; }
+  33.33% { opacity: 1; }
+  37.68% { opacity: 0; }
+  100%   { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-invoice-img { animation: none; opacity: 0; }
+  .hero-invoice-img--corporate { opacity: 1; }
+}
+
+/* ── SOCIAL PROOF BAR ── */
+.proof-bar {
+  position: relative;
+  z-index: 1;
+  background: var(--navy);
+  padding: 20px 40px;
+}
+.proof-bar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.proof-text {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+.proof-stats {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.proof-stat { text-align: center; }
+.proof-stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+}
+.proof-stat-label { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+
+/* ── SECTIONS ── */
+.section {
+  position: relative;
+  z-index: 1;
+  padding: 80px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-tag {
+  display: inline-block;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -1.5px;
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+.section-sub {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 48px;
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+/* HOW IT WORKS */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.step-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: 0 2px 16px rgba(15,45,107,0.06);
+  position: relative;
+}
+.step-num {
+  width: 44px; height: 44px;
+  background: var(--blue);
+  color: white;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 800;
+  margin-bottom: 18px;
+}
+.step-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.step-time { font-size: 12px; color: var(--blue); font-weight: 600; margin-top: 10px; }
+
+/* FEATURES */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.feature-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 2px 16px rgba(15,45,107,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(15,45,107,0.12); }
+.feature-icon {
+  width: 48px; height: 48px;
+  background: var(--blue-pale);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+  font-size: 22px;
+}
+.feature-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.feature-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* COMPARISON TABLE */
+.comparison-section {
+  position: relative;
+  z-index: 1;
+  padding: 80px 40px;
+  background: white;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.comparison-inner { max-width: 1100px; margin: 0 auto; }
+
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(15,45,107,0.08);
+  margin-top: 36px;
+}
+.comparison-table thead th {
+  padding: 16px 24px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  background: var(--navy);
+  color: white;
+}
+.comparison-table thead th:first-child { border-radius: 16px 0 0 0; }
+.comparison-table thead th:last-child { border-radius: 0 16px 0 0; text-align: center; }
+.comparison-table thead th:nth-child(2) { text-align: center; color: rgba(255,255,255,0.6); }
+.comparison-table thead th:last-child { background: linear-gradient(135deg, #3B82F6, #6366f1); }
+.comparison-table tbody tr { background: white; }
+.comparison-table tbody tr:nth-child(even) { background: var(--off-white); }
+.comparison-table tbody td {
+  padding: 14px 24px;
+  font-size: 14px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.comparison-table tbody td:nth-child(2),
+.comparison-table tbody td:nth-child(3) { text-align: center; }
+.comparison-table tbody td:nth-child(2) { color: var(--muted); }
+.comparison-table tbody td:nth-child(3) { color: #10B981; font-weight: 600; }
+.comparison-table tbody tr:last-child td { border-bottom: none; }
+.comparison-table tbody tr:last-child td:first-child { border-radius: 0 0 0 16px; }
+.comparison-table tbody tr:last-child td:last-child { border-radius: 0 0 16px 0; }
+
+/* BOTTOM CTA */
+.bottom-cta {
+  position: relative;
+  z-index: 1;
+  padding: 100px 40px;
+  text-align: center;
+}
+.bottom-cta h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(30px, 3vw, 40px);
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -1.5px;
+  margin-bottom: 12px;
+}
+.bottom-cta p { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+.bottom-cta .btn-primary-lg { margin: 0 auto; }
+
+/* FOOTER */
+footer {
+  position: relative;
+  z-index: 1;
+  background: #050E1F;
+  color: rgba(255,255,255,0.5);
+  padding: 40px;
+  text-align: center;
+}
+footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+footer a:hover { color: white; }
+.footer-brand-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+.footer-brand-text span { color: var(--blue-light); }
+.footer-desc { font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 20px; }
+.footer-links-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+.footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 20px 60px; min-height: auto; }
+  .hero-inner { display: block; }
+  .hero h1 { font-size: 34px; letter-spacing: -1px; margin-bottom: 16px; }
+  .hero p { font-size: 16px; margin-bottom: 28px; }
+  .hero-preview { margin-top: 40px; }
+  .hero-invoice-frame { height: clamp(300px, 58vw, 420px); }
+  .proof-bar { padding: 20px; }
+  .proof-bar-inner { flex-direction: column; gap: 16px; text-align: center; }
+  .proof-stats { gap: 24px; }
+  .section { padding: 60px 20px; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .comparison-section { padding: 60px 20px; }
+  .comparison-table thead th,
+  .comparison-table tbody td { padding: 12px 14px; font-size: 13px; }
+  .bottom-cta { padding: 60px 20px; }
+  footer { padding: 32px 20px; }
+}
+@media (max-width: 480px) {
+  .btn-primary-lg { width: 100%; justify-content: center; padding: 14px 20px; }
+  .hero-actions { width: 100%; }
+}
+
+/* ── RECEIPT FORM ── */
+.receipt-form { display: flex; flex-direction: column; gap: 20px; }
+.rf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.rf-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(15,45,107,0.06);
+}
+.rf-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 16px;
+}
+.rf-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-field { margin-bottom: 16px; }
+.form-field:last-child { margin-bottom: 0; }
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-optional { font-weight: 400; color: var(--muted); }
+.form-input {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: border-color 0.2s;
+}
+.form-input:focus { outline: none; border-color: var(--blue); }
+textarea.form-input { resize: vertical; }
+.template-picker { display: flex; gap: 12px; }
+.template-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.template-option input { position: absolute; opacity: 0; pointer-events: none; }
+.template-option.selected { border-color: var(--blue); background: var(--blue-pale); color: var(--navy); }
+.line-item-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+.line-item-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px;
+  flex-shrink: 0;
+}
+.line-item-remove:hover { color: #DC2626; }
+@media (max-width: 768px) {
+  .rf-grid { grid-template-columns: 1fr; }
+  .rf-row-2 { grid-template-columns: 1fr; }
+  .template-picker { flex-direction: column; }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <!-- Cookie consent banner -->
@@ -342,358 +710,246 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
   }
 </script>
 
-<!-- LOADING SCREEN -->
-<div id="loadingScreen">
-  <div class="spinner"></div>
-</div>
-
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="logo">
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="/">
     <img src="data:image/png;base64,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" alt="Aadya AI">
-  </div>
-  <div class="nav-right">
-    <a href="/dashboard" class="nav-link-btn">Dashboard</a>
-    <a href="/invoices" class="nav-link-btn active">Invoices</a>
-    <button class="user-badge" onclick="window.location.href='/account'">
-      <div class="avatar" id="userAvatar">?</div>
-      <span id="userNameDisplay">Loading...</span>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.55;flex-shrink:0;margin-left:2px;"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
-    <span class="plan-badge" id="planBadge">Free</span>
-    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#how">How it works</a></li>
+    <li><a href="/#features">Features</a></li>
+    <li><a href="/#pricing">Pricing</a></li>
+    <li><a href="/invoice">Invoice Generator</a></li>
+    <li><a href="/receipt" class="active">Receipt Generator</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="/dashboard" class="btn-ghost">Dashboard</a>
+    <a href="/receipt#cta" class="btn-primary">Create Receipt →</a>
   </div>
 </nav>
 
-<!-- PAGE HEADER -->
-<div class="page-header">
-  <div class="page-header-inner">
-    <h1>Your Invoices</h1>
-    <p>Track and manage all your invoices in one place</p>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Free · 3 templates · Saved to your dashboard
+      </div>
+      <h1>Create a Professional Payment <em>Receipt</em></h1>
+      <p>Confirm a payment your client already made. Choose Corporate, Creative or Classic, fill in the payment details, and save it to your dashboard in seconds. Free to try.</p>
+      <div class="hero-actions">
+        <a href="#receipt-form" class="btn-primary-lg">
+          Create My Receipt →
+        </a>
+        <span class="hero-small-text">Free plan includes 3 documents/month</span>
+      </div>
+    </div>
+    <div class="hero-preview">
+      <div class="hero-invoice-frame">
+        <div class="hero-invoice-carousel">
+          <img class="hero-invoice-img hero-invoice-img--corporate" src="/images/invoice-hero-corporate.png" alt="Corporate-style receipt template with a clean navy header, itemized services table and amount paid">
+          <img class="hero-invoice-img hero-invoice-img--creative" src="/images/invoice-hero-gst.png" alt="Creative-style receipt template with bold branded colors and payment details">
+          <img class="hero-invoice-img hero-invoice-img--classic" src="/images/invoice-hero-classic.png" alt="Classic-style receipt template with a traditional layout and amount paid">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF BAR -->
+<div class="proof-bar">
+  <div class="proof-bar-inner">
+    <div class="proof-text">Trusted by freelancers and consultants across India, US and Europe</div>
+    <div class="proof-stats">
+      <div class="proof-stat">
+        <div class="proof-stat-num">Free</div>
+        <div class="proof-stat-label">No credit card needed</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-num">3 templates</div>
+        <div class="proof-stat-label">Corporate, Creative, Classic</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-num">3 currencies</div>
+        <div class="proof-stat-label">INR, USD, EUR</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- MAIN -->
-<div class="main-content">
-
-  <!-- USAGE CARD -->
-  <div class="usage-card">
-    <div class="usage-info">
-      <div class="usage-title">Invoices This Month</div>
-      <div class="usage-count" id="invUsedCount">0</div>
-      <div class="usage-sub" id="invUsedSub">of 3 invoices used</div>
+<!-- HOW IT WORKS -->
+<div class="section" id="how">
+  <div class="section-tag">How it works</div>
+  <h2 class="section-title">Three steps to a payment receipt</h2>
+  <p class="section-sub">Confirming a payment that already happened shouldn't take longer than the payment itself.</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Fill in the payment details</div>
+      <div class="step-desc">Your business info, who paid, how much, when, and how (cash, bank transfer, UPI or card).</div>
+      <div class="step-time">~60 seconds</div>
     </div>
-    <div class="usage-bar-wrap">
-      <div class="usage-bar"><div class="usage-fill" id="invUsageFill" style="width:0%"></div></div>
-      <div class="usage-bar-label" id="invUsageBarLabel">Loading…</div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Pick a template</div>
+      <div class="step-desc">Corporate, Creative or Classic — the same look as your invoices, so your paperwork stays consistent.</div>
+      <div class="step-time">~10 seconds</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-      <span class="usage-plan-badge" id="invPlanBadge">Free</span>
-      <a href="/#pricing" class="upgrade-link" id="upgradeLink">Upgrade →</a>
-    </div>
-  </div>
-
-  <!-- INVOICES TABLE CARD -->
-  <div class="invoices-card">
-    <div class="invoices-card-header">
-      <h2>Invoice History</h2>
-      <button class="gen-invoice-btn" onclick="generateInvoice()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="12" y2="15"/></svg>
-        Generate Invoice →
-      </button>
-    </div>
-
-    <!-- DESKTOP TABLE -->
-    <div class="table-wrap">
-      <table class="inv-table" id="invoiceTable">
-        <thead>
-          <tr>
-            <th>Invoice #</th>
-            <th>Client</th>
-            <th>Service</th>
-            <th>Amount</th>
-            <th>Currency</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="invoiceTableBody">
-          <tr class="loading-row"><td colspan="8">Loading invoices…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- MOBILE CARDS -->
-    <div class="invoice-cards" id="invoiceCards">
-      <p style="text-align:center;color:var(--muted);padding:20px;">Loading invoices…</p>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Saved to your dashboard</div>
+      <div class="step-desc">Your receipt is saved and linked to the invoice it settles. PDF download and email delivery are coming soon.</div>
+      <div class="step-time">Instant</div>
     </div>
   </div>
-
-  <!-- RECEIPTS CARD -->
-  <div class="invoices-card" id="receiptsCard" style="display:none;">
-    <div class="invoices-card-header">
-      <h2>Receipts</h2>
-    </div>
-    <div class="table-wrap">
-      <table class="inv-table">
-        <thead>
-          <tr>
-            <th>Receipt #</th>
-            <th>Payer</th>
-            <th>Amount</th>
-            <th>Payment Date</th>
-            <th>Method</th>
-            <th>Linked Invoice</th>
-          </tr>
-        </thead>
-        <tbody id="receiptTableBody"></tbody>
-      </table>
-    </div>
-    <div class="invoice-cards" id="receiptCards"></div>
-  </div>
-
 </div>
 
-<!-- RECEIPT MODAL (built dynamically, see openReceiptModal) -->
+<!-- FEATURES -->
+<div class="section" id="features" style="padding-top:0;">
+  <div class="section-tag">Features</div>
+  <h2 class="section-title">Everything you need to confirm a payment</h2>
+  <p class="section-sub">Built for freelancers and consultants who want their paperwork to look consistent, invoice to receipt.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🎨</div>
+      <div class="feature-title">Premium Templates</div>
+      <div class="feature-desc">Corporate, Creative and Classic — the same three styles as your invoices, so receipts match.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💱</div>
+      <div class="feature-title">Multi-Currency Support</div>
+      <div class="feature-desc">Record payments in INR, USD or EUR with correct symbol formatting.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-title">One click from a paid invoice</div>
+      <div class="feature-desc">Already marked an invoice Paid in your dashboard? Generate its receipt with the details pre-filled.</div>
+    </div>
+  </div>
+</div>
 
+<!-- COMPARISON TABLE -->
+<div class="comparison-section">
+  <div class="comparison-inner">
+    <div class="section-tag">Why Aadya AI?</div>
+    <h2 class="section-title">Why not just use Word or Excel?</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Word / Excel</th>
+          <th>Aadya AI ✨</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pre-fills from your paid invoice</td>
+          <td>❌ Retype everything</td>
+          <td>✅ Automatic</td>
+        </tr>
+        <tr>
+          <td>Consistent branded design</td>
+          <td>❌ Basic</td>
+          <td>✅ Premium templates</td>
+        </tr>
+        <tr>
+          <td>Linked to the original invoice</td>
+          <td>Manual tracking</td>
+          <td>✅ Automatic</td>
+        </tr>
+        <tr>
+          <td>Saved to a dashboard</td>
+          <td>❌ Scattered files</td>
+          <td>✅ One place</td>
+        </tr>
+        <tr>
+          <td>Time to create</td>
+          <td>15+ minutes</td>
+          <td>✅ 60 seconds</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-<script src="/js/invoice-popup.js"></script>
-<script>
-const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<!-- RECEIPT FORM -->
+<section class="section" id="receipt-form">
+  <div class="section-tag">Get started</div>
+  <h2 class="section-title">Create your receipt</h2>
+  <p class="section-sub">Sign in first — receipts are saved to your dashboard, not emailed (that's coming soon).</p>
 
-let currentInvoices = [];
-let allReceipts = [];
-let receiptsByInvoiceId = {};
+  <div id="receiptFormMsg" style="display:none;"></div>
 
-function hideLoader() {
-  document.getElementById('loadingScreen').classList.add('hidden');
-}
+  <form id="receiptForm" class="receipt-form" style="display:none;">
+    <div class="rf-card">
+      <div class="rf-card-title">Template</div>
+      <div class="template-picker" id="templatePicker">
+        <label class="template-option selected">
+          <input type="radio" name="template" value="corporate" checked>
+          <span>Corporate</span>
+        </label>
+        <label class="template-option">
+          <input type="radio" name="template" value="creative">
+          <span>Creative</span>
+        </label>
+        <label class="template-option">
+          <input type="radio" name="template" value="classic">
+          <span>Classic</span>
+        </label>
+      </div>
+    </div>
 
-function formatDate(isoStr) {
-  if (!isoStr) return '—';
-  const d = new Date(isoStr);
-  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
-}
+    <div class="rf-grid">
+      <div class="rf-card">
+        <div class="rf-card-title">From (your business)</div>
+        <div class="form-field">
+          <label class="form-label" for="rfFromName">Business name</label>
+          <input class="form-input" id="rfFromName" type="text" placeholder="Your business name" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="rfFromEmail">Business email</label>
+          <input class="form-input" id="rfFromEmail" type="email" placeholder="you@business.com" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="rfFromTaxId">Tax ID <span class="form-optional">(optional)</span></label>
+          <input class="form-input" id="rfFromTaxId" type="text" placeholder="GSTIN / EIN / VAT number">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="rfFromAddress">Address <span class="form-optional">(optional)</span></label>
+          <textarea class="form-input" id="rfFromAddress" rows="2" placeholder="Business address"></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="rfFromLogo">Logo URL <span class="form-optional">(optional)</span></label>
+          <input class="form-input" id="rfFromLogo" type="url" placeholder="https://…">
+        </div>
+      </div>
 
-function formatAmount(amount, currency) {
-  const sym = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₹';
-  return sym + Number(amount || 0).toLocaleString('en-IN');
-}
+      <div class="rf-card">
+        <div class="rf-card-title">To (payer)</div>
+        <div class="form-field">
+          <label class="form-label" for="rfPayerName">Payer name</label>
+          <input class="form-input" id="rfPayerName" type="text" placeholder="Client name" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="rfPayerEmail">Payer email <span class="form-optional">(optional)</span></label>
+          <input class="form-input" id="rfPayerEmail" type="email" placeholder="client@email.com">
+        </div>
 
-function statusBadge(status) {
-  const s = (status || 'sent').toLowerCase();
-  if (s === 'paid')    return '<span class="badge badge-paid">✓ Paid</span>';
-  if (s === 'overdue') return '<span class="badge badge-overdue">⚠ Overdue</span>';
-  return '<span class="badge badge-sent">Sent</span>';
-}
-
-function actionCell(invoice) {
-  const s = (invoice.status || 'sent').toLowerCase();
-  if (s === 'paid') {
-    if (receiptsByInvoiceId[invoice.id]) {
-      return `<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid · Receipt saved</span>`;
-    }
-    return `<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span> <button class="mark-paid-btn" onclick="openReceiptModal('${invoice.id}')">Generate Receipt →</button>`;
-  }
-  return `<button class="mark-paid-btn" onclick="markPaid('${invoice.id}', this)">Mark as Paid</button>`;
-}
-
-async function markPaid(invoiceId, btn) {
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  try {
-    const { error } = await supabaseClient
-      .from('invoices')
-      .update({ status: 'paid' })
-      .eq('id', invoiceId);
-
-    if (error) throw error;
-
-    // Update badge and button in table row (desktop)
-    const row = btn.closest('tr');
-    if (row) {
-      row.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
-      btn.closest('td').innerHTML = '<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span>';
-    }
-
-    // Update badge in mobile card
-    const card = btn.closest('.invoice-card');
-    if (card) {
-      card.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
-      btn.closest('.inv-card-actions').innerHTML = '<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span>';
-    }
-  } catch(e) {
-    console.error('Mark paid error:', e);
-    btn.disabled = false;
-    btn.textContent = 'Mark as Paid';
-    alert('Error updating invoice. Please try again.');
-  }
-}
-
-function renderTable(invoices) {
-  const tbody = document.getElementById('invoiceTableBody');
-  const mobileDiv = document.getElementById('invoiceCards');
-
-  if (!invoices || invoices.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8">
-          <div class="empty-state">
-            <div class="empty-icon">🧾</div>
-            <div class="empty-title">No invoices yet</div>
-            <div class="empty-sub">Generate your first invoice and it will appear here automatically</div>
-            <button class="gen-invoice-btn" onclick="generateInvoice()">Generate Invoice →</button>
+        <div class="rf-card-title" style="margin-top:24px;">Payment</div>
+        <div class="form-field">
+          <label class="form-label" for="rfReceiptNumber">Receipt number</label>
+          <input class="form-input" id="rfReceiptNumber" type="text" placeholder="REC-0001" required>
+        </div>
+        <div class="rf-row-2">
+          <div class="form-field">
+            <label class="form-label" for="rfPaymentDate">Payment date</label>
+            <input class="form-input" id="rfPaymentDate" type="date" required>
           </div>
-        </td>
-      </tr>`;
-    mobileDiv.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🧾</div>
-        <div class="empty-title">No invoices yet</div>
-        <div class="empty-sub">Generate your first invoice and it will appear here automatically</div>
-        <button class="gen-invoice-btn" onclick="generateInvoice()">Generate Invoice →</button>
-      </div>`;
-    return;
-  }
-
-  // Desktop table rows
-  tbody.innerHTML = invoices.map(inv => `
-    <tr>
-      <td style="font-weight:600;color:var(--navy);">${inv.invoice_number || '—'}</td>
-      <td>${inv.client_name || '—'}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${inv.project_name || '—'}</td>
-      <td style="font-weight:600;">${formatAmount(inv.amount, inv.currency)}</td>
-      <td>${inv.currency || 'INR'}</td>
-      <td data-status-cell>${statusBadge(inv.status)}</td>
-      <td style="color:var(--muted);">${formatDate(inv.created_at)}</td>
-      <td>${actionCell(inv)}</td>
-    </tr>`).join('');
-
-  // Mobile cards
-  mobileDiv.innerHTML = invoices.map(inv => `
-    <div class="invoice-card">
-      <div class="inv-card-row">
-        <div class="inv-card-num">${inv.invoice_number || 'Invoice'}</div>
-        <div data-status-cell>${statusBadge(inv.status)}</div>
-      </div>
-      <div class="inv-card-grid">
-        <div>
-          <div class="inv-card-label">Client</div>
-          <div class="inv-card-value">${inv.client_name || '—'}</div>
-        </div>
-        <div>
-          <div class="inv-card-label">Amount</div>
-          <div class="inv-card-value" style="font-weight:600;">${formatAmount(inv.amount, inv.currency)}</div>
-        </div>
-        <div>
-          <div class="inv-card-label">Service</div>
-          <div class="inv-card-value">${inv.project_name || '—'}</div>
-        </div>
-        <div>
-          <div class="inv-card-label">Date</div>
-          <div class="inv-card-value">${formatDate(inv.created_at)}</div>
-        </div>
-      </div>
-      <div class="inv-card-actions">${actionCell(inv)}</div>
-    </div>`).join('');
-}
-
-function renderReceiptsTable(receipts) {
-  const card = document.getElementById('receiptsCard');
-  const tbody = document.getElementById('receiptTableBody');
-  const mobileDiv = document.getElementById('receiptCards');
-
-  if (!receipts || receipts.length === 0) {
-    card.style.display = 'none';
-    return;
-  }
-  card.style.display = '';
-
-  const linkedInvoiceNumber = r => {
-    if (!r.invoice_id) return '—';
-    const inv = currentInvoices.find(i => i.id === r.invoice_id);
-    return (inv && inv.invoice_number) || '—';
-  };
-
-  tbody.innerHTML = receipts.map(r => `
-    <tr>
-      <td style="font-weight:600;color:var(--navy);">${r.receipt_number || '—'}</td>
-      <td>${r.payer_name || '—'}</td>
-      <td style="font-weight:600;">${formatAmount(r.amount, r.currency)}</td>
-      <td style="color:var(--muted);">${formatDate(r.payment_date)}</td>
-      <td>${r.payment_method || '—'}</td>
-      <td>${linkedInvoiceNumber(r)}</td>
-    </tr>`).join('');
-
-  mobileDiv.innerHTML = receipts.map(r => `
-    <div class="invoice-card">
-      <div class="inv-card-row">
-        <div class="inv-card-num">${r.receipt_number || 'Receipt'}</div>
-        <div style="font-size:13px;color:var(--muted);">${linkedInvoiceNumber(r)}</div>
-      </div>
-      <div class="inv-card-grid">
-        <div>
-          <div class="inv-card-label">Payer</div>
-          <div class="inv-card-value">${r.payer_name || '—'}</div>
-        </div>
-        <div>
-          <div class="inv-card-label">Amount</div>
-          <div class="inv-card-value" style="font-weight:600;">${formatAmount(r.amount, r.currency)}</div>
-        </div>
-        <div>
-          <div class="inv-card-label">Payment Date</div>
-          <div class="inv-card-value">${formatDate(r.payment_date)}</div>
-        </div>
-        <div>
-          <div class="inv-card-label">Method</div>
-          <div class="inv-card-value">${r.payment_method || '—'}</div>
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-function openReceiptModal(invoiceId) {
-  const invoice = currentInvoices.find(i => i.id === invoiceId);
-  if (!invoice) return;
-
-  const existing = document.getElementById('receiptModal');
-  if (existing) existing.remove();
-
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const suggestedNumber = 'REC-' + (invoice.invoice_number || invoiceId.slice(0, 8));
-
-  const modal = document.createElement('div');
-  modal.id = 'receiptModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
-  modal.innerHTML = `
-    <div style="background:#ffffff;border-radius:20px;padding:32px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
-      <h2 style="font-size:20px;font-weight:800;color:#0F2D6B;margin:0 0 4px;">Generate Receipt</h2>
-      <p style="font-size:13px;color:#64748b;margin:0 0 20px;">For invoice ${invoice.invoice_number || ''} · ${invoice.client_name || ''}</p>
-      <div id="receiptModalMsg"></div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Template</label>
-          <div style="display:flex;gap:8px;" id="rmTemplatePicker">
-            <button type="button" class="rm-template-btn selected" data-template="corporate" onclick="rmSelectTemplate(this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #3B82F6;background:#DBEAFE;color:#0F2D6B;font-weight:600;font-size:13px;cursor:pointer;">Corporate</button>
-            <button type="button" class="rm-template-btn" data-template="creative" onclick="rmSelectTemplate(this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:600;font-size:13px;cursor:pointer;">Creative</button>
-            <button type="button" class="rm-template-btn" data-template="classic" onclick="rmSelectTemplate(this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:600;font-size:13px;cursor:pointer;">Classic</button>
-          </div>
-        </div>
-        <div>
-          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Receipt number</label>
-          <input id="rmReceiptNumber" type="text" value="${suggestedNumber}" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Payment date</label>
-            <input id="rmPaymentDate" type="date" value="${todayStr}" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Payment method</label>
-            <select id="rmPaymentMethod" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
+          <div class="form-field">
+            <label class="form-label" for="rfPaymentMethod">Payment method</label>
+            <select class="form-input" id="rfPaymentMethod" required>
               <option value="">Select…</option>
               <option value="cash">Cash</option>
               <option value="bank_transfer">Bank transfer</option>
@@ -703,297 +959,186 @@ function openReceiptModal(invoiceId) {
             </select>
           </div>
         </div>
-        <div>
-          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">From (your business) — optional</label>
-          <input id="rmFromName" type="text" placeholder="Business name" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
-          <input id="rmFromEmail" type="email" placeholder="Business email" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
-        </div>
-        <div style="display:flex;gap:10px;margin-top:8px;">
-          <button onclick="document.getElementById('receiptModal').remove()" style="flex:1;background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
-          <button id="rmSubmitBtn" onclick="submitReceipt('${invoiceId}')" style="flex:2;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Save Receipt →</button>
+        <div class="rf-row-2">
+          <div class="form-field">
+            <label class="form-label" for="rfCurrency">Currency</label>
+            <select class="form-input" id="rfCurrency">
+              <option value="INR">INR (₹)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="rfAmount">Amount paid</label>
+            <input class="form-input" id="rfAmount" type="number" step="0.01" min="0" placeholder="0.00" required>
+          </div>
         </div>
       </div>
     </div>
-  `;
-  document.body.appendChild(modal);
+
+    <div class="rf-card">
+      <div class="rf-card-title">Line items <span class="form-optional">(optional)</span></div>
+      <div id="lineItemsWrap"></div>
+      <button type="button" class="btn-ghost" style="padding:8px 0;" onclick="addLineItem()">+ Add line item</button>
+    </div>
+
+    <button type="submit" class="btn-primary-lg" id="rfSubmitBtn" style="width:100%;justify-content:center;">
+      Save Receipt →
+    </button>
+  </form>
+</section>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta" id="cta">
+  <div class="section-tag" style="margin-bottom:16px;">Get started free</div>
+  <h2>Ready to confirm your first payment?</h2>
+  <p>Free to start. No credit card needed.</p>
+  <a href="#receipt-form" class="btn-primary-lg" style="display:inline-flex;">
+    Create My Receipt →
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand-text">Aadya <span>AI</span></div>
+  <div class="footer-desc">The AI platform for professional documents — proposals, invoices, receipts and more. Built for freelancers everywhere.</div>
+  <div class="footer-links-row">
+    <a href="/">Home</a>
+    <a href="/#pricing">Pricing</a>
+    <a href="/invoice">Invoice Generator</a>
+    <a href="/receipt">Receipt Generator</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+  </div>
+  <div class="footer-copy">© 2026 Aadya AI. All rights reserved.</div>
+</footer>
+
+
+<script>
+const _RCPT_SUPABASE_URL = 'https://rscpsmwqtkduahhaejtv.supabase.co';
+const _RCPT_SUPABASE_KEY = 'sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA';
+const receiptSupabase = window.supabase.createClient(_RCPT_SUPABASE_URL, _RCPT_SUPABASE_KEY);
+
+// Matches dashboard.html's PLAN_LIMITS — documents_used is shared across
+// invoices, proposals and receipts.
+const RCPT_PLAN_LIMITS = { free: 3, starter: 20, pro: Infinity };
+function rcptPlanLimit(plan) {
+  const p = (plan || 'free').toLowerCase();
+  if (p.includes('pro')) return RCPT_PLAN_LIMITS.pro;
+  if (p.includes('starter')) return RCPT_PLAN_LIMITS.starter;
+  return RCPT_PLAN_LIMITS.free;
 }
 
-function rmSelectTemplate(btn) {
-  document.querySelectorAll('.rm-template-btn').forEach(b => {
-    b.classList.remove('selected');
-    b.style.border = '2px solid #e2e8f0';
-    b.style.background = '#fff';
-    b.style.color = '#64748b';
-  });
-  btn.classList.add('selected');
-  btn.style.border = '2px solid #3B82F6';
-  btn.style.background = '#DBEAFE';
-  btn.style.color = '#0F2D6B';
-}
-
-function rmShowMsg(html, kind) {
-  const box = document.getElementById('receiptModalMsg');
-  if (!box) return;
-  const bg = kind === 'error' ? '#FEF2F2' : '#F0FDF4';
-  const color = kind === 'error' ? '#B91C1C' : '#15803D';
-  box.style.cssText = `display:block;background:${bg};color:${color};padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;`;
+function rcptShowMsg(html, kind) {
+  const box = document.getElementById('receiptFormMsg');
+  const bg = kind === 'error' ? '#FEF2F2' : kind === 'success' ? '#F0FDF4' : '#EFF6FF';
+  const border = kind === 'error' ? '#FCA5A5' : kind === 'success' ? '#86EFAC' : '#93C5FD';
+  const color = kind === 'error' ? '#B91C1C' : kind === 'success' ? '#15803D' : '#1D4ED8';
+  box.style.cssText = `display:block;background:${bg};border:1px solid ${border};color:${color};padding:16px 20px;border-radius:12px;font-size:14px;margin-bottom:24px;`;
   box.innerHTML = html;
 }
 
-async function submitReceipt(invoiceId) {
-  const invoice = currentInvoices.find(i => i.id === invoiceId);
-  if (!invoice) return;
+function addLineItem() {
+  const wrap = document.getElementById('lineItemsWrap');
+  const row = document.createElement('div');
+  row.className = 'line-item-row';
+  row.innerHTML = `
+    <input class="form-input" type="text" placeholder="Description" data-li-desc>
+    <input class="form-input" type="number" step="0.01" placeholder="Amount" data-li-amount style="max-width:140px;">
+    <button type="button" class="line-item-remove" onclick="this.closest('.line-item-row').remove()">✕</button>
+  `;
+  wrap.appendChild(row);
+}
 
-  const btn = document.getElementById('rmSubmitBtn');
-  const paymentMethod = document.getElementById('rmPaymentMethod').value;
-  if (!paymentMethod) {
-    rmShowMsg('Please select a payment method.', 'error');
+document.getElementById('templatePicker').addEventListener('change', function(e) {
+  document.querySelectorAll('.template-option').forEach(el => el.classList.remove('selected'));
+  e.target.closest('.template-option').classList.add('selected');
+});
+
+async function rcptInit() {
+  const form = document.getElementById('receiptForm');
+  document.getElementById('rfPaymentDate').valueAsDate = new Date();
+
+  const { data: { session } } = await receiptSupabase.auth.getSession();
+  if (!session || !session.user) {
+    rcptShowMsg('Sign in to create and save a receipt. <a href="/dashboard" style="color:inherit;font-weight:700;">Go to Dashboard →</a>', 'info');
     return;
   }
+  form.style.display = 'flex';
+}
 
+async function rcptSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('rfSubmitBtn');
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
   try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) { rmShowMsg('Your session expired. Please sign in again.', 'error'); return; }
+    const { data: { session } } = await receiptSupabase.auth.getSession();
+    if (!session || !session.user) {
+      rcptShowMsg('Your session expired. <a href="/dashboard" style="color:inherit;font-weight:700;">Sign in again →</a>', 'error');
+      return;
+    }
     const email = session.user.email;
 
-    // No documents_used gate/increment here on purpose: this invoice already
-    // consumed a document slot when it was created, so generating its receipt
-    // isn't a new document — it's exempt from the counter. Only the standalone
-    // /receipt page (a genuinely new document) counts against the limit.
-    const template = document.querySelector('.rm-template-btn.selected').dataset.template;
+    const { data: userData } = await receiptSupabase
+      .from('users').select('plan, documents_used').eq('email', email).maybeSingle();
+    const plan = (userData && userData.plan || 'free').toLowerCase();
+    const docsUsed = (userData && userData.documents_used) || 0;
+    const limit = rcptPlanLimit(plan);
 
-    const { error: insertError } = await supabaseClient.from('receipts').insert({
+    if (docsUsed >= limit) {
+      rcptShowMsg(`You've used ${docsUsed} of ${limit} documents this month. <a href="/dashboard" style="color:inherit;font-weight:700;">Upgrade your plan →</a>`, 'error');
+      return;
+    }
+
+    const lineItems = Array.from(document.querySelectorAll('#lineItemsWrap .line-item-row')).map(row => ({
+      description: row.querySelector('[data-li-desc]').value.trim(),
+      amount: parseFloat(row.querySelector('[data-li-amount]').value) || 0
+    })).filter(li => li.description || li.amount);
+
+    const template = document.querySelector('input[name="template"]:checked').value;
+
+    const { error: insertError } = await receiptSupabase.from('receipts').insert({
       user_email: email,
-      invoice_id: invoiceId,
-      receipt_number: document.getElementById('rmReceiptNumber').value.trim(),
-      payer_name: invoice.client_name || null,
-      payer_email: invoice.client_email || null,
-      from_name: document.getElementById('rmFromName').value.trim() || null,
-      from_email: document.getElementById('rmFromEmail').value.trim() || null,
-      payment_date: document.getElementById('rmPaymentDate').value,
-      payment_method: paymentMethod,
-      currency: invoice.currency || 'INR',
-      amount: invoice.amount,
+      invoice_id: null,
+      receipt_number: document.getElementById('rfReceiptNumber').value.trim(),
+      payer_name: document.getElementById('rfPayerName').value.trim(),
+      payer_email: document.getElementById('rfPayerEmail').value.trim() || null,
+      from_name: document.getElementById('rfFromName').value.trim(),
+      from_email: document.getElementById('rfFromEmail').value.trim(),
+      from_tax_id: document.getElementById('rfFromTaxId').value.trim() || null,
+      from_address: document.getElementById('rfFromAddress').value.trim() || null,
+      from_logo_url: document.getElementById('rfFromLogo').value.trim() || null,
+      payment_date: document.getElementById('rfPaymentDate').value,
+      payment_method: document.getElementById('rfPaymentMethod').value,
+      currency: document.getElementById('rfCurrency').value,
+      amount: parseFloat(document.getElementById('rfAmount').value) || 0,
+      line_items: lineItems.length ? lineItems : null,
       template: template
     });
 
     if (insertError) throw insertError;
 
-    document.getElementById('receiptModal').remove();
-    start();
+    // documents_used is incremented server-side for invoices/proposals; since
+    // receipts have no backend pipeline yet, we increment it here directly.
+    const { error: usageError } = await receiptSupabase.from('users').update({ documents_used: docsUsed + 1 }).eq('email', email);
+    if (usageError) console.error('documents_used update failed (receipt still saved):', usageError);
+
+    document.getElementById('receiptForm').style.display = 'none';
+    rcptShowMsg('✓ Receipt saved. PDF download and email delivery are coming soon — for now you can find it in your dashboard. <a href="/invoices" style="color:inherit;font-weight:700;">View My Invoices →</a>', 'success');
 
   } catch (err) {
     console.error('Receipt save error:', err);
-    rmShowMsg('Something went wrong saving your receipt. Please try again.', 'error');
+    rcptShowMsg('Something went wrong saving your receipt. Please try again.', 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Save Receipt →'; }
+    btn.disabled = false;
+    btn.textContent = 'Save Receipt →';
   }
 }
 
-async function loadUsage(email, plan) {
-  const isPro = plan.includes('pro');
-  const isStarter = plan.includes('starter');
-  const limit = isPro ? 999999 : (isStarter ? 10 : 3);
-
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-  const { count } = await supabaseClient
-    .from('invoices')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_email', email)
-    .gte('created_at', monthStart);
-
-  const used = count || 0;
-  const planLabel = isPro ? 'Pro' : (isStarter ? 'Starter' : 'Free');
-
-  document.getElementById('invUsedCount').textContent = used;
-  document.getElementById('invUsedSub').textContent = isPro
-    ? 'Unlimited invoices on Pro'
-    : `of ${limit} invoices this month`;
-  document.getElementById('invUsageFill').style.width = isPro ? '10%' : Math.min((used / limit) * 100, 100) + '%';
-  document.getElementById('invUsageBarLabel').textContent = isPro
-    ? `${used} invoices sent this month`
-    : `${used} of ${limit} used`;
-
-  const planBadgeEl = document.getElementById('invPlanBadge');
-  planBadgeEl.textContent = planLabel;
-  if (isPro) planBadgeEl.classList.add('pro');
-
-  const upgradeLink = document.getElementById('upgradeLink');
-  if (isPro) upgradeLink.style.display = 'none';
-}
-
-async function generateInvoice() {
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) {
-      window.location.href = 'https://aadya-ai.com';
-      return;
-    }
-    const email = session.user.email;
-
-    const { data: userData } = await supabaseClient
-      .from('users')
-      .select('plan, name')
-      .eq('email', email)
-      .maybeSingle();
-
-    const plan = ((userData && userData.plan) || 'free').toLowerCase();
-    const isPro = plan.includes('pro');
-    const isStarter = plan.includes('starter');
-    const invoiceLimit = isPro ? Infinity : (isStarter ? 10 : 3);
-    const userName = (userData && userData.name) ? userData.name : email.split('@')[0];
-
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-    const { count } = await supabaseClient
-      .from('invoices')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_email', email)
-      .gte('created_at', monthStart);
-
-    const used = count || 0;
-
-    if (used >= invoiceLimit) {
-      showInvoiceLimitModal(invoiceLimit, plan);
-      return;
-    }
-
-    openInvoicePopup(email, userName, start);
-  } catch(e) {
-    console.error('Generate invoice error:', e);
-    openInvoicePopup('', '', start);
-  }
-}
-
-function showInvoiceLimitModal(limit, plan) {
-  const existing = document.getElementById('invoiceLimitModal');
-  if (existing) existing.remove();
-
-  const isStarter = plan.includes('starter');
-  const nextPlan = isStarter ? 'Pro' : 'Starter';
-  const nextPrice = isStarter ? '₹599/month' : '₹299/month';
-  const nextCount = isStarter ? 'unlimited' : '10';
-
-  const modal = document.createElement('div');
-  modal.id = 'invoiceLimitModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.innerHTML = `
-    <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-      <div style="font-size:48px;margin-bottom:16px;">📄</div>
-      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've used all ${limit} invoice${limit === 1 ? '' : 's'} this month!</h2>
-      <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
-        Upgrade to <strong>${nextPlan}</strong> for just <strong>${nextPrice}</strong> and generate up to ${nextCount} invoices every month.
-      </p>
-      <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
-        <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">${nextPlan} Plan — ${nextPrice}</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;${nextCount} invoices per month</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Professional branded PDFs</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to you &amp; your client</div>
-        <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
-      </div>
-      <a href="https://aadya-ai.com/#pricing" target="_blank"
-         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
-        Upgrade to ${nextPlan} →
-      </a>
-      <button onclick="document.getElementById('invoiceLimitModal').remove()"
-              style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
-        Maybe later
-      </button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-}
-
-async function logout() {
-  await supabaseClient.auth.signOut();
-  localStorage.clear();
-  sessionStorage.clear();
-  window.location.href = 'https://aadya-ai.com';
-}
-
-async function start() {
-  try {
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-
-    if (!session || !session.user) {
-      window.location.href = 'https://aadya-ai.com';
-      return;
-    }
-
-    hideLoader();
-
-    const email = session.user.email;
-    const firstName = email.split('@')[0].charAt(0).toUpperCase();
-    document.getElementById('userAvatar').textContent = firstName;
-    document.getElementById('userNameDisplay').textContent = email.split('@')[0];
-
-    // Load user plan
-    const { data: userData } = await supabaseClient
-      .from('users')
-      .select('plan, name')
-      .eq('email', email)
-      .maybeSingle();
-
-    const plan = ((userData && userData.plan) || 'free').toLowerCase();
-    const isPro = plan.includes('pro');
-    const planLabel = isPro ? 'Pro' : (plan.includes('starter') ? 'Starter' : 'Free');
-
-    document.getElementById('planBadge').textContent = planLabel;
-    if (isPro) document.getElementById('planBadge').classList.add('pro');
-
-    if (userData && userData.name) {
-      document.getElementById('userNameDisplay').textContent = userData.name;
-    }
-
-    // Load usage stats
-    await loadUsage(email, plan);
-
-    // Load invoices
-    const { data: invoices, error: invErr } = await supabaseClient
-      .from('invoices')
-      .select('*')
-      .eq('user_email', email)
-      .order('created_at', { ascending: false });
-
-    if (invErr) throw invErr;
-
-    currentInvoices = invoices || [];
-
-    // Load receipts (invoice-linked and standalone)
-    const { data: receipts, error: rcptErr } = await supabaseClient
-      .from('receipts')
-      .select('*')
-      .eq('user_email', email)
-      .order('created_at', { ascending: false });
-
-    if (rcptErr) console.error('Receipts fetch error:', rcptErr);
-    allReceipts = receipts || [];
-    receiptsByInvoiceId = {};
-    allReceipts.forEach(r => { if (r.invoice_id) receiptsByInvoiceId[r.invoice_id] = r; });
-
-    renderTable(currentInvoices);
-    renderReceiptsTable(allReceipts);
-
-  } catch(e) {
-    console.error('Invoices page error:', e);
-    hideLoader();
-  }
-}
-
-start();
-</script>
-
-<!-- PWA Service Worker Registration -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-}
+document.getElementById('receiptForm').addEventListener('submit', rcptSubmit);
+rcptInit();
 </script>
 
 </body>
