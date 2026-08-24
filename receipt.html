@@ -1019,6 +1019,10 @@ const _RCPT_SUPABASE_URL = 'https://rscpsmwqtkduahhaejtv.supabase.co';
 const _RCPT_SUPABASE_KEY = 'sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA';
 const receiptSupabase = window.supabase.createClient(_RCPT_SUPABASE_URL, _RCPT_SUPABASE_KEY);
 
+// Make.com webhook that owns PDF generation, emailing the client, the
+// Supabase `receipts` insert, and the documents_used increment.
+const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrqjgbvxcn';
+
 // Matches dashboard.html's PLAN_LIMITS — documents_used is shared across
 // invoices, proposals and receipts.
 const RCPT_PLAN_LIMITS = { free: 3, starter: 20, pro: Infinity };
@@ -1099,9 +1103,11 @@ async function rcptSubmit(e) {
 
     const template = document.querySelector('input[name="template"]:checked').value;
 
-    const { error: insertError } = await receiptSupabase.from('receipts').insert({
+    const payload = {
+      flow: 'standalone',
       user_email: email,
       invoice_id: null,
+      invoice_number: null,
       receipt_number: document.getElementById('rfReceiptNumber').value.trim(),
       payer_name: document.getElementById('rfPayerName').value.trim(),
       payer_email: document.getElementById('rfPayerEmail').value.trim() || null,
@@ -1116,21 +1122,24 @@ async function rcptSubmit(e) {
       amount: parseFloat(document.getElementById('rfAmount').value) || 0,
       line_items: lineItems.length ? lineItems : null,
       template: template
+    };
+
+    const resp = await fetch(RECEIPT_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+    if (!resp.ok) throw new Error('Webhook responded with ' + resp.status);
 
-    if (insertError) throw insertError;
-
-    // documents_used is incremented server-side for invoices/proposals; since
-    // receipts have no backend pipeline yet, we increment it here directly.
-    const { error: usageError } = await receiptSupabase.from('users').update({ documents_used: docsUsed + 1 }).eq('email', email);
-    if (usageError) console.error('documents_used update failed (receipt still saved):', usageError);
+    // documents_used is now incremented by the webhook's backend, not here —
+    // only for the standalone flow (this one); convert-from-invoice is exempt.
 
     document.getElementById('receiptForm').style.display = 'none';
-    rcptShowMsg('✓ Receipt saved. PDF download and email delivery are coming soon — for now you can find it in your dashboard. <a href="/invoices" style="color:inherit;font-weight:700;">View My Invoices →</a>', 'success');
+    rcptShowMsg('✓ Receipt submitted. We\'re generating your PDF and emailing it to you and your client now — it\'ll also show up in your dashboard shortly. <a href="/invoices" style="color:inherit;font-weight:700;">View My Invoices →</a>', 'success');
 
   } catch (err) {
-    console.error('Receipt save error:', err);
-    rcptShowMsg('Something went wrong saving your receipt. Please try again.', 'error');
+    console.error('Receipt submit error:', err);
+    rcptShowMsg('Something went wrong submitting your receipt. Please try again.', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Save Receipt →';

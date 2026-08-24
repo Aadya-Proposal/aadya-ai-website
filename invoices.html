@@ -464,6 +464,11 @@ const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Make.com webhook that owns PDF generation, emailing the client, the
+// Supabase `receipts` insert, and (standalone flow only) the documents_used
+// increment.
+const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrqjgbvxcn';
+
 let currentInvoices = [];
 let allReceipts = [];
 let receiptsByInvoiceId = {};
@@ -756,39 +761,63 @@ async function submitReceipt(invoiceId) {
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) { rmShowMsg('Your session expired. Please sign in again.', 'error'); return; }
+    if (!session || !session.user) {
+      rmShowMsg('Your session expired. Please sign in again.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Save Receipt →';
+      return;
+    }
     const email = session.user.email;
 
     // No documents_used gate/increment here on purpose: this invoice already
     // consumed a document slot when it was created, so generating its receipt
     // isn't a new document — it's exempt from the counter. Only the standalone
-    // /receipt page (a genuinely new document) counts against the limit.
+    // /receipt page (a genuinely new document) counts against the limit. The
+    // webhook backend knows to skip the increment for flow: 'convert_from_invoice'.
     const template = document.querySelector('.rm-template-btn.selected').dataset.template;
 
-    const { error: insertError } = await supabaseClient.from('receipts').insert({
+    const payload = {
+      flow: 'convert_from_invoice',
       user_email: email,
       invoice_id: invoiceId,
+      invoice_number: invoice.invoice_number || null,
       receipt_number: document.getElementById('rmReceiptNumber').value.trim(),
       payer_name: invoice.client_name || null,
       payer_email: invoice.client_email || null,
       from_name: document.getElementById('rmFromName').value.trim() || null,
       from_email: document.getElementById('rmFromEmail').value.trim() || null,
+      from_tax_id: null,
+      from_address: null,
+      from_logo_url: null,
       payment_date: document.getElementById('rmPaymentDate').value,
       payment_method: paymentMethod,
       currency: invoice.currency || 'INR',
       amount: invoice.amount,
+      line_items: null,
       template: template
+    };
+
+    const resp = await fetch(RECEIPT_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+    if (!resp.ok) throw new Error('Webhook responded with ' + resp.status);
 
-    if (insertError) throw insertError;
-
-    document.getElementById('receiptModal').remove();
-    start();
+    // The receipt row is now written asynchronously by the webhook's backend,
+    // so it won't show up in the Receipts list/badge immediately — confirm
+    // submission here rather than refreshing into a misleadingly unchanged view.
+    rmShowMsg('✓ Receipt submitted. It\'ll appear in your Receipts list once generated.', 'success');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitted ✓'; }
+    setTimeout(function() {
+      const m = document.getElementById('receiptModal');
+      if (m) m.remove();
+      start();
+    }, 2000);
 
   } catch (err) {
-    console.error('Receipt save error:', err);
-    rmShowMsg('Something went wrong saving your receipt. Please try again.', 'error');
-  } finally {
+    console.error('Receipt submit error:', err);
+    rmShowMsg('Something went wrong submitting your receipt. Please try again.', 'error');
     if (btn) { btn.disabled = false; btn.textContent = 'Save Receipt →'; }
   }
 }
