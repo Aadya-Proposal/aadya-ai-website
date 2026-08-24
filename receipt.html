@@ -293,58 +293,30 @@ nav {
   color: var(--muted);
 }
 
-/* ── HERO INVOICE CAROUSEL ── */
+/* ── HERO RECEIPT MOCKUP ── */
 .hero-preview {
   display: flex;
   justify-content: center;
   animation: fadeUp 0.6s 0.5s ease both;
 }
-.hero-invoice-frame {
-  position: relative;
-  height: clamp(360px, 42vw, 560px);
-  aspect-ratio: 900 / 1271;
-  width: auto;
-}
-.hero-invoice-frame::before {
-  content: '';
-  position: absolute;
-  top: -8px; left: 8px; right: -8px; bottom: 8px;
-  background: rgba(59,130,246,0.08);
-  border-radius: 16px;
-  z-index: -1;
-}
-.hero-invoice-carousel {
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(15,45,107,0.05), 0 8px 32px rgba(15,45,107,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
-}
-.hero-invoice-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  animation: heroInvoiceFade 13.8s ease-in-out infinite;
-}
-.hero-invoice-img--corporate { animation-delay: 0s; }
-.hero-invoice-img--creative  { animation-delay: 4.6s; }
-.hero-invoice-img--classic   { animation-delay: 9.2s; }
-
-@keyframes heroInvoiceFade {
-  0%     { opacity: 0; }
-  4.35%  { opacity: 1; }
-  33.33% { opacity: 1; }
-  37.68% { opacity: 0; }
-  100%   { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-invoice-img { animation: none; opacity: 0; }
-  .hero-invoice-img--corporate { opacity: 1; }
-}
+.receipt-hero-sheet{width:600px;max-width:100%;background:#fff;border-radius:6px;box-shadow:0 20px 60px rgba(12,58,110,0.25);overflow:hidden;font-family:Arial,sans-serif}
+.rh-header{background:#0c3a6e;color:#fff;padding:28px 36px;display:flex;justify-content:space-between;align-items:flex-start}
+.rh-title{font-size:24px;font-weight:700;letter-spacing:0.5px}
+.rh-meta{text-align:right;font-size:13px;color:#b7d0ea}
+.rh-num{font-size:14px;color:#fff;font-weight:600;margin-bottom:2px}
+.rh-body{padding:28px 36px}
+.rh-row{display:flex;justify-content:space-between;gap:24px;margin-bottom:24px}
+.rh-col{flex:1}
+.rh-label{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#8a8f9c;margin-bottom:4px}
+.rh-value{font-size:14px;line-height:1.5;color:#1a1a2e}
+.rh-name{font-weight:600}
+.rh-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:13px}
+.rh-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#8a8f9c;padding:8px 0;border-bottom:2px solid #eaecf0}
+.rh-table td{padding:10px 0;border-bottom:1px solid #eaecf0;color:#1a1a2e}
+.rh-num{text-align:right}
+.rh-amount-box{background:#eef3fa;border-radius:8px;padding:20px 24px;text-align:center;margin:24px 0}
+.rh-amt{font-size:34px;font-weight:700;color:#0c3a6e;margin-top:4px}
+.rh-footer{padding:20px 36px;border-top:1px solid #eaecf0;font-size:11px;color:#9aa0ac;text-align:center}
 
 /* ── SOCIAL PROOF BAR ── */
 .proof-bar {
@@ -578,7 +550,6 @@ footer a:hover { color: white; }
   .hero h1 { font-size: 34px; letter-spacing: -1px; margin-bottom: 16px; }
   .hero p { font-size: 16px; margin-bottom: 28px; }
   .hero-preview { margin-top: 40px; }
-  .hero-invoice-frame { height: clamp(300px, 58vw, 420px); }
   .proof-bar { padding: 20px; }
   .proof-bar-inner { flex-direction: column; gap: 16px; text-align: center; }
   .proof-stats { gap: 24px; }
@@ -747,12 +718,38 @@ textarea.form-input { resize: vertical; }
       </div>
     </div>
     <div class="hero-preview">
-      <div class="hero-invoice-frame">
-        <div class="hero-invoice-carousel">
-          <img class="hero-invoice-img hero-invoice-img--corporate" src="/images/invoice-hero-corporate.png" alt="Corporate-style receipt template with a clean navy header, itemized services table and amount paid">
-          <img class="hero-invoice-img hero-invoice-img--creative" src="/images/invoice-hero-gst.png" alt="Creative-style receipt template with bold branded colors and payment details">
-          <img class="hero-invoice-img hero-invoice-img--classic" src="/images/invoice-hero-classic.png" alt="Classic-style receipt template with a traditional layout and amount paid">
+      <div class="receipt-hero-sheet">
+        <div class="rh-header">
+          <div class="rh-title">RECEIPT</div>
+          <div class="rh-meta">
+            <div class="rh-num">Receipt #REC-001</div>
+            <div>Paid 07 August 2026</div>
+          </div>
         </div>
+        <div class="rh-body">
+          <div class="rh-row">
+            <div class="rh-col">
+              <div class="rh-label">From</div>
+              <div class="rh-value"><span class="rh-name">Marco Hensen</span><br>marcoh@outlook.com</div>
+            </div>
+            <div class="rh-col">
+              <div class="rh-label">Paid by</div>
+              <div class="rh-value"><span class="rh-name">SNP Group</span><br>care@snpgroup.com</div>
+            </div>
+          </div>
+          <table class="rh-table">
+            <thead><tr><th>Description</th><th class="rh-num">Amount</th></tr></thead>
+            <tbody><tr><td>Project Discovery Session & Strategy Development</td><td class="rh-num">€5,600.00</td></tr></tbody>
+          </table>
+          <div class="rh-amount-box">
+            <div class="rh-label">Amount paid</div>
+            <div class="rh-amt">€5,600.00</div>
+          </div>
+          <div class="rh-row">
+            <div class="rh-col"><div class="rh-label">Payment method</div><div class="rh-value">Bank transfer</div></div>
+          </div>
+        </div>
+        <div class="rh-footer">Generated by Aadya AI — aadya-ai.com</div>
       </div>
     </div>
   </div>
