@@ -1103,6 +1103,11 @@ async function rcptSubmit(e) {
 
     const template = document.querySelector('input[name="template"]:checked').value;
 
+    const rcptEscapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const lineItemsHtml = lineItems.map(li =>
+      `<tr><td>${rcptEscapeHtml(li.description)}</td><td class="num">${li.amount.toFixed(2)}</td></tr>`
+    ).join('');
+
     const payload = {
       flow: 'standalone',
       user_email: email,
@@ -1121,6 +1126,7 @@ async function rcptSubmit(e) {
       currency: document.getElementById('rfCurrency').value,
       amount: parseFloat(document.getElementById('rfAmount').value) || 0,
       line_items: lineItems.length ? lineItems : null,
+      line_items_html: lineItemsHtml,
       template: template
     };
 
