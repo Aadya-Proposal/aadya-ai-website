@@ -694,8 +694,8 @@ textarea.form-input { resize: vertical; }
     <li><a href="/receipt" class="active">Receipt Generator</a></li>
   </ul>
   <div class="nav-cta">
-    <a href="/dashboard" class="btn-ghost">Dashboard</a>
-    <a href="/receipt#cta" class="btn-primary">Create Receipt →</a>
+    <a href="/dashboard" class="btn-ghost" id="rcptNavGhost">Dashboard</a>
+    <a href="/receipt#cta" class="btn-primary" id="rcptNavPrimary">Create Receipt →</a>
   </div>
 </nav>
 
@@ -711,7 +711,7 @@ textarea.form-input { resize: vertical; }
       <h1>Create a Professional Payment <em>Receipt</em></h1>
       <p>Confirm a payment your client already made. Choose Corporate, Creative or Classic, fill in the payment details, and save it to your dashboard in seconds. Free to try.</p>
       <div class="hero-actions">
-        <a href="#receipt-form" class="btn-primary-lg">
+        <a href="#receipt-form" class="btn-primary-lg rcpt-cta-btn">
           Create My Receipt →
         </a>
         <span class="hero-small-text">Free plan includes 3 documents/month</span>
@@ -990,7 +990,7 @@ textarea.form-input { resize: vertical; }
   <div class="section-tag" style="margin-bottom:16px;">Get started free</div>
   <h2>Ready to confirm your first payment?</h2>
   <p>Sign in required — free, no credit card needed.</p>
-  <a href="#receipt-form" class="btn-primary-lg" style="display:inline-flex;">
+  <a href="#receipt-form" class="btn-primary-lg rcpt-cta-btn" style="display:inline-flex;">
     Create My Receipt →
   </a>
 </div>
@@ -1062,10 +1062,25 @@ async function rcptInit() {
 
   const { data: { session } } = await receiptSupabase.auth.getSession();
   if (!session || !session.user) {
+    rcptApplyLoggedOutNav();
     rcptShowMsg('Sign in to create and save a receipt. <a href="/dashboard" style="color:inherit;font-weight:700;">Go to Dashboard →</a>', 'info');
     return;
   }
   form.style.display = 'flex';
+}
+
+// Logged-out visitors get the homepage's nav ("Sign in" / "Start free →") and both
+// "Create My Receipt →" CTAs route straight to the homepage sign-in flow instead of
+// scrolling to a form that only says "sign in first".
+function rcptApplyLoggedOutNav() {
+  const SIGNIN_URL = 'https://aadya-ai.com/?signin=1';
+  const ghost = document.getElementById('rcptNavGhost');
+  const primary = document.getElementById('rcptNavPrimary');
+  if (ghost) { ghost.textContent = 'Sign in'; ghost.href = SIGNIN_URL; }
+  if (primary) { primary.textContent = 'Start free →'; primary.href = SIGNIN_URL; }
+  document.querySelectorAll('.rcpt-cta-btn').forEach(function(btn) {
+    btn.setAttribute('href', SIGNIN_URL);
+  });
 }
 
 async function rcptSubmit(e) {

@@ -3275,6 +3275,20 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// Auto-open the sign-in modal when arriving from a sub-page's logged-out CTA
+// Triggered by /receipt linking here with ?signin=1 (its nav + "Create My Receipt →" CTAs)
+document.addEventListener('DOMContentLoaded', function() {
+  const wantsSignin = new URLSearchParams(window.location.search).get('signin');
+  if (wantsSignin === '1' && typeof openSignIn === 'function') {
+    setTimeout(() => {
+      openSignIn();
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }, 400);
+  }
+});
+
 // ── LIVE PROPOSAL COUNTER ────────────────────────────────────────────────────
 async function loadProposalCount() {
   try {
