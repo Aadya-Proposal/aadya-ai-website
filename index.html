@@ -2788,7 +2788,7 @@ function showOnboardingModal(actionType) {
   
   modal.innerHTML = `
     <div style="background:white;border-radius:20px;padding:40px 36px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
-      <button onclick="document.getElementById('onboardingModal').remove(); window.location.href='https://aadya-ai.com';" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;color:#64748b;font-size:24px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">×</button>
+      <button onclick="document.getElementById('onboardingModal').remove(); window.location.href='https://www.aadya-ai.com';" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;color:#64748b;font-size:24px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">×</button>
       
       <h2 style="font-size:24px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">${actionText[actionType] || 'Ready to get started?'}</h2>
       <p style="font-size:14px;color:#64748b;margin-bottom:32px;">Choose how you'd like to proceed</p>
@@ -2840,7 +2840,7 @@ function showEmailCapture(actionType) {
   
   modal.innerHTML = `
     <div style="background:white;border-radius:20px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
-      <button onclick="document.getElementById('emailCaptureModal').remove(); window.location.href='https://aadya-ai.com';" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;color:#64748b;font-size:24px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">×</button>
+      <button onclick="document.getElementById('emailCaptureModal').remove(); window.location.href='https://www.aadya-ai.com';" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;color:#64748b;font-size:24px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">×</button>
       
       <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin-bottom:12px;">Before you win clients, let's get your details</h2>
       <p style="font-size:14px;color:#64748b;margin-bottom:24px;">We'll use these to personalize everything</p>
@@ -3117,7 +3117,7 @@ async function signInWithGoogle() {
   const { error } = await aadyaSupabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://aadya-ai.com/dashboard.html',
+      redirectTo: 'https://www.aadya-ai.com/dashboard.html',
       queryParams: { prompt: 'select_account' }
     }
   });
@@ -3136,7 +3136,7 @@ async function sendMagicLink() {
 
   const { error } = await aadyaSupabase.auth.signInWithOtp({
     email: email,
-    options: { emailRedirectTo: 'https://aadya-ai.com/dashboard.html' }
+    options: { emailRedirectTo: 'https://www.aadya-ai.com/dashboard.html' }
   });
 
   if (error) {

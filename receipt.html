@@ -1056,24 +1056,51 @@ document.getElementById('templatePicker').addEventListener('change', function(e)
   e.target.closest('.template-option').classList.add('selected');
 });
 
+let rcptFormRevealed = false;
+let rcptAuthSettled = false;
+
+function rcptRevealForm() {
+  if (rcptFormRevealed) return;
+  rcptFormRevealed = true;
+  rcptAuthSettled = true;
+  const msg = document.getElementById('receiptFormMsg');
+  if (msg) msg.style.display = 'none';
+  document.getElementById('receiptForm').style.display = 'flex';
+}
+
+function rcptShowLoggedOut() {
+  if (rcptFormRevealed || rcptAuthSettled) return;
+  rcptAuthSettled = true;
+  rcptApplyLoggedOutNav();
+  rcptShowMsg('Sign in to create and save a receipt. <a href="/dashboard" style="color:inherit;font-weight:700;">Go to Dashboard →</a>', 'info');
+}
+
 async function rcptInit() {
-  const form = document.getElementById('receiptForm');
   document.getElementById('rfPaymentDate').valueAsDate = new Date();
 
+  // A single unguarded getSession() is unsafe here: on a cold client that
+  // call can resolve *before* the session has rehydrated from storage, and
+  // rcptInit's logged-out branch has no retry — a logged-in user would be
+  // stranded on the "sign in" wall until a manual reload. Instead, reveal
+  // the form on any auth event that carries a session, and only commit to
+  // the logged-out state once the client reports its initial load is done
+  // (INITIAL_SESSION / SIGNED_OUT), with a hard timeout as a last resort.
+  receiptSupabase.auth.onAuthStateChange((event, session) => {
+    if (session && session.user) rcptRevealForm();
+    else if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') rcptShowLoggedOut();
+  });
+
   const { data: { session } } = await receiptSupabase.auth.getSession();
-  if (!session || !session.user) {
-    rcptApplyLoggedOutNav();
-    rcptShowMsg('Sign in to create and save a receipt. <a href="/dashboard" style="color:inherit;font-weight:700;">Go to Dashboard →</a>', 'info');
-    return;
-  }
-  form.style.display = 'flex';
+  if (session && session.user) { rcptRevealForm(); return; }
+
+  setTimeout(rcptShowLoggedOut, 3000);
 }
 
 // Logged-out visitors get the homepage's nav ("Sign in" / "Start free →") and both
 // "Create My Receipt →" CTAs route straight to the homepage sign-in flow instead of
 // scrolling to a form that only says "sign in first".
 function rcptApplyLoggedOutNav() {
-  const SIGNIN_URL = 'https://aadya-ai.com/?signin=1';
+  const SIGNIN_URL = 'https://www.aadya-ai.com/?signin=1';
   const ghost = document.getElementById('rcptNavGhost');
   const primary = document.getElementById('rcptNavPrimary');
   if (ghost) { ghost.textContent = 'Sign in'; ghost.href = SIGNIN_URL; }

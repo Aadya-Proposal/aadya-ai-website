@@ -873,7 +873,7 @@ async function generateInvoice() {
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session || !session.user) {
-      window.location.href = 'https://aadya-ai.com';
+      window.location.href = 'https://www.aadya-ai.com';
       return;
     }
     const email = session.user.email;
@@ -939,7 +939,7 @@ function showInvoiceLimitModal(limit, plan) {
         <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to you &amp; your client</div>
         <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
       </div>
-      <a href="https://aadya-ai.com/#pricing" target="_blank"
+      <a href="https://www.aadya-ai.com/#pricing" target="_blank"
          style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
         Upgrade to ${nextPlan} →
       </a>
@@ -956,7 +956,7 @@ async function logout() {
   await supabaseClient.auth.signOut();
   localStorage.clear();
   sessionStorage.clear();
-  window.location.href = 'https://aadya-ai.com';
+  window.location.href = 'https://www.aadya-ai.com';
 }
 
 async function start() {
@@ -964,7 +964,7 @@ async function start() {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
 
     if (!session || !session.user) {
-      window.location.href = 'https://aadya-ai.com';
+      window.location.href = 'https://www.aadya-ai.com';
       return;
     }
 

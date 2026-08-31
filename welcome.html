@@ -148,7 +148,7 @@ async function sendMagicLink(isResend) {
 
   const { error } = await welcomeSupabase.auth.signInWithOtp({
     email: targetEmail,
-    options: { emailRedirectTo: 'https://aadya-ai.com/dashboard.html' }
+    options: { emailRedirectTo: 'https://www.aadya-ai.com/dashboard.html' }
   });
 
   if (error) {

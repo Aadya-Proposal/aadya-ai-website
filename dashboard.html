@@ -1115,7 +1115,7 @@ async function start() {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     
     if (!session || !session.user) {
-      window.location.href = 'https://aadya-ai.com';
+      window.location.href = 'https://www.aadya-ai.com';
       return;
     }
 
@@ -1281,7 +1281,7 @@ async function logout() {
   await supabaseClient.auth.signOut();
   localStorage.clear();
   sessionStorage.clear();
-  window.location.href = 'https://aadya-ai.com';
+  window.location.href = 'https://www.aadya-ai.com';
 }
 
 start();
