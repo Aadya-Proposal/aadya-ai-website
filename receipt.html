@@ -1059,10 +1059,16 @@ document.getElementById('templatePicker').addEventListener('change', function(e)
 let rcptFormRevealed = false;
 let rcptAuthSettled = false;
 
+// Generated once when the form is revealed, then reused for every submit
+// attempt (including retries) so the Make.com webhook can dedupe retried
+// submissions instead of re-emailing the client / double-inserting the row.
+let rcptClientId = null;
+
 function rcptRevealForm() {
   if (rcptFormRevealed) return;
   rcptFormRevealed = true;
   rcptAuthSettled = true;
+  rcptClientId = crypto.randomUUID();
   const msg = document.getElementById('receiptFormMsg');
   if (msg) msg.style.display = 'none';
   document.getElementById('receiptForm').style.display = 'flex';
@@ -1149,6 +1155,7 @@ async function rcptSubmit(e) {
 
     const payload = {
       flow: 'standalone',
+      client_id: rcptClientId,
       user_email: email,
       invoice_id: null,
       invoice_number: null,

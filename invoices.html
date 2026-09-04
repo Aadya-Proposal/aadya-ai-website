@@ -684,6 +684,10 @@ function openReceiptModal(invoiceId) {
 
   const modal = document.createElement('div');
   modal.id = 'receiptModal';
+  // Generated once per modal open, then reused for every submit attempt
+  // (including retries) so the Make.com webhook can dedupe retried
+  // submissions instead of re-emailing the client / double-inserting the row.
+  modal.dataset.clientId = crypto.randomUUID();
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
   modal.innerHTML = `
     <div style="background:#ffffff;border-radius:20px;padding:32px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
@@ -787,9 +791,11 @@ async function submitReceipt(invoiceId) {
     // /receipt page (a genuinely new document) counts against the limit. The
     // webhook backend knows to skip the increment for flow: 'convert_from_invoice'.
     const template = document.querySelector('.rm-template-btn.selected').dataset.template;
+    const clientId = document.getElementById('receiptModal').dataset.clientId;
 
     const payload = {
       flow: 'convert_from_invoice',
+      client_id: clientId,
       user_email: email,
       invoice_id: invoiceId,
       invoice_number: invoice.invoice_number || null,
