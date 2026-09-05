@@ -706,14 +706,6 @@ function openReceiptModal(invoiceId) {
       <div id="receiptModalMsg"></div>
       <div style="display:flex;flex-direction:column;gap:14px;">
         <div>
-          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Template</label>
-          <div style="display:flex;gap:8px;" id="rmTemplatePicker">
-            <button type="button" class="rm-template-btn selected" data-template="corporate" onclick="rmSelectTemplate(this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #3B82F6;background:#DBEAFE;color:#0F2D6B;font-weight:600;font-size:13px;cursor:pointer;">Corporate</button>
-            <button type="button" class="rm-template-btn" data-template="creative" onclick="rmSelectTemplate(this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:600;font-size:13px;cursor:pointer;">Creative</button>
-            <button type="button" class="rm-template-btn" data-template="classic" onclick="rmSelectTemplate(this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:600;font-size:13px;cursor:pointer;">Classic</button>
-          </div>
-        </div>
-        <div>
           <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Receipt number</label>
           <input id="rmReceiptNumber" type="text" value="${suggestedNumber}" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
         </div>
@@ -747,19 +739,6 @@ function openReceiptModal(invoiceId) {
     </div>
   `;
   document.body.appendChild(modal);
-}
-
-function rmSelectTemplate(btn) {
-  document.querySelectorAll('.rm-template-btn').forEach(b => {
-    b.classList.remove('selected');
-    b.style.border = '2px solid #e2e8f0';
-    b.style.background = '#fff';
-    b.style.color = '#64748b';
-  });
-  btn.classList.add('selected');
-  btn.style.border = '2px solid #3B82F6';
-  btn.style.background = '#DBEAFE';
-  btn.style.color = '#0F2D6B';
 }
 
 function rmShowMsg(html, kind) {
@@ -800,7 +779,6 @@ async function submitReceipt(invoiceId) {
     // isn't a new document — it's exempt from the counter. Only the standalone
     // /receipt page (a genuinely new document) counts against the limit. The
     // webhook backend knows to skip the increment for flow: 'convert_from_invoice'.
-    const template = document.querySelector('.rm-template-btn.selected').dataset.template;
     const clientId = document.getElementById('receiptModal').dataset.clientId;
 
     const payload = {
@@ -823,7 +801,7 @@ async function submitReceipt(invoiceId) {
       amount: invoice.amount,
       line_items: null,
       line_items_html: '',
-      template: template
+      template: 'corporate'
     };
 
     const resp = await fetch(RECEIPT_WEBHOOK_URL, {

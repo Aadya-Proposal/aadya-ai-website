@@ -608,23 +608,6 @@ footer a:hover { color: white; }
 }
 .form-input:focus { outline: none; border-color: var(--blue); }
 textarea.form-input { resize: vertical; }
-.template-picker { display: flex; gap: 12px; }
-.template-option {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.template-option input { position: absolute; opacity: 0; pointer-events: none; }
-.template-option.selected { border-color: var(--blue); background: var(--blue-pale); color: var(--navy); }
 .line-item-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
 .line-item-remove {
   background: none;
@@ -639,7 +622,6 @@ textarea.form-input { resize: vertical; }
 @media (max-width: 768px) {
   .rf-grid { grid-template-columns: 1fr; }
   .rf-row-2 { grid-template-columns: 1fr; }
-  .template-picker { flex-direction: column; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -706,10 +688,10 @@ textarea.form-input { resize: vertical; }
     <div class="hero-content">
       <div class="hero-badge">
         <span class="hero-badge-dot"></span>
-        Free · 3 templates · Saved to your dashboard
+        Free · Corporate template · Saved to your dashboard
       </div>
       <h1>Create a Professional Payment <em>Receipt</em></h1>
-      <p>Confirm a payment your client already made. Choose Corporate, Creative or Classic, fill in the payment details, and save it to your dashboard in seconds. Free to try.</p>
+      <p>Confirm a payment your client already made. Fill in the payment details and save it to your dashboard in seconds. Free to try.</p>
       <div class="hero-actions">
         <a href="#receipt-form" class="btn-primary-lg rcpt-cta-btn">
           Create My Receipt →
@@ -765,8 +747,8 @@ textarea.form-input { resize: vertical; }
         <div class="proof-stat-label">No credit card needed</div>
       </div>
       <div class="proof-stat">
-        <div class="proof-stat-num">3 templates</div>
-        <div class="proof-stat-label">Corporate, Creative, Classic</div>
+        <div class="proof-stat-num">Corporate</div>
+        <div class="proof-stat-label">Professional template</div>
       </div>
       <div class="proof-stat">
         <div class="proof-stat-num">3 currencies</div>
@@ -790,9 +772,9 @@ textarea.form-input { resize: vertical; }
     </div>
     <div class="step-card">
       <div class="step-num">2</div>
-      <div class="step-title">Pick a template</div>
-      <div class="step-desc">Corporate, Creative or Classic — the same look as your invoices, so your paperwork stays consistent.</div>
-      <div class="step-time">~10 seconds</div>
+      <div class="step-title">Corporate template applied</div>
+      <div class="step-desc">Every receipt uses our clean Corporate template — the same look as your invoices, so your paperwork stays consistent.</div>
+      <div class="step-time">Automatic</div>
     </div>
     <div class="step-card">
       <div class="step-num">3</div>
@@ -811,8 +793,8 @@ textarea.form-input { resize: vertical; }
   <div class="features-grid">
     <div class="feature-card">
       <div class="feature-icon">🎨</div>
-      <div class="feature-title">Premium Templates</div>
-      <div class="feature-desc">Corporate, Creative and Classic — the same three styles as your invoices, so receipts match.</div>
+      <div class="feature-title">Premium Template</div>
+      <div class="feature-desc">Corporate — the same clean style as your invoices, so receipts match.</div>
     </div>
     <div class="feature-card">
       <div class="feature-icon">💱</div>
@@ -849,7 +831,7 @@ textarea.form-input { resize: vertical; }
         <tr>
           <td>Consistent branded design</td>
           <td>❌ Basic</td>
-          <td>✅ Premium templates</td>
+          <td>✅ Premium template</td>
         </tr>
         <tr>
           <td>Linked to the original invoice</td>
@@ -880,24 +862,6 @@ textarea.form-input { resize: vertical; }
   <div id="receiptFormMsg" style="display:none;"></div>
 
   <form id="receiptForm" class="receipt-form" style="display:none;">
-    <div class="rf-card">
-      <div class="rf-card-title">Template</div>
-      <div class="template-picker" id="templatePicker">
-        <label class="template-option selected">
-          <input type="radio" name="template" value="corporate" checked>
-          <span>Corporate</span>
-        </label>
-        <label class="template-option">
-          <input type="radio" name="template" value="creative">
-          <span>Creative</span>
-        </label>
-        <label class="template-option">
-          <input type="radio" name="template" value="classic">
-          <span>Classic</span>
-        </label>
-      </div>
-    </div>
-
     <div class="rf-grid">
       <div class="rf-card">
         <div class="rf-card-title">From (your business)</div>
@@ -1051,11 +1015,6 @@ function addLineItem() {
   wrap.appendChild(row);
 }
 
-document.getElementById('templatePicker').addEventListener('change', function(e) {
-  document.querySelectorAll('.template-option').forEach(el => el.classList.remove('selected'));
-  e.target.closest('.template-option').classList.add('selected');
-});
-
 let rcptFormRevealed = false;
 let rcptAuthSettled = false;
 
@@ -1146,8 +1105,6 @@ async function rcptSubmit(e) {
       amount: parseFloat(row.querySelector('[data-li-amount]').value) || 0
     })).filter(li => li.description || li.amount);
 
-    const template = document.querySelector('input[name="template"]:checked').value;
-
     const rcptEscapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const lineItemsHtml = lineItems.map(li =>
       `<tr><td>${rcptEscapeHtml(li.description)}</td><td class="num">${li.amount.toFixed(2)}</td></tr>`
@@ -1173,7 +1130,7 @@ async function rcptSubmit(e) {
       amount: parseFloat(document.getElementById('rfAmount').value) || 0,
       line_items: lineItems.length ? lineItems : null,
       line_items_html: lineItemsHtml,
-      template: template
+      template: 'corporate'
     };
 
     const resp = await fetch(RECEIPT_WEBHOOK_URL, {
