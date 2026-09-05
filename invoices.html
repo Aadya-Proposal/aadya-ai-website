@@ -457,6 +457,7 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
             <th>Payment Date</th>
             <th>Method</th>
             <th>Linked Invoice</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody id="receiptTableBody"></tbody>
@@ -635,6 +636,13 @@ function renderReceiptsTable(receipts) {
     return (inv && inv.invoice_number) || '—';
   };
 
+  // Older receipts predate PDF generation and have pdf_url = NULL — same
+  // "hide it, show a dash" treatment as linkedInvoiceNumber above.
+  const downloadAction = r => {
+    if (!r.pdf_url) return '—';
+    return `<a href="${r.pdf_url}" target="_blank" rel="noopener noreferrer" style="color:var(--blue);font-weight:600;text-decoration:none;">Download</a>`;
+  };
+
   tbody.innerHTML = receipts.map(r => `
     <tr>
       <td style="font-weight:600;color:var(--navy);">${r.receipt_number || '—'}</td>
@@ -643,6 +651,7 @@ function renderReceiptsTable(receipts) {
       <td style="color:var(--muted);">${formatDate(r.payment_date)}</td>
       <td>${r.payment_method || '—'}</td>
       <td>${linkedInvoiceNumber(r)}</td>
+      <td>${downloadAction(r)}</td>
     </tr>`).join('');
 
   mobileDiv.innerHTML = receipts.map(r => `
@@ -669,6 +678,7 @@ function renderReceiptsTable(receipts) {
           <div class="inv-card-value">${r.payment_method || '—'}</div>
         </div>
       </div>
+      <div class="inv-card-actions">${downloadAction(r)}</div>
     </div>`).join('');
 }
 
