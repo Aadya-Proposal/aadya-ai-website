@@ -882,8 +882,9 @@ textarea.form-input { resize: vertical; }
           <textarea class="form-input" id="rfFromAddress" rows="2" placeholder="Business address"></textarea>
         </div>
         <div class="form-field">
-          <label class="form-label" for="rfFromLogo">Logo URL <span class="form-optional">(optional)</span></label>
-          <input class="form-input" id="rfFromLogo" type="url" placeholder="https://…">
+          <label class="form-label" for="rfFromLogo">Logo <span class="form-optional">(optional)</span></label>
+          <input class="form-input" id="rfFromLogo" type="file" accept="image/*">
+          <div id="rfLogoStatus" style="font-size:12px;color:var(--muted);margin-top:4px;"></div>
         </div>
       </div>
 
@@ -984,6 +985,13 @@ const receiptSupabase = window.supabase.createClient(_RCPT_SUPABASE_URL, _RCPT_S
 // Supabase `receipts` insert, and the documents_used increment.
 const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrqjgbvxcn';
 
+// Public Supabase Storage bucket for user-uploaded business logos. Must be
+// created in the Supabase dashboard first (public read, authenticated
+// insert) — see PR description. The webhook/PDF backend just needs a
+// publicly fetchable image URL, same as the old plain-text Logo URL field.
+const RCPT_LOGO_BUCKET = 'logos';
+const RCPT_LOGO_MAX_BYTES = 5 * 1024 * 1024;
+
 // Matches dashboard.html's PLAN_LIMITS — documents_used is shared across
 // invoices, proposals and receipts.
 const RCPT_PLAN_LIMITS = { free: 3, starter: 20, pro: Infinity };
@@ -1014,6 +1022,20 @@ function addLineItem() {
   `;
   wrap.appendChild(row);
 }
+
+document.getElementById('rfFromLogo').addEventListener('change', function(e) {
+  const status = document.getElementById('rfLogoStatus');
+  const file = e.target.files[0];
+  if (!file) { status.textContent = ''; return; }
+  if (file.size > RCPT_LOGO_MAX_BYTES) {
+    status.style.color = '#B91C1C';
+    status.textContent = 'That file is too large (max 5MB). Choose a smaller image.';
+    e.target.value = '';
+    return;
+  }
+  status.style.color = 'var(--muted)';
+  status.textContent = file.name;
+});
 
 let rcptFormRevealed = false;
 let rcptAuthSettled = false;
@@ -1100,6 +1122,23 @@ async function rcptSubmit(e) {
       return;
     }
 
+    let logoUrl = null;
+    const logoFile = document.getElementById('rfFromLogo').files[0];
+    if (logoFile) {
+      btn.textContent = 'Uploading logo…';
+      const ext = (logoFile.name.split('.').pop() || 'png').toLowerCase();
+      const path = `${crypto.randomUUID()}.${ext}`;
+      const { error: uploadErr } = await receiptSupabase.storage
+        .from(RCPT_LOGO_BUCKET).upload(path, logoFile);
+      if (uploadErr) {
+        console.error('Logo upload error:', uploadErr);
+        rcptShowMsg('Could not upload your logo. Please try again, or remove it and submit without one.', 'error');
+        return;
+      }
+      logoUrl = receiptSupabase.storage.from(RCPT_LOGO_BUCKET).getPublicUrl(path).data.publicUrl;
+      btn.textContent = 'Saving…';
+    }
+
     const lineItems = Array.from(document.querySelectorAll('#lineItemsWrap .line-item-row')).map(row => ({
       description: row.querySelector('[data-li-desc]').value.trim(),
       amount: parseFloat(row.querySelector('[data-li-amount]').value) || 0
@@ -1123,7 +1162,7 @@ async function rcptSubmit(e) {
       from_email: document.getElementById('rfFromEmail').value.trim(),
       from_tax_id: document.getElementById('rfFromTaxId').value.trim() || null,
       from_address: document.getElementById('rfFromAddress').value.trim() || null,
-      from_logo_url: document.getElementById('rfFromLogo').value.trim() || null,
+      from_logo_url: logoUrl,
       payment_date: document.getElementById('rfPaymentDate').value,
       payment_method: document.getElementById('rfPaymentMethod').value,
       currency: document.getElementById('rfCurrency').value,
