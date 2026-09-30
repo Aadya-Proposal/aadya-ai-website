@@ -248,6 +248,15 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
 .mark-paid-btn:hover { background:var(--success); color:white; }
 .mark-paid-btn:disabled { opacity:0.5; cursor:not-allowed; }
 
+/* DOWNLOAD BUTTON */
+.download-btn {
+  background:none; border:none; padding:6px 4px;
+  color:var(--blue); font-size:13px; font-weight:600;
+  font-family:inherit; cursor:pointer; white-space:nowrap;
+}
+.download-btn:hover { text-decoration:underline; }
+.download-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
 /* EMPTY STATE */
 .empty-state {
   text-align:center;
@@ -508,15 +517,45 @@ function statusBadge(status) {
   return '<span class="badge badge-sent">Sent</span>';
 }
 
+// Invoices generated before PDFs were stored have pdf_path = NULL — no
+// button for those. Access control lives in the "invoices" bucket's storage
+// policy (own auth.uid() folder only), not in pdf_path, which users can edit.
+function downloadButton(invoice) {
+  if (!invoice.pdf_path) return '';
+  return `<button class="download-btn" onclick="downloadInvoice('${invoice.id}', this)">Download</button> `;
+}
+
 function actionCell(invoice) {
   const s = (invoice.status || 'sent').toLowerCase();
+  const dl = downloadButton(invoice);
   if (s === 'paid') {
     if (receiptsByInvoiceId[invoice.id]) {
-      return `<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid · Receipt saved</span>`;
+      return `${dl}<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid · Receipt saved</span>`;
     }
-    return `<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span> <button class="mark-paid-btn" onclick="openReceiptModal('${invoice.id}')">Generate Receipt →</button>`;
+    return `${dl}<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span> <button class="mark-paid-btn" onclick="openReceiptModal('${invoice.id}')">Generate Receipt →</button>`;
   }
-  return `<button class="mark-paid-btn" onclick="markPaid('${invoice.id}', this)">Mark as Paid</button>`;
+  return `${dl}<button class="mark-paid-btn" onclick="markPaid('${invoice.id}', this)">Mark as Paid</button>`;
+}
+
+async function downloadInvoice(invoiceId, btn) {
+  const invoice = currentInvoices.find(i => i.id === invoiceId);
+  if (!invoice || !invoice.pdf_path) return;
+  btn.disabled = true;
+  try {
+    // Short-lived signed URL, created with the user's own session. The
+    // download option makes it an attachment, so navigating to it keeps
+    // the page in place (and window.open after an await would be blocked).
+    const { data, error } = await supabaseClient.storage
+      .from('invoices')
+      .createSignedUrl(invoice.pdf_path, 60, { download: `${invoice.invoice_number || 'invoice'}.pdf` });
+    if (error) throw error;
+    window.location.href = data.signedUrl;
+  } catch(e) {
+    console.error('Invoice download error:', e);
+    alert('Could not download this invoice. Please try again.');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function markPaid(invoiceId, btn) {
@@ -530,18 +569,24 @@ async function markPaid(invoiceId, btn) {
 
     if (error) throw error;
 
+    // Re-render the action cell via actionCell so the Download button (and
+    // Generate Receipt) survive the status change.
+    const invoice = currentInvoices.find(i => i.id === invoiceId);
+    if (invoice) invoice.status = 'paid';
+    const paidCell = actionCell(invoice || { id: invoiceId, status: 'paid' });
+
     // Update badge and button in table row (desktop)
     const row = btn.closest('tr');
     if (row) {
       row.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
-      btn.closest('td').innerHTML = '<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span>';
+      btn.closest('td').innerHTML = paidCell;
     }
 
     // Update badge in mobile card
     const card = btn.closest('.invoice-card');
     if (card) {
       card.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
-      btn.closest('.inv-card-actions').innerHTML = '<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span>';
+      btn.closest('.inv-card-actions').innerHTML = paidCell;
     }
   } catch(e) {
     console.error('Mark paid error:', e);
