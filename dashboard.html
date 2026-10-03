@@ -513,6 +513,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
 
 </div>
 
+<script src="/js/business-profile.js"></script>
 <script src="/js/invoice-popup.js"></script>
 <script src="/checkout-links.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -734,7 +735,8 @@ async function openInvoiceForm() {
       return;
     }
 
-    openInvoicePopup(email, userName, loadInvoiceUsage);
+    const profile = await loadBusinessProfile(supabaseClient, email);
+    openInvoicePopup(email, userName, loadInvoiceUsage, profile);
   } catch(e) {
     console.error('Invoice form open error:', e);
     openInvoicePopup('', '', loadInvoiceUsage);

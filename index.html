@@ -2639,7 +2639,7 @@ function closeModal() {
   document.getElementById('proposalIframe').src = '';
 }
 async function openInvoicePopup() {
-  let email = '', name = '';
+  let email = '', name = '', profile = null;
   try {
     const { data: { session } } = await aadyaSupabase.auth.getSession();
     if (session && session.user) {
@@ -2648,6 +2648,7 @@ async function openInvoicePopup() {
       const { data: userData } = await aadyaSupabase
         .from('users').select('name').eq('email', email).maybeSingle();
       if (userData && userData.name) name = userData.name;
+      profile = await loadBusinessProfile(aadyaSupabase, email);
     }
   } catch (e) {
     // fall through to blank pre-fill
@@ -2659,6 +2660,7 @@ async function openInvoicePopup() {
   const params = new URLSearchParams();
   if (email) params.append('user_email', email);
   if (name) params.append('user_name', name);
+  if (profile) appendBusinessProfileParams(params, profile);
 
   const formUrl = 'https://forms.fillout.com/t/5wEMqv7uzCus' + (params.toString() ? '?' + params.toString() : '');
 
@@ -3086,6 +3088,7 @@ document.getElementById('payment-overlay').addEventListener('click', function(e)
 
 <!-- SUPABASE AUTH -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/business-profile.js"></script>
 <script src="/checkout-links.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 

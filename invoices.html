@@ -480,6 +480,7 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
 <!-- RECEIPT MODAL (built dynamically, see openReceiptModal) -->
 
 
+<script src="/js/business-profile.js"></script>
 <script src="/js/invoice-popup.js"></script>
 <script>
 const SUPABASE_URL = "https://rscpsmwqtkduahhaejtv.supabase.co";
@@ -494,6 +495,11 @@ const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrq
 let currentInvoices = [];
 let allReceipts = [];
 let receiptsByInvoiceId = {};
+// Saved business profile: pre-fills the receipt modal's From fields and the
+// Fillout invoice form. Updated when a receipt submit saves edits back.
+let currentBusinessProfile = pickBusinessProfile(null);
+// Logo the open receipt modal will use unless a new file is chosen.
+let rmSavedLogoUrl = null;
 
 function hideLoader() {
   document.getElementById('loadingScreen').classList.add('hidden');
@@ -772,9 +778,21 @@ function openReceiptModal(invoiceId) {
           </div>
         </div>
         <div>
-          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">From (your business) — optional</label>
+          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">From (your business)</label>
           <input id="rmFromName" type="text" placeholder="Business name" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
-          <input id="rmFromEmail" type="email" placeholder="Business email" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
+          <input id="rmFromEmail" type="email" placeholder="Business email (optional)" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
+          <input id="rmFromTaxId" type="text" placeholder="GSTIN / EIN / VAT number (optional)" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
+          <textarea id="rmFromAddress" rows="2" placeholder="Business address (optional)" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Logo <span style="font-weight:400;color:#64748b;">(optional)</span></label>
+          <div id="rmSavedLogo" style="display:none;align-items:center;gap:12px;margin-bottom:8px;">
+            <img id="rmSavedLogoImg" alt="Your saved logo" style="max-height:40px;max-width:140px;border:1px solid #e2e8f0;border-radius:6px;padding:3px;background:#fff;">
+            <span style="font-size:12px;color:#64748b;">Saved logo</span>
+            <button type="button" onclick="rmSetSavedLogo(null)" style="background:none;border:none;padding:0;font-size:12px;font-weight:600;color:#64748b;text-decoration:underline;cursor:pointer;">Remove</button>
+          </div>
+          <input id="rmFromLogo" type="file" accept="image/*" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;">
+          <div id="rmLogoStatus" style="font-size:12px;color:#64748b;margin-top:4px;"></div>
         </div>
         <div style="display:flex;gap:10px;margin-top:8px;">
           <button onclick="document.getElementById('receiptModal').remove()" style="flex:1;background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
@@ -784,6 +802,38 @@ function openReceiptModal(invoiceId) {
     </div>
   `;
   document.body.appendChild(modal);
+
+  // Set via .value rather than interpolated into the markup above, so
+  // profile text can't break out of the HTML.
+  document.getElementById('rmFromName').value = currentBusinessProfile.business_name || '';
+  document.getElementById('rmFromEmail').value = currentBusinessProfile.business_email || '';
+  document.getElementById('rmFromTaxId').value = currentBusinessProfile.tax_id || '';
+  document.getElementById('rmFromAddress').value = currentBusinessProfile.business_address || '';
+  rmSetSavedLogo(currentBusinessProfile.logo_url);
+
+  document.getElementById('rmFromLogo').addEventListener('change', function(e) {
+    const status = document.getElementById('rmLogoStatus');
+    const file = e.target.files[0];
+    if (!file) { status.textContent = ''; return; }
+    if (file.size > BUSINESS_LOGO_MAX_BYTES) {
+      status.style.color = '#B91C1C';
+      status.textContent = 'That file is too large (max 5MB). Choose a smaller image.';
+      e.target.value = '';
+      return;
+    }
+    status.style.color = '#64748b';
+    status.textContent = rmSavedLogoUrl ? file.name + ' — replaces your saved logo' : file.name;
+  });
+}
+
+function rmSetSavedLogo(url) {
+  rmSavedLogoUrl = url || null;
+  document.getElementById('rmSavedLogo').style.display = rmSavedLogoUrl ? 'flex' : 'none';
+  if (rmSavedLogoUrl) document.getElementById('rmSavedLogoImg').src = rmSavedLogoUrl;
+}
+
+function rmEscapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function rmShowMsg(html, kind) {
@@ -803,6 +853,10 @@ async function submitReceipt(invoiceId) {
   const paymentMethod = document.getElementById('rmPaymentMethod').value;
   if (!paymentMethod) {
     rmShowMsg('Please select a payment method.', 'error');
+    return;
+  }
+  if (!document.getElementById('rmFromName').value.trim()) {
+    rmShowMsg('Please enter your business name.', 'error');
     return;
   }
 
@@ -826,6 +880,39 @@ async function submitReceipt(invoiceId) {
     // webhook backend knows to skip the increment for flow: 'convert_from_invoice'.
     const clientId = document.getElementById('receiptModal').dataset.clientId;
 
+    let logoUrl = rmSavedLogoUrl;
+    const logoFile = document.getElementById('rmFromLogo').files[0];
+    if (logoFile) {
+      btn.textContent = 'Uploading logo…';
+      try {
+        logoUrl = await uploadBusinessLogo(supabaseClient, logoFile);
+      } catch (uploadErr) {
+        console.error('Logo upload error:', uploadErr);
+        rmShowMsg('Could not upload your logo. Please try again, or remove it and submit without one.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Save Receipt →';
+        return;
+      }
+      btn.textContent = 'Saving…';
+    }
+
+    const fromProfile = pickBusinessProfile({
+      business_name: document.getElementById('rmFromName').value,
+      business_email: document.getElementById('rmFromEmail').value,
+      tax_id: document.getElementById('rmFromTaxId').value,
+      business_address: document.getElementById('rmFromAddress').value,
+      logo_url: logoUrl
+    });
+
+    // A receipt for an invoice is one line: what the invoice was for, at its amount.
+    const lineItems = [{
+      description: invoice.project_name || ('Invoice ' + (invoice.invoice_number || '')).trim(),
+      amount: parseFloat(invoice.amount) || 0
+    }];
+    const lineItemsHtml = lineItems.map(li =>
+      `<tr><td>${rmEscapeHtml(li.description)}</td><td class="num">${li.amount.toFixed(2)}</td></tr>`
+    ).join('');
+
     const payload = {
       flow: 'convert_from_invoice',
       client_id: clientId,
@@ -835,17 +922,17 @@ async function submitReceipt(invoiceId) {
       receipt_number: document.getElementById('rmReceiptNumber').value.trim(),
       payer_name: invoice.client_name || null,
       payer_email: invoice.client_email || null,
-      from_name: document.getElementById('rmFromName').value.trim() || null,
-      from_email: document.getElementById('rmFromEmail').value.trim() || null,
-      from_tax_id: null,
-      from_address: null,
-      from_logo_url: null,
+      from_name: fromProfile.business_name,
+      from_email: fromProfile.business_email,
+      from_tax_id: fromProfile.tax_id,
+      from_address: fromProfile.business_address,
+      from_logo_url: fromProfile.logo_url,
       payment_date: document.getElementById('rmPaymentDate').value,
       payment_method: paymentMethod,
       currency: invoice.currency || 'INR',
       amount: invoice.amount,
-      line_items: null,
-      line_items_html: '',
+      line_items: lineItems,
+      line_items_html: lineItemsHtml,
       template: 'corporate'
     };
 
@@ -855,6 +942,17 @@ async function submitReceipt(invoiceId) {
       body: JSON.stringify(payload)
     });
     if (!resp.ok) throw new Error('Webhook responded with ' + resp.status);
+
+    // Edited From details become the new business profile. Best-effort: the
+    // receipt is already submitted, so a failed save is only logged.
+    if (businessProfileChanged(fromProfile, currentBusinessProfile)) {
+      try {
+        await saveBusinessProfile(supabaseClient, email, fromProfile);
+        currentBusinessProfile = fromProfile;
+      } catch (profileErr) {
+        console.error('Business profile save error:', profileErr);
+      }
+    }
 
     // The receipt row is now written asynchronously by the webhook's backend,
     // so it won't show up in the Receipts list/badge immediately — confirm
@@ -945,7 +1043,7 @@ async function generateInvoice() {
       return;
     }
 
-    openInvoicePopup(email, userName, start);
+    openInvoicePopup(email, userName, start, currentBusinessProfile);
   } catch(e) {
     console.error('Generate invoice error:', e);
     openInvoicePopup('', '', start);
@@ -1034,6 +1132,8 @@ async function start() {
 
     // Load usage stats
     await loadUsage(email, plan);
+
+    currentBusinessProfile = await loadBusinessProfile(supabaseClient, email);
 
     // Load invoices
     const { data: invoices, error: invErr } = await supabaseClient

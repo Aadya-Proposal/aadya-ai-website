@@ -36,6 +36,7 @@
 <meta name="theme-color" content="#0F2D6B">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/business-profile.js"></script>
 <script src="/checkout-links.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
@@ -214,6 +215,32 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   transition:opacity 0.3s;
 }
 .save-confirm.visible { opacity:1; }
+.form-optional { font-weight:400; color:var(--muted); }
+.logo-preview {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:8px;
+}
+.logo-preview img {
+  max-height:48px;
+  max-width:160px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:4px;
+  background:white;
+}
+.logo-remove-btn {
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:underline;
+  padding:0;
+}
+.logo-status { font-size:12px; color:var(--muted); margin-top:4px; }
 
 /* PLAN */
 .plan-current {
@@ -409,7 +436,45 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
     </div>
   </div>
 
-  <!-- Card 2: Plan & Billing -->
+  <!-- Card 2: Business profile -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Business profile</h2>
+      <span class="card-badge">Invoices &amp; receipts</span>
+    </div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">Pre-filled as the "From" details on your invoices and receipts.</p>
+    <div class="form-group">
+      <label class="form-label" for="bpName">Business name</label>
+      <input type="text" id="bpName" class="form-input" placeholder="Your business name">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="bpEmail">Business email</label>
+      <input type="email" id="bpEmail" class="form-input" placeholder="you@business.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="bpTaxId">Tax ID <span class="form-optional">(optional)</span></label>
+      <input type="text" id="bpTaxId" class="form-input" placeholder="GSTIN / EIN / VAT number">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="bpAddress">Address <span class="form-optional">(optional)</span></label>
+      <textarea id="bpAddress" class="form-input" rows="2" placeholder="Business address"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="bpLogo">Logo <span class="form-optional">(optional)</span></label>
+      <div class="logo-preview" id="bpLogoPreview" style="display:none;">
+        <img id="bpLogoImg" alt="Your saved logo">
+        <button type="button" class="logo-remove-btn" onclick="removeBusinessLogo()">Remove</button>
+      </div>
+      <input type="file" id="bpLogo" class="form-input" accept="image/*">
+      <div class="logo-status" id="bpLogoStatus"></div>
+    </div>
+    <div class="save-row">
+      <button class="save-btn" id="bpSaveBtn" onclick="saveBusinessDetails()">Save business profile</button>
+      <span class="save-confirm" id="bpSaveConfirm">Saved ✓</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Plan & Billing -->
   <div class="card">
     <div class="card-header">
       <h2>Plan &amp; Billing</h2>
@@ -420,7 +485,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
     </div>
   </div>
 
-  <!-- Card 3: Account -->
+  <!-- Card 4: Account -->
   <div class="card">
     <div class="card-header">
       <h2>Account</h2>
@@ -441,6 +506,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUserEmail = '';
 let currentSubscriptionId = null;
 let currentPaymentProvider = null;
+let currentBusinessLogoUrl = null;
 
 function hideLoader() {
   document.getElementById('loadingScreen').classList.add('hidden');
@@ -487,6 +553,8 @@ async function start() {
     }
 
     renderPlanSection(plan, email, subscriptionStatus);
+
+    renderBusinessProfile(await loadBusinessProfile(supabaseClient, email));
 
   } catch(e) {
     console.error('Account page error:', e);
@@ -643,6 +711,78 @@ async function saveName() {
 
   } catch(e) {
     alert('Error saving: ' + e.message);
+  }
+}
+
+function renderBusinessProfile(profile) {
+  document.getElementById('bpName').value = profile.business_name || '';
+  document.getElementById('bpEmail').value = profile.business_email || '';
+  document.getElementById('bpTaxId').value = profile.tax_id || '';
+  document.getElementById('bpAddress').value = profile.business_address || '';
+  document.getElementById('bpLogo').value = '';
+  document.getElementById('bpLogoStatus').textContent = '';
+  setBusinessLogo(profile.logo_url);
+}
+
+function setBusinessLogo(url) {
+  currentBusinessLogoUrl = url || null;
+  document.getElementById('bpLogoPreview').style.display = currentBusinessLogoUrl ? 'flex' : 'none';
+  if (currentBusinessLogoUrl) document.getElementById('bpLogoImg').src = currentBusinessLogoUrl;
+}
+
+// Only clears the profile's reference to the logo; takes effect on Save.
+function removeBusinessLogo() {
+  setBusinessLogo(null);
+}
+
+document.getElementById('bpLogo').addEventListener('change', function(e) {
+  const status = document.getElementById('bpLogoStatus');
+  const file = e.target.files[0];
+  if (!file) { status.textContent = ''; return; }
+  if (file.size > BUSINESS_LOGO_MAX_BYTES) {
+    status.style.color = 'var(--danger)';
+    status.textContent = 'That file is too large (max 5MB). Choose a smaller image.';
+    e.target.value = '';
+    return;
+  }
+  status.style.color = 'var(--muted)';
+  status.textContent = file.name + ' — replaces your logo when you save';
+});
+
+async function saveBusinessDetails() {
+  const btn = document.getElementById('bpSaveBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+
+  try {
+    let logoUrl = currentBusinessLogoUrl;
+    const logoFile = document.getElementById('bpLogo').files[0];
+    if (logoFile) {
+      btn.textContent = 'Uploading logo…';
+      logoUrl = await uploadBusinessLogo(supabaseClient, logoFile);
+    }
+    btn.textContent = 'Saving…';
+
+    const profile = pickBusinessProfile({
+      business_name: document.getElementById('bpName').value,
+      business_email: document.getElementById('bpEmail').value,
+      tax_id: document.getElementById('bpTaxId').value,
+      business_address: document.getElementById('bpAddress').value,
+      logo_url: logoUrl
+    });
+    await saveBusinessProfile(supabaseClient, currentUserEmail, profile);
+    renderBusinessProfile(profile);
+
+    const confirm = document.getElementById('bpSaveConfirm');
+    confirm.classList.add('visible');
+    setTimeout(() => confirm.classList.remove('visible'), 2500);
+
+  } catch(e) {
+    console.error('Business profile save error:', e);
+    alert('Error saving business profile: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
   }
 }
 
