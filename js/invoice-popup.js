@@ -1,4 +1,6 @@
-function openInvoicePopup(email, name, onClose) {
+// profile (optional): business profile from js/business-profile.js, passed to
+// the form as URL parameters for pre-fill.
+function openInvoicePopup(email, name, onClose, profile) {
   onClose = onClose || function(){};
 
   const existing = document.getElementById('invoicePopupOverlay');
@@ -7,6 +9,7 @@ function openInvoicePopup(email, name, onClose) {
   const params = new URLSearchParams();
   if (email) params.append('user_email', email);
   if (name) params.append('user_name', name);
+  if (profile) appendBusinessProfileParams(params, profile);
 
   const formUrl = 'https://forms.fillout.com/t/5wEMqv7uzCus' + (params.toString() ? '?' + params.toString() : '');
 
