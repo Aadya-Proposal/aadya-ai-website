@@ -416,7 +416,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   <div class="stat-card">
     <div class="stat-label">Shared document usage</div>
     <div class="stat-value" id="docsUsed">0</div>
-    <div class="stat-sub" id="docsLimit">of 20 included in Starter</div>
+    <div class="stat-sub" id="docsLimit">of 20 this month · Starter</div>
     <div class="usage-bar"><div class="usage-fill" id="usageFill" style="width:0%"></div></div>
   </div>
   <div class="stat-card">
@@ -533,7 +533,7 @@ function updateUsageStats(plan, docsUsed) {
   const limit = getPlanLimit(plan);
 
   document.getElementById('docsUsed').textContent = docsUsed;
-  document.getElementById('docsLimit').textContent = isPro ? 'Unlimited on Pro' : `of ${limit} included in ${planLabel}`;
+  document.getElementById('docsLimit').textContent = isPro ? 'this month · unlimited on Pro' : `of ${limit} this month · ${planLabel}`;
   const pct = isPro ? 0 : Math.min((docsUsed / limit) * 100, 100);
   document.getElementById('usageFill').style.width = pct + '%';
 }
@@ -638,9 +638,9 @@ function showUpgradeWall(plan, docsUsed, limit, email) {
   modal.innerHTML = `
     <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
       <div style="font-size:48px;margin-bottom:16px;">🚀</div>
-      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've reached your plan's limit!</h2>
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've reached this month's limit!</h2>
       <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
-        You've used all ${limit} documents included in your current plan. Upgrade to keep generating proposals and invoices for your clients.
+        You've used all ${limit} documents in your plan for this month. Your allowance resets on the 1st (UTC), or upgrade to keep generating proposals and invoices now.
       </p>
 
       <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
@@ -728,9 +728,9 @@ function showInvoiceUpgradeModal(limit, plan, email) {
   modal.innerHTML = `
     <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
       <div style="font-size:48px;margin-bottom:16px;">📄</div>
-      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've reached your plan's limit!</h2>
+      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've reached this month's limit!</h2>
       <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
-        You've used all ${limit} documents included in your current plan. Upgrade to keep generating proposals and invoices for your clients.
+        You've used all ${limit} documents in your plan for this month. Your allowance resets on the 1st (UTC), or upgrade to keep generating proposals and invoices now.
       </p>
       <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
         <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">${nextPlan} Plan — ${nextPrice}</div>
@@ -794,9 +794,7 @@ async function loadInvoiceUsage() {
 
     const el = document.getElementById('invoiceUsageText');
     if (el) {
-      el.textContent = isPro
-        ? `${docsUsed} documents generated — Unlimited on Pro`
-        : `${docsUsed} of ${limit} documents used`;
+      el.textContent = formatDocumentUsage(docsUsed, limit);
     }
   } catch(e) {
     console.warn('Invoice usage load failed:', e);
@@ -1183,7 +1181,7 @@ async function start() {
         const plan = userData.data.plan || 'free';  // Default to 'free', not 'starter'
         const isPro = plan.toLowerCase().includes('pro');
         const planLabel = isPro ? 'Pro' : (plan === 'free' ? 'Free' : 'Starter');
-        const planPrice = plan === 'free' ? '3 documents free' : 'Manage your subscription in Account';
+        const planPrice = plan === 'free' ? `${DOCUMENT_LIMITS.free} free documents per month` : 'Manage your subscription in Account';
         const docsUsed = userData.data.documents_used || 0;
         const displayName = userData.data.name || email.split('@')[0];
 

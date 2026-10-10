@@ -2,11 +2,17 @@
 
 Frontend work is local only. No SQL, Make changes, file migration, purchase or deployment has been executed.
 
-## Shared document allowance
+## Monthly document allowance
 
-All modified generation entry points use `users.documents_used`: Free 3 total, Starter 20 per paid billing period, Pro unlimited. Proposal, SOW, invoice and standalone receipt share this allowance. Invoice-linked receipts retain `flow: convert_from_invoice` and do not update usage in the browser.
+Decision: Free 3 documents per calendar month (UTC), Starter 20 per calendar month, Pro unlimited. Proposals (including SOWs), invoices and standalone receipts share this allowance.
 
-Make/backend must enforce the same limits atomically before accepting a new chargeable document. Browser checks are UX, not security: Fillout URLs can be opened directly. Verify billing-period resets occur once at the appropriate subscription renewal for both providers; do not reset the free allowance monthly. Neither reset logic nor atomic increment implementation exists in this repository. Failed generation should not consume a successful-document allowance. Confirm the existing backend behavior before release.
+The database owns the count. `upsert_user_doc_count()` recomputes `users.documents_used` as invoices + proposals + standalone receipts (`invoice_id` is null) created since the 1st of the current month (UTC), and a daily recount corrects any drift. The count therefore drops back at the start of each month without any subscription-renewal or browser reset logic.
+
+The browser only reads `documents_used` (`js/document-usage.js`). It never increments, decrements or resets it. Every usage label says "this month", e.g. "2 of 3 documents used this month"; limit prompts say the allowance resets on the 1st (UTC).
+
+Receipts created from an invoice (Record payment, `flow: convert_from_invoice`, `invoice_id` set) are never blocked by the allowance check and are excluded from the count.
+
+Browser checks are UX, not security: Fillout URLs can be opened directly. Make/backend should refuse a new chargeable document when the current month's count is at the plan limit. Confirm SOWs are stored in `proposals` (so they are counted) and that a failed generation leaves no row behind (so it does not consume the allowance).
 
 ## Proposal storage prerequisite (do not deploy download UI first)
 
@@ -28,15 +34,16 @@ Dashboard limit prompts and invoice-page limits offer India (Razorpay, INR) and 
 
 Record payment opens one modal for full payment, with receipt generation checked by default. Business details are collapsed when already saved. Mark-paid-only does not create a receipt or persist date/method (there are no verified payment-detail columns); those controls are hidden in that mode. Receipt requests carry payment date/method as before.
 
-Payment state is saved before requesting the receipt. If the receipt request fails, the invoice stays paid. Retry uses the same client_id within the tab, including reloads. The Make receipt scenario must deduplicate that client_id, skip documents_used for invoice conversion, and also prevent duplicate receipts per invoice across tabs/devices. The frontend cannot make the database update and webhook atomic. After an accepted webhook request, the UI shows “Receipt processing”; returning to the page or Refresh reloads the persisted receipt. An accepted-but-failed Make run requires backend retry with the same ID; the UI does not blindly resend accepted requests.
+Payment state is saved before requesting the receipt. If the receipt request fails, the invoice stays paid. Retry uses the same client_id within the tab, including reloads. The Make receipt scenario must deduplicate that client_id, store invoice_id on the receipt (so it is excluded from documents_used), and also prevent duplicate receipts per invoice across tabs/devices. The frontend cannot make the database update and webhook atomic. After an accepted webhook request, the UI shows “Receipt processing”; returning to the page or Refresh reloads the persisted receipt. An accepted-but-failed Make run requires backend retry with the same ID; the UI does not blindly resend accepted requests.
 
 Receipt downloads reuse the current stored receipt URL. This batch does not migrate receipt storage. Confirm these URLs work and have the intended privacy model before rollout.
 
 ## Acceptance checks
 
-- Free allowance exhausted by any combination of product types blocks a new chargeable document.
+- Free allowance (3 this month) exhausted by any combination of product types blocks a new chargeable document; the same account can generate again after the 1st (UTC).
 - Starter at 19 allows one more; at 20 blocks invoice/proposal/standalone receipt entry. Pro is unlimited.
-- Invoice-linked receipt succeeds at the allowance limit without a users counter mutation.
+- Invoice-linked receipt succeeds at the monthly limit and does not change documents_used.
+- Every usage label and limit prompt says "this month"; none says "total" or "billing period".
 - India checkout uses Razorpay; EU/US choice never calls the Razorpay webhook.
 - Paid invoice plus failed receipt remains paid, and retry keeps its idempotency ID.
 - Mark-paid-only sends no receipt webhook.
@@ -49,4 +56,4 @@ Receipt downloads reuse the current stored receipt URL. This batch does not migr
 
 Run `node tests/batch-one.cjs` with Playwright available through your Node module path and Microsoft Edge installed. It intercepts all requests and mocks Supabase, Make and payments; it never purchases, emails or changes live data. Run `node tests/proposal-migration.cjs` for migration safety checks with in-memory Storage. Neither test runs SQL.
 
-Validation completed locally: 37 browser/logic checks plus 4 migration safety checks passed. Real Storage RLS, production checkout activation and Make execution remain to be verified after the manual backend steps.
+Validation completed locally: 55 browser/logic checks plus 4 migration safety checks passed. Real Storage RLS, production checkout activation and Make execution remain to be verified after the manual backend steps.

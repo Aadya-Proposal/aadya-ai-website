@@ -9,6 +9,7 @@ function check(value, message) { assert.ok(value, message); checks++; console.lo
 const context = vm.createContext({ console, URL });
 vm.runInContext(fs.readFileSync(path.join(root, 'js/document-usage.js'), 'utf8'), context);
 check(vm.runInContext("getPlanLimit('starter') === 20 && getPlanLimit('free') === 3 && getPlanLimit('pro') === Infinity", context), 'one allowance definition');
+check(vm.runInContext("formatDocumentUsage(2, 3) === '2 of 3 documents used this month' && formatDocumentUsage(1, Infinity) === '1 document this month — unlimited on Pro'", context), 'usage label says per month');
 vm.runInContext(fs.readFileSync(path.join(root, 'js/proposal-downloads.js'), 'utf8'), context);
 check(vm.runInContext("proposalObjectPath({pdf_path:'a/token.pdf'},'a') === 'a/token.pdf'", context), 'owner folder accepted');
 for (const value of ['b/token.pdf', 'token.pdf', 'a/../b.pdf', 'a/%2e%2e.pdf', 'a/x.pdf?token=secret']) {
@@ -19,6 +20,11 @@ for (const file of ['dashboard.html','invoices.html','invoice.html','receipt.htm
  for (const match of fs.readFileSync(path.join(root,file),'utf8').matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) new Function(match[1]);
 }
 check(true, 'all modified inline scripts parse');
+for (const file of ['dashboard.html','invoices.html','invoice.html','receipt.html','index.html','account.html','checkout-links.js','js/document-usage.js']) {
+ const source = fs.readFileSync(path.join(root,file),'utf8');
+ check(!/documents_used\s*(?:[+\-]?=|:)|\.(?:update|upsert|insert)\(\{[^}]*documents_used/.test(source), 'browser never writes or resets documents_used: ' + file);
+ check(!/no time limit|included in your (?:current )?plan|shared documents|billing period[^.]*documents/i.test(source), 'no total or billing-period allowance wording: ' + file);
+}
 (async () => {
  const browser = await chromium.launch({ channel: 'msedge', headless: true });
  try {
@@ -69,7 +75,7 @@ check(true, 'all modified inline scripts parse');
   const invoiceId='22222222-2222-4222-8222-222222222222';
   await page.goto('https://aadya.test/invoices');
   await page.waitForSelector('#invoiceTableBody .mark-paid-btn');
-  check((await page.locator('#invUsedSub').innerText()).includes('20 shared'), 'invoice page shows shared allowance');
+  check((await page.locator('#invUsedSub').innerText()).includes('of 20 documents used this month'), 'invoice page shows monthly allowance');
   await page.evaluate(()=>generateInvoice());
   check(await page.locator('#regionalCheckout').isVisible(), 'invoice blocked at shared limit offers regional upgrade');
   await page.locator('[data-close]').click();
@@ -83,7 +89,7 @@ check(true, 'all modified inline scripts parse');
   check(await page.evaluate(()=>__fixture.invoices[0].status==='paid' && __fixture.updates===1), 'receipt failure preserves recorded payment');
   const first=await page.evaluate(()=>__fixture.posts[0]);
   check(first.flow==='convert_from_invoice' && first.line_items[0].amount===500 && first.line_items_html.includes('&lt;review&gt;'), 'receipt payload is free linked flow with escaped line item');
-  check(await page.evaluate(()=>__fixture.used===20), 'linked receipt does not modify allowance');
+  check(first.invoice_id===invoiceId && await page.evaluate(()=>__fixture.used===20), 'invoice-linked receipt is sent at the monthly limit and does not modify allowance');
   await page.locator('#rmCancelBtn').click();
   await page.reload();await page.waitForSelector('#invoiceTableBody .mark-paid-btn');
   // The mock DB resets on reload; restore the persisted paid status to model the backend.
@@ -128,6 +134,8 @@ check(true, 'all modified inline scripts parse');
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'mobile receipt flow has no horizontal overflow');
   await page.screenshot({path:path.join(process.env.TEMP||root,'aadya-receipt-mobile.png')});
   await page.goto('https://aadya.test/dashboard');await page.waitForSelector('.history-download');
+  await page.waitForFunction(()=>document.getElementById('docsLimit').textContent.includes('this month'));
+  check((await page.locator('#docsLimit').innerText()).includes('of 20 this month'),'dashboard usage label is monthly');
   await page.evaluate(()=>showInvoiceUpgradeModal(20,'starter','owner@example.test'));
   await page.locator('#invoiceUpgradeCtaBtn').click();
   check(await page.locator('#regionalCheckout [data-region="usd"]').isVisible(),'dashboard upgrades expose international checkout');
@@ -146,7 +154,7 @@ check(true, 'all modified inline scripts parse');
   await page.goto('https://aadya.test/receipt');
   await page.waitForFunction(()=>typeof rcptSubmit==='function');
   await page.evaluate(()=>rcptSubmit({preventDefault(){}}));
-  check((await page.locator('#receiptFormMsg').innerText()).includes('20 documents included') && await page.evaluate(()=>__fixture.posts.length===0),'standalone receipt respects exhausted shared allowance');
+  check((await page.locator('#receiptFormMsg').innerText()).includes('20 of 20 documents in your plan this month') && await page.evaluate(()=>__fixture.posts.length===0),'standalone receipt respects exhausted shared allowance');
   await page.goto('https://aadya.test/');
   await page.waitForFunction(()=>typeof openInvoicePopup==='function' && typeof readDocumentUsage==='function');
   await page.evaluate(()=>openInvoicePopup());

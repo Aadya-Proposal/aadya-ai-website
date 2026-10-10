@@ -497,8 +497,8 @@ const SUPABASE_KEY = "sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Make.com webhook that owns PDF generation, emailing the client, the
-// Supabase `receipts` insert, and (standalone flow only) the documents_used
-// increment.
+// Supabase `receipts` insert. documents_used is recomputed in the database by
+// upsert_user_doc_count(); receipts with an invoice_id are never counted.
 const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrqjgbvxcn';
 
 let currentInvoices = [];
@@ -910,11 +910,9 @@ async function submitReceipt(invoiceId) {
       return;
     }
 
-    // No documents_used gate/increment here on purpose: this invoice already
-    // consumed a document slot when it was created, so generating its receipt
-    // isn't a new document — it's exempt from the counter. Only the standalone
-    // /receipt page (a genuinely new document) counts against the limit. The
-    // webhook backend knows to skip the increment for flow: 'convert_from_invoice'.
+    // No allowance check here on purpose: the invoice already counted when it
+    // was created, so its receipt is never blocked. The receipt row carries
+    // invoice_id, which upsert_user_doc_count() excludes from documents_used.
     const clientId = document.getElementById('receiptModal').dataset.clientId;
     receiptRequest(invoiceId, { clientId, date: paymentDate, method: paymentMethod, state: 'failed' });
 
@@ -1023,9 +1021,9 @@ async function loadUsage(email) {
   const { plan, used, limit } = await readDocumentUsage(supabaseClient, email);
   const isPro = limit === Infinity;
   document.getElementById('invUsedCount').textContent = used;
-  document.getElementById('invUsedSub').textContent = isPro ? 'Shared documents — unlimited on Pro' : `of ${limit} shared documents`;
+  document.getElementById('invUsedSub').textContent = isPro ? 'this month · unlimited on Pro' : `of ${limit} documents used this month`;
   document.getElementById('invUsageFill').style.width = isPro ? '0%' : Math.min(used / limit * 100, 100) + '%';
-  document.getElementById('invUsageBarLabel').textContent = 'Proposals, SOWs, invoices and standalone receipts. Invoice-linked receipts are free.';
+  document.getElementById('invUsageBarLabel').textContent = 'Proposals, SOWs, invoices and standalone receipts count toward your monthly allowance (resets on the 1st, UTC). Receipts created from an invoice are free.';
   const badge = document.getElementById('invPlanBadge');
   badge.textContent = isPro ? 'Pro' : plan.includes('starter') ? 'Starter' : 'Free';
   badge.classList.toggle('pro', isPro);
