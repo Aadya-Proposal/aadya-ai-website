@@ -16,6 +16,8 @@ Browser checks are UX, not security: Fillout URLs can be opened directly. Make/b
 
 ## Proposal storage prerequisite (do not deploy download UI first)
 
+The download UI is behind `PROPOSAL_DOWNLOADS_ENABLED` in `js/proposal-downloads.js`. It ships as `false`: the dashboard lists proposals with no Download button, link or notice, and makes no Storage calls for proposals. The rest of batch one can be released with the flag off. Set it to `true` only after steps 1–7 below are complete.
+
 1. Export the proposals rows, inspect existing Storage policies, and confirm files really are `<token>.pdf` inside the PRIVATE proposals bucket. Account ownership must be verified against trusted historical Make/Fillout records. The migration uses `user_email` as an initial mapping only; if rows were tampered with, that is not proof of original ownership. Resolve disputed/missing owners manually.
 2. Review and manually run `sql/proposal-private-downloads.sql`. It adds `pdf_path`, keeps the bucket private, grants user-folder reads and adds restrictive guards against older broad policies. Anonymous reads and browser writes to proposals remain denied. Other buckets are unaffected. Existing restrictive policies can still deny legitimate reads; inspect them rather than deleting them blindly.
 3. In the proposals/SOW Make scenario, use the existing service-role-only UID lookup (or a trusted existing auth UID). Stop the route if the lookup is empty. Never use an unverified form-supplied UID.
@@ -23,7 +25,7 @@ Browser checks are UX, not security: Fillout URLs can be opened directly. Make/b
 5. For existing documents, install `@supabase/supabase-js` in an isolated local tools directory, expose it via `NODE_PATH`, and set `SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` in the local environment (never commit keys). Run `node scripts/migrate-proposal-pdfs.cjs` for a dry-run. It reads source files but makes no changes. Review every mapping and blocked row.
 6. After reviewing the mapping, run the same command with `--apply`. The script copies each source into its owner's folder, downloads both to compare SHA-256 hashes, and updates `pdf_path` only after verification. Original files stay intact. A pre-existing destination must have identical bytes. Conflicting cross-account source mappings are blocked. It is rerunnable; already mapped rows are skipped and failures return a nonzero exit status.
 7. Test user A can sign/download A's file; user B cannot sign A's path even by editing B's proposal row. Confirm anonymous reads fail and browser writes fail. Test through Storage itself, not only the UI's path guard.
-8. Deploy the frontend only after migration and new-generation mapping work. Old documents lacking `pdf_path` show “Download not available”; they are not regenerated or publicly exposed.
+8. Set `PROPOSAL_DOWNLOADS_ENABLED = true` only after migration and new-generation mapping work. Old documents lacking `pdf_path` show “Download not available”; they are not regenerated or publicly exposed.
 9. After an agreed retention period and verification of every migrated file, separately approve removal of old flat objects through Storage API. The supplied script never deletes originals and never edits storage.objects directly. Keep pdf_url until email/approval dependencies have been audited.
 
 ## Checkout
@@ -56,4 +58,6 @@ Receipt downloads reuse the current stored receipt URL. This batch does not migr
 
 Run `node tests/batch-one.cjs` with Playwright available through your Node module path and Microsoft Edge installed. It intercepts all requests and mocks Supabase, Make and payments; it never purchases, emails or changes live data. Run `node tests/proposal-migration.cjs` for migration safety checks with in-memory Storage. Neither test runs SQL.
 
-Validation completed locally: 55 browser/logic checks plus 4 migration safety checks passed. Real Storage RLS, production checkout activation and Make execution remain to be verified after the manual backend steps.
+With the shipped flag (`false`) the two download checks are reported as SKIP and two flag-off checks run instead. Run `PROPOSAL_DOWNLOADS=on node tests/batch-one.cjs` to test the download UI as if enabled, without editing the file.
+
+Validation completed locally: 55 browser/logic checks (2 skipped with the flag off; all pass with `PROPOSAL_DOWNLOADS=on`) plus 4 migration safety checks passed. Real Storage RLS, production checkout activation and Make execution remain to be verified after the manual backend steps.

@@ -6,11 +6,22 @@ const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '..');
 let checks = 0;
 function check(value, message) { assert.ok(value, message); checks++; console.log('PASS', message); }
+let skips = 0;
+function skip(message) { skips++; console.log('SKIP', message); }
+// The shipped flag decides which proposal-download checks run. PROPOSAL_DOWNLOADS=on
+// serves the script with the flag forced on, to test the feature before enabling it.
+const forceDownloadsOn = process.env.PROPOSAL_DOWNLOADS === 'on';
+const proposalScript = () => {
+ const source = fs.readFileSync(path.join(root, 'js/proposal-downloads.js'), 'utf8');
+ return forceDownloadsOn ? source.replace('const PROPOSAL_DOWNLOADS_ENABLED = false;', 'const PROPOSAL_DOWNLOADS_ENABLED = true;') : source;
+};
 const context = vm.createContext({ console, URL });
 vm.runInContext(fs.readFileSync(path.join(root, 'js/document-usage.js'), 'utf8'), context);
 check(vm.runInContext("getPlanLimit('starter') === 20 && getPlanLimit('free') === 3 && getPlanLimit('pro') === Infinity", context), 'one allowance definition');
 check(vm.runInContext("formatDocumentUsage(2, 3) === '2 of 3 documents used this month' && formatDocumentUsage(1, Infinity) === '1 document this month — unlimited on Pro'", context), 'usage label says per month');
-vm.runInContext(fs.readFileSync(path.join(root, 'js/proposal-downloads.js'), 'utf8'), context);
+vm.runInContext(proposalScript(), context);
+const downloadsEnabled = vm.runInContext('PROPOSAL_DOWNLOADS_ENABLED', context);
+console.log('PROPOSAL_DOWNLOADS_ENABLED =', downloadsEnabled);
 check(vm.runInContext("proposalObjectPath({pdf_path:'a/token.pdf'},'a') === 'a/token.pdf'", context), 'owner folder accepted');
 for (const value of ['b/token.pdf', 'token.pdf', 'a/../b.pdf', 'a/%2e%2e.pdf', 'a/x.pdf?token=secret']) {
  context.input = value;
@@ -59,6 +70,7 @@ for (const file of ['dashboard.html','invoices.html','invoice.html','receipt.htm
    if(u.hostname==='aadya.test') {
     if(u.pathname==='/download.pdf') return route.fulfill({status:200,contentType:'application/pdf',body:'test',headers:{'content-disposition':'attachment; filename="test.pdf"'}});
     let file=path.join(root,u.pathname==='/'?'index.html':u.pathname.slice(1)); if(!path.extname(file))file+='.html';
+    if(file===path.join(root,'js','proposal-downloads.js'))return route.fulfill({body:proposalScript(),contentType:'application/javascript'});
     if(fs.existsSync(file))return route.fulfill({path:file,contentType:file.endsWith('.js')?'application/javascript':file.endsWith('.html')?'text/html':undefined});
     return route.fulfill({status:404,body:''});
    }
@@ -133,7 +145,7 @@ for (const file of ['dashboard.html','invoices.html','invoice.html','receipt.htm
   await page.screenshot({path:path.join(process.env.TEMP||root,'aadya-receipt-mobile.png')});
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'mobile receipt flow has no horizontal overflow');
   await page.screenshot({path:path.join(process.env.TEMP||root,'aadya-receipt-mobile.png')});
-  await page.goto('https://aadya.test/dashboard');await page.waitForSelector('.history-download');
+  await page.goto('https://aadya.test/dashboard');await page.waitForSelector('.history-item');
   await page.waitForFunction(()=>document.getElementById('docsLimit').textContent.includes('this month'));
   check((await page.locator('#docsLimit').innerText()).includes('of 20 this month'),'dashboard usage label is monthly');
   await page.evaluate(()=>showInvoiceUpgradeModal(20,'starter','owner@example.test'));
@@ -145,12 +157,22 @@ for (const file of ['dashboard.html','invoices.html','invoice.html','receipt.htm
   const navigation=page.waitForURL('https://aadya-proposals.lemonsqueezy.com/**');
   await page.locator('[data-region="usd"]').click();await navigation;
   check(new URL(page.url()).searchParams.get('checkout[email]')==='owner@example.test','international checkout prefills account email');
-  await page.goto('https://aadya.test/dashboard');await page.waitForSelector('.history-download');
-  const download=page.waitForEvent('download');await page.locator('.history-download').click();await download;
-  check(await page.evaluate(()=>__fixture.signed[0].bucket==='proposals' && __fixture.signed[0].seconds===60),'proposal Download creates 60-second signed URL');
-  await page.evaluate(()=>{const p={...__fixture.proposals[0],pdf_path:'another-user/token.pdf'};renderProposalHistory(supabase.createClient(),[p])});
-  await page.locator('.history-download').click();
-  check(await page.evaluate(()=>__fixture.signed.length===1 && __alerts.length>0),'foreign path never reaches signing API');
+  await page.goto('https://aadya.test/dashboard');await page.waitForSelector('.history-item');
+  if (downloadsEnabled) {
+   const download=page.waitForEvent('download');await page.locator('.history-download').click();await download;
+   check(await page.evaluate(()=>__fixture.signed[0].bucket==='proposals' && __fixture.signed[0].seconds===60),'proposal Download creates 60-second signed URL');
+   await page.evaluate(()=>{const p={...__fixture.proposals[0],pdf_path:'another-user/token.pdf'};renderProposalHistory(supabase.createClient(),[p])});
+   await page.locator('.history-download').click();
+   check(await page.evaluate(()=>__fixture.signed.length===1 && __alerts.length>0),'foreign path never reaches signing API');
+  } else {
+   skip('proposal Download creates 60-second signed URL (PROPOSAL_DOWNLOADS_ENABLED is false)');
+   skip('foreign path never reaches signing API (PROPOSAL_DOWNLOADS_ENABLED is false)');
+   await page.evaluate(()=>renderProposalHistory(supabase.createClient(),[__fixture.proposals[0],{...__fixture.proposals[0],id:'legacy',pdf_path:null,pdf_url:'https://aadya.test/legacy.pdf'}]));
+   const history=await page.locator('#historyContainer').innerText();
+   check(await page.locator('#historyContainer .history-item').count()===2 && await page.locator('#historyContainer button, #historyContainer a').count()===0 && !history.includes('Download'),'flag off: proposal history shows no download button, link or notice');
+   await page.evaluate(()=>downloadProposal(supabase.createClient(),__fixture.proposals[0],document.createElement('button')));
+   check(await page.evaluate(()=>__fixture.signed.length===0),'flag off: no Storage calls for proposals');
+  }
   await page.goto('https://aadya.test/receipt');
   await page.waitForFunction(()=>typeof rcptSubmit==='function');
   await page.evaluate(()=>rcptSubmit({preventDefault(){}}));
@@ -162,6 +184,6 @@ for (const file of ['dashboard.html','invoices.html','invoice.html','receipt.htm
   await page.locator('[data-close]').click();await page.evaluate(()=>openModal());
   check(await page.locator('#regionalCheckout').isVisible() && !(await page.locator('#proposalModal').getAttribute('class')).includes('open'),'homepage proposal entry cannot bypass allowance');
   check(errors.length===0,'no browser script errors: '+errors.join('; '));
-  console.log(`${checks} checks passed. All external effects mocked.`);
+  console.log(`${checks} checks passed, ${skips} skipped. All external effects mocked.`);
  } finally {await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

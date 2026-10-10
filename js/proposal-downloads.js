@@ -1,4 +1,7 @@
 // Only user-folder paths are signed. Flat legacy files need the migration in docs/batch-one-rollout.md.
+// Keep false until the SQL, file migration and Make upload steps in that doc are done.
+// While false the dashboard renders no proposal download controls and never calls Storage for proposals.
+const PROPOSAL_DOWNLOADS_ENABLED = false;
 function proposalObjectPath(proposal, userId) {
   const path = proposal.pdf_path;
   if (typeof path !== 'string' || !userId) return null;
@@ -7,7 +10,7 @@ function proposalObjectPath(proposal, userId) {
   return path;
 }
 async function downloadProposal(client, proposal, button) {
-  if (button.disabled) return;
+  if (!PROPOSAL_DOWNLOADS_ENABLED || button.disabled) return;
   button.disabled = true;
   const label = button.textContent;
   button.textContent = 'Preparing…';
@@ -37,7 +40,9 @@ function renderProposalHistory(client, proposals) {
     const name = document.createElement('div'); name.className = 'history-name'; name.textContent = `${proposal.client_name || 'Client'} — ${proposal.proposal_title || 'Document'}`;
     const date = document.createElement('div'); date.className = 'history-date'; date.textContent = new Date(proposal.created_at).toLocaleDateString(undefined, {day:'numeric',month:'short',year:'numeric'});
     info.append(name, date); row.append(icon, info);
-    if (proposal.pdf_path) {
+    if (!PROPOSAL_DOWNLOADS_ENABLED) {
+      // No download controls until the storage migration is live.
+    } else if (proposal.pdf_path) {
       const button = document.createElement('button'); button.className = 'history-download'; button.textContent = 'Download';
       button.onclick = () => downloadProposal(client, proposal, button); row.append(button);
     } else if (proposal.pdf_url) {
