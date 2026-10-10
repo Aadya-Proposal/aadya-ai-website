@@ -625,6 +625,7 @@ textarea.form-input { resize: vertical; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/document-usage.js"></script>
 <script src="/js/business-profile.js"></script>
 </head>
 <body>
@@ -988,7 +989,8 @@ const _RCPT_SUPABASE_KEY = 'sb_publishable_kU78DNrxlnaF-3dRn0IoNA_sHIY1boA';
 const receiptSupabase = window.supabase.createClient(_RCPT_SUPABASE_URL, _RCPT_SUPABASE_KEY);
 
 // Make.com webhook that owns PDF generation, emailing the client, the
-// Supabase `receipts` insert, and the documents_used increment.
+// Supabase `receipts` insert. documents_used is recomputed in the database by
+// upsert_user_doc_count(); standalone receipts (invoice_id null) count.
 const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrqjgbvxcn';
 
 // Logos upload to the public `logos` bucket via uploadBusinessLogo()
@@ -999,16 +1001,6 @@ const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrq
 // detect edits worth saving back after a successful submit.
 let rcptProfile = pickBusinessProfile(null);
 let rcptSavedLogoUrl = null;
-
-// Matches dashboard.html's PLAN_LIMITS — documents_used is shared across
-// invoices, proposals and receipts.
-const RCPT_PLAN_LIMITS = { free: 3, starter: 20, pro: Infinity };
-function rcptPlanLimit(plan) {
-  const p = (plan || 'free').toLowerCase();
-  if (p.includes('pro')) return RCPT_PLAN_LIMITS.pro;
-  if (p.includes('starter')) return RCPT_PLAN_LIMITS.starter;
-  return RCPT_PLAN_LIMITS.free;
-}
 
 function rcptShowMsg(html, kind) {
   const box = document.getElementById('receiptFormMsg');
@@ -1144,14 +1136,10 @@ async function rcptSubmit(e) {
     }
     const email = session.user.email;
 
-    const { data: userData } = await receiptSupabase
-      .from('users').select('plan, documents_used').eq('email', email).maybeSingle();
-    const plan = (userData && userData.plan || 'free').toLowerCase();
-    const docsUsed = (userData && userData.documents_used) || 0;
-    const limit = rcptPlanLimit(plan);
+    const { plan, used: docsUsed, limit } = await readDocumentUsage(receiptSupabase, email);
 
     if (docsUsed >= limit) {
-      rcptShowMsg(`You've used ${docsUsed} of ${limit} documents this month. <a href="/dashboard" style="color:inherit;font-weight:700;">Upgrade your plan →</a>`, 'error');
+      rcptShowMsg(`You've used ${docsUsed} of ${limit} documents in your plan this month. Your allowance resets on the 1st (UTC). <a href="/dashboard" style="color:inherit;font-weight:700;">Upgrade your plan →</a>`, 'error');
       return;
     }
 
@@ -1227,8 +1215,8 @@ async function rcptSubmit(e) {
       }
     }
 
-    // documents_used is now incremented by the webhook's backend, not here —
-    // only for the standalone flow (this one); convert-from-invoice is exempt.
+    // documents_used is recomputed in the database (monthly, UTC); this
+    // standalone receipt (invoice_id null) counts. The browser never writes it.
 
     document.getElementById('receiptForm').style.display = 'none';
     rcptShowMsg('✓ Receipt submitted. We\'re generating your PDF and emailing it to you and your client now — it\'ll also show up in your dashboard shortly. <a href="/invoices" style="color:inherit;font-weight:700;">View My Invoices →</a>', 'success');

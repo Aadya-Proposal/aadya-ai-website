@@ -1,5 +1,10 @@
 {
   "cleanUrls": true,
+  "git": {
+    "deploymentEnabled": {
+      "feature/batch-one": false
+    }
+  },
   "redirects": [
     { "source": "/:path*", "has": [{ "type": "host", "value": "aadya-ai.com" }], "destination": "https://www.aadya-ai.com/:path*", "permanent": true },
     { "source": "/gst-invoice-generator", "destination": "/invoice#gst", "permanent": true },

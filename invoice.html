@@ -708,6 +708,7 @@ footer a:hover { color: white; }
 .inv-modal-footer-badge { font-size: 11px; font-weight: 600; color: #16A34A; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/document-usage.js"></script>
 <script src="/js/business-profile.js"></script>
 </head>
 <body>
@@ -780,7 +781,7 @@ footer a:hover { color: white; }
         <a href="#" class="btn-primary-lg" onclick="event.preventDefault(); openInvoiceModal()">
           Create My Invoice →
         </a>
-        <span class="hero-small-text">Free plan includes 3 invoices/month</span>
+        <span class="hero-small-text">Free plan includes 3 documents per month</span>
       </div>
     </div>
     <div class="hero-preview">
@@ -1022,15 +1023,23 @@ async function openInvoiceModal() {
     if (session && session.user) {
       const email = session.user.email;
       let name = email.split('@')[0];
-      const { data: userData } = await invoiceSupabase
-        .from('users').select('name').eq('email', email).maybeSingle();
-      if (userData && userData.name) name = userData.name;
+      const usage = await readDocumentUsage(invoiceSupabase, email);
+      if (usage.used >= usage.limit) {
+        closeInvoiceModal();
+        window.location.href = '/account';
+        return;
+      }
+      if (usage.name) name = usage.name;
       const params = new URLSearchParams({ user_email: email, user_name: name });
       appendBusinessProfileParams(params, await loadBusinessProfile(invoiceSupabase, email));
       iframe.src = `${INVOICE_FORM_URL}?${params}`;
       return;
     }
-  } catch(e) { /* fall through */ }
+  } catch(e) {
+    closeInvoiceModal();
+    alert('Could not check your document allowance. Please try again.');
+    return;
+  }
 
   iframe.src = INVOICE_FORM_URL;
 }
