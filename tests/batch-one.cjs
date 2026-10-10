@@ -116,6 +116,14 @@ for (const file of ['dashboard.html','invoices.html','invoice.html','receipt.htm
   check((await page.locator('#invoiceTableBody').innerText()).includes('Receipt processing'),'accepted request shows processing rather than completion');
   await page.evaluate(()=>{__fixture.receipts=[{id:'receipt',invoice_id:__fixture.invoices[0].id,pdf_url:'https://aadya.test/download.pdf',amount:500,currency:'USD'}];return start()});
   check((await page.locator('#invoiceTableBody').innerText()).includes('Download receipt'),'completed receipt accessible beside invoice');
+  // Legacy receipt row (pdf_url null) that nobody requested from this browser.
+  await page.evaluate(()=>{sessionStorage.clear();__fixture.receipts=[{id:'legacy-receipt',invoice_id:__fixture.invoices[0].id,pdf_url:null,amount:500,currency:'USD',created_at:'2026-08-12'}];return start()});
+  const legacyRow=await page.locator('#invoiceTableBody').innerText();
+  check(legacyRow.includes('✓ Paid · Receipt saved') && !legacyRow.includes('Receipt processing') && !legacyRow.includes('Download receipt') && !legacyRow.includes('Refresh'),'legacy receipt with null pdf_url shows saved, not processing');
+  check(await page.locator('#invoiceTableBody .mark-paid-btn').count()===0,'legacy receipt row offers no Record payment or Create receipt');
+  // A row exists, so even a request still marked submitted in this browser is not processing.
+  await page.evaluate(()=>{receiptRequest(__fixture.invoices[0].id,{clientId:'x',state:'submitted'});return start()});
+  check(!(await page.locator('#invoiceTableBody').innerText()).includes('Receipt processing'),'persisted receipt row overrides local processing state');
   // Fresh state for mark-paid-only.
   await page.evaluate(()=>sessionStorage.clear());await page.reload();await page.waitForSelector('#invoiceTableBody .mark-paid-btn');
   await page.locator('#invoiceTableBody .mark-paid-btn').click();await page.locator('#rmCreateReceipt').uncheck();

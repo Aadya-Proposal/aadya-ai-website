@@ -555,7 +555,12 @@ function actionCell(invoice) {
   if (receipt?.pdf_url) {
     return `${dl}<button class="download-btn" onclick="downloadLinkedReceipt('${invoice.id}')">Download receipt</button> <span>✓ Paid</span>`;
   }
-  if (receipt || request?.state === 'submitted') {
+  // A saved receipt without a PDF (e.g. legacy rows) is final, not processing.
+  if (receipt) {
+    return `${dl}<span>✓ Paid · Receipt saved</span>`;
+  }
+  // Only a request sent from this browser that has not produced a row yet.
+  if (request?.state === 'submitted') {
     return `${dl}<span>Receipt processing</span> <button class="download-btn" onclick="start()">Refresh</button>`;
   }
   if ((invoice.status || '').toLowerCase() === 'paid') {
