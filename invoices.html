@@ -314,6 +314,12 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
   .invoice-cards { display:block; padding:16px; }
   .usage-card { flex-direction:column; align-items:flex-start; }
 }
+@media (max-width: 640px) {
+  .navbar { height:auto; min-height:72px; flex-wrap:wrap; gap:8px; padding:12px 16px; }
+  .nav-right { width:100%; flex-wrap:wrap; gap:6px; }
+  .nav-link-btn, .logout-btn { padding:8px 10px; }
+  .user-badge { padding:8px 10px; }
+}
 </style>
 </head>
 <body>
@@ -390,9 +396,9 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
   <!-- USAGE CARD -->
   <div class="usage-card">
     <div class="usage-info">
-      <div class="usage-title">Invoices This Month</div>
+      <div class="usage-title">Shared document usage</div>
       <div class="usage-count" id="invUsedCount">0</div>
-      <div class="usage-sub" id="invUsedSub">of 3 invoices used</div>
+      <div class="usage-sub" id="invUsedSub">Loading shared allowance…</div>
     </div>
     <div class="usage-bar-wrap">
       <div class="usage-bar"><div class="usage-fill" id="invUsageFill" style="width:0%"></div></div>
@@ -480,6 +486,9 @@ table.inv-table tbody tr:hover { background:#fafbfc; }
 <!-- RECEIPT MODAL (built dynamically, see openReceiptModal) -->
 
 
+<script src="/checkout-links.js?v=batch-one"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="/js/document-usage.js"></script>
 <script src="/js/business-profile.js"></script>
 <script src="/js/invoice-popup.js"></script>
 <script>
@@ -531,16 +540,36 @@ function downloadButton(invoice) {
   return `<button class="download-btn" onclick="downloadInvoice('${invoice.id}', this)">Download</button> `;
 }
 
+let receiptOwnerId = '';
+function receiptRequest(invoiceId, value) {
+  const key = `aadya.receipt.${receiptOwnerId}.${invoiceId}`;
+  try {
+    if (value) sessionStorage.setItem(key, JSON.stringify(value));
+    return JSON.parse(sessionStorage.getItem(key) || 'null');
+  } catch (_) { return value || null; }
+}
 function actionCell(invoice) {
-  const s = (invoice.status || 'sent').toLowerCase();
   const dl = downloadButton(invoice);
-  if (s === 'paid') {
-    if (receiptsByInvoiceId[invoice.id]) {
-      return `${dl}<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid · Receipt saved</span>`;
-    }
-    return `${dl}<span style="font-size:13px;color:var(--success);font-weight:600;">✓ Paid</span> <button class="mark-paid-btn" onclick="openReceiptModal('${invoice.id}')">Generate Receipt →</button>`;
+  const receipt = receiptsByInvoiceId[invoice.id];
+  const request = receiptRequest(invoice.id);
+  if (receipt?.pdf_url) {
+    return `${dl}<button class="download-btn" onclick="downloadLinkedReceipt('${invoice.id}')">Download receipt</button> <span>✓ Paid</span>`;
   }
-  return `${dl}<button class="mark-paid-btn" onclick="markPaid('${invoice.id}', this)">Mark as Paid</button>`;
+  if (receipt || request?.state === 'submitted') {
+    return `${dl}<span>Receipt processing</span> <button class="download-btn" onclick="start()">Refresh</button>`;
+  }
+  if ((invoice.status || '').toLowerCase() === 'paid') {
+    return `${dl}<span>✓ Paid</span> <button class="mark-paid-btn" onclick="openReceiptModal('${invoice.id}')">${request?.state === 'failed' ? 'Retry receipt — free' : 'Create receipt — free'}</button>`;
+  }
+  return `${dl}<button class="mark-paid-btn" onclick="openReceiptModal('${invoice.id}')">Record payment</button>`;
+}
+function downloadLinkedReceipt(invoiceId) {
+  const url = receiptsByInvoiceId[invoiceId]?.pdf_url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') throw new Error('Invalid receipt URL');
+    window.open(parsed.href, '_blank', 'noopener,noreferrer');
+  } catch (_) { alert('Receipt download is not available yet. Please refresh.'); }
 }
 
 async function downloadInvoice(invoiceId, btn) {
@@ -564,42 +593,15 @@ async function downloadInvoice(invoiceId, btn) {
   }
 }
 
-async function markPaid(invoiceId, btn) {
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  try {
-    const { error } = await supabaseClient
-      .from('invoices')
-      .update({ status: 'paid' })
-      .eq('id', invoiceId);
-
-    if (error) throw error;
-
-    // Re-render the action cell via actionCell so the Download button (and
-    // Generate Receipt) survive the status change.
-    const invoice = currentInvoices.find(i => i.id === invoiceId);
-    if (invoice) invoice.status = 'paid';
-    const paidCell = actionCell(invoice || { id: invoiceId, status: 'paid' });
-
-    // Update badge and button in table row (desktop)
-    const row = btn.closest('tr');
-    if (row) {
-      row.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
-      btn.closest('td').innerHTML = paidCell;
-    }
-
-    // Update badge in mobile card
-    const card = btn.closest('.invoice-card');
-    if (card) {
-      card.querySelector('[data-status-cell]').innerHTML = statusBadge('paid');
-      btn.closest('.inv-card-actions').innerHTML = paidCell;
-    }
-  } catch(e) {
-    console.error('Mark paid error:', e);
-    btn.disabled = false;
-    btn.textContent = 'Mark as Paid';
-    alert('Error updating invoice. Please try again.');
-  }
+async function markPaid(invoiceId) {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session?.user) throw new Error('Please sign in again.');
+  const { data, error } = await supabaseClient.from('invoices')
+    .update({ status: 'paid' }).eq('id', invoiceId).eq('user_email', session.user.email).select('id').single();
+  if (error || !data) throw error || new Error('Payment was not saved.');
+  const invoice = currentInvoices.find(i => i.id === invoiceId);
+  if (invoice) invoice.status = 'paid';
+  renderTable(currentInvoices);
 }
 
 function renderTable(invoices) {
@@ -740,7 +742,10 @@ function openReceiptModal(invoiceId) {
   const existing = document.getElementById('receiptModal');
   if (existing) existing.remove();
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const alreadyPaid = (invoice.status || '').toLowerCase() === 'paid';
+  const priorRequest = receiptRequest(invoiceId);
   const suggestedNumber = 'REC-' + (invoice.invoice_number || invoiceId.slice(0, 8));
 
   const modal = document.createElement('div');
@@ -748,18 +753,18 @@ function openReceiptModal(invoiceId) {
   // Generated once per modal open, then reused for every submit attempt
   // (including retries) so the Make.com webhook can dedupe retried
   // submissions instead of re-emailing the client / double-inserting the row.
-  modal.dataset.clientId = crypto.randomUUID();
+  modal.dataset.clientId = priorRequest?.clientId || crypto.randomUUID();
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
   modal.innerHTML = `
     <div style="background:#ffffff;border-radius:20px;padding:32px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
-      <h2 style="font-size:20px;font-weight:800;color:#0F2D6B;margin:0 0 4px;">Generate Receipt</h2>
-      <p style="font-size:13px;color:#64748b;margin:0 0 20px;">For invoice ${invoice.invoice_number || ''} · ${invoice.client_name || ''}</p>
+      <h2 style="font-size:20px;font-weight:800;color:#0F2D6B;margin:0 0 4px;">${alreadyPaid ? 'Create receipt' : 'Record full payment'}</h2>
+      <p style="font-size:13px;color:#64748b;margin:0 0 20px;">${rmEscapeHtml(invoice.invoice_number || '')} · ${rmEscapeHtml(invoice.client_name || '')}<br><strong>${rmEscapeHtml(formatAmount(invoice.amount, invoice.currency))} ${rmEscapeHtml(invoice.currency || 'INR')}</strong> · Full invoice amount</p>
       <div id="receiptModalMsg"></div>
       <div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Receipt number</label>
-          <input id="rmReceiptNumber" type="text" value="${suggestedNumber}" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;">
-        </div>
+        <label><input id="rmCreateReceipt" type="checkbox" checked ${alreadyPaid ? 'disabled' : ''} onchange="updateReceiptChoice()"> Create receipt — free</label>
+        <p style="margin:0;font-size:13px;color:#64748b">No document credit is used. ${alreadyPaid ? 'Payment has already been recorded.' : 'Uncheck to mark paid without creating a receipt.'}</p>
+        <div id="rmReceiptFields">
+        <input id="rmReceiptNumber" type="hidden" value="${rmEscapeHtml(suggestedNumber)}">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
             <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">Payment date</label>
@@ -777,7 +782,9 @@ function openReceiptModal(invoiceId) {
             </select>
           </div>
         </div>
-        <div>
+        <details id="rmBusinessDetails" ${currentBusinessProfile.business_name ? '' : 'open'} style="margin-top:16px">
+          <summary style="cursor:pointer">${rmEscapeHtml(currentBusinessProfile.business_name || 'Add business details')} · Edit business details</summary>
+          <div style="margin-top:12px">
           <label style="display:block;font-size:13px;font-weight:600;color:#0F1F3D;margin-bottom:6px;">From (your business)</label>
           <input id="rmFromName" type="text" placeholder="Business name" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
           <input id="rmFromEmail" type="email" placeholder="Business email (optional)" style="width:100%;font-size:14px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
@@ -794,9 +801,11 @@ function openReceiptModal(invoiceId) {
           <input id="rmFromLogo" type="file" accept="image/*" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;">
           <div id="rmLogoStatus" style="font-size:12px;color:#64748b;margin-top:4px;"></div>
         </div>
+        </details>
+        </div>
         <div style="display:flex;gap:10px;margin-top:8px;">
-          <button onclick="document.getElementById('receiptModal').remove()" style="flex:1;background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
-          <button id="rmSubmitBtn" onclick="submitReceipt('${invoiceId}')" style="flex:2;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Save Receipt →</button>
+          <button id="rmCancelBtn" onclick="document.getElementById('receiptModal').remove()" style="flex:1;background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button id="rmSubmitBtn" onclick="submitReceipt('${invoiceId}')" style="flex:2;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">${alreadyPaid ? 'Create receipt — free' : 'Record payment &amp; create receipt'}</button>
         </div>
       </div>
     </div>
@@ -810,6 +819,10 @@ function openReceiptModal(invoiceId) {
   document.getElementById('rmFromTaxId').value = currentBusinessProfile.tax_id || '';
   document.getElementById('rmFromAddress').value = currentBusinessProfile.business_address || '';
   rmSetSavedLogo(currentBusinessProfile.logo_url);
+  if (priorRequest?.date) document.getElementById('rmPaymentDate').value = priorRequest.date;
+  if (priorRequest?.method) document.getElementById('rmPaymentMethod').value = priorRequest.method;
+  modal.dataset.alreadyPaid = String(alreadyPaid);
+  updateReceiptChoice();
 
   document.getElementById('rmFromLogo').addEventListener('change', function(e) {
     const status = document.getElementById('rmLogoStatus');
@@ -824,6 +837,14 @@ function openReceiptModal(invoiceId) {
     status.style.color = '#64748b';
     status.textContent = rmSavedLogoUrl ? file.name + ' — replaces your saved logo' : file.name;
   });
+}
+
+function updateReceiptChoice() {
+  const create = document.getElementById('rmCreateReceipt').checked;
+  document.getElementById('rmReceiptFields').hidden = !create;
+  document.getElementById('rmSubmitBtn').textContent = create
+    ? (document.getElementById('receiptModal').dataset.alreadyPaid === 'true' ? 'Create receipt — free' : 'Record payment & create receipt')
+    : 'Mark paid only';
 }
 
 function rmSetSavedLogo(url) {
@@ -850,28 +871,44 @@ async function submitReceipt(invoiceId) {
   if (!invoice) return;
 
   const btn = document.getElementById('rmSubmitBtn');
+  if (btn.disabled) return;
+  const createReceipt = document.getElementById('rmCreateReceipt').checked;
   const paymentMethod = document.getElementById('rmPaymentMethod').value;
-  if (!paymentMethod) {
-    rmShowMsg('Please select a payment method.', 'error');
-    return;
+  const paymentDate = document.getElementById('rmPaymentDate').value;
+  if (invoice.amount == null || invoice.amount === '' || !Number.isFinite(Number(invoice.amount)) || Number(invoice.amount) <= 0) {
+    rmShowMsg('This invoice needs a valid positive amount before recording payment.', 'error'); return;
   }
-  if (!document.getElementById('rmFromName').value.trim()) {
-    rmShowMsg('Please enter your business name.', 'error');
-    return;
+  if (createReceipt && (!paymentMethod || !paymentDate)) {
+    rmShowMsg('Please confirm the payment date and method.', 'error'); return;
   }
-
+  if (createReceipt && !document.getElementById('rmFromName').value.trim()) {
+    document.getElementById('rmBusinessDetails').open = true;
+    rmShowMsg('Please enter your business name.', 'error'); return;
+  }
+  if (createReceipt && !document.getElementById('rmFromEmail').checkValidity()) {
+    document.getElementById('rmBusinessDetails').open = true;
+    rmShowMsg('Please enter a valid business email or leave it empty.', 'error'); return;
+  }
   btn.disabled = true;
   btn.textContent = 'Saving…';
+  document.getElementById('rmCancelBtn').disabled = true;
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session || !session.user) {
       rmShowMsg('Your session expired. Please sign in again.', 'error');
       btn.disabled = false;
-      btn.textContent = 'Save Receipt →';
+      updateReceiptChoice();
       return;
     }
     const email = session.user.email;
+    receiptOwnerId = session.user.id;
+    if ((invoice.status || '').toLowerCase() !== 'paid') await markPaid(invoiceId);
+    document.getElementById('receiptModal').dataset.alreadyPaid = 'true';
+    if (!createReceipt) {
+      document.getElementById('receiptModal').remove();
+      return;
+    }
 
     // No documents_used gate/increment here on purpose: this invoice already
     // consumed a document slot when it was created, so generating its receipt
@@ -879,6 +916,7 @@ async function submitReceipt(invoiceId) {
     // /receipt page (a genuinely new document) counts against the limit. The
     // webhook backend knows to skip the increment for flow: 'convert_from_invoice'.
     const clientId = document.getElementById('receiptModal').dataset.clientId;
+    receiptRequest(invoiceId, { clientId, date: paymentDate, method: paymentMethod, state: 'failed' });
 
     let logoUrl = rmSavedLogoUrl;
     const logoFile = document.getElementById('rmFromLogo').files[0];
@@ -890,7 +928,8 @@ async function submitReceipt(invoiceId) {
         console.error('Logo upload error:', uploadErr);
         rmShowMsg('Could not upload your logo. Please try again, or remove it and submit without one.', 'error');
         btn.disabled = false;
-        btn.textContent = 'Save Receipt →';
+        updateReceiptChoice();
+        renderTable(currentInvoices);
         return;
       }
       btn.textContent = 'Saving…';
@@ -942,6 +981,8 @@ async function submitReceipt(invoiceId) {
       body: JSON.stringify(payload)
     });
     if (!resp.ok) throw new Error('Webhook responded with ' + resp.status);
+    receiptRequest(invoiceId, { clientId, date: paymentDate, method: paymentMethod, state: 'submitted' });
+    renderTable(currentInvoices);
 
     // Edited From details become the new business profile. Best-effort: the
     // receipt is already submitted, so a failed save is only logged.
@@ -959,134 +1000,52 @@ async function submitReceipt(invoiceId) {
     // submission here rather than refreshing into a misleadingly unchanged view.
     rmShowMsg('✓ Receipt submitted. It\'ll appear in your Receipts list once generated.', 'success');
     if (btn) { btn.disabled = true; btn.textContent = 'Submitted ✓'; }
+    const submittedModal = document.getElementById('receiptModal');
     setTimeout(function() {
-      const m = document.getElementById('receiptModal');
-      if (m) m.remove();
+      submittedModal?.remove();
       start();
     }, 2000);
 
   } catch (err) {
     console.error('Receipt submit error:', err);
-    rmShowMsg('Something went wrong submitting your receipt. Please try again.', 'error');
-    if (btn) { btn.disabled = false; btn.textContent = 'Save Receipt →'; }
+    rmShowMsg((invoice.status || '').toLowerCase() === 'paid'
+      ? 'Payment is recorded. The receipt was not confirmed. Retry here without recording payment again.'
+      : 'Payment could not be recorded. Please try again.', 'error');
+    renderTable(currentInvoices);
+    if (btn) { btn.disabled = false; updateReceiptChoice(); }
+  } finally {
+    const cancel = document.getElementById('rmCancelBtn');
+    if (cancel) cancel.disabled = false;
   }
 }
 
-async function loadUsage(email, plan) {
-  const isPro = plan.includes('pro');
-  const isStarter = plan.includes('starter');
-  const limit = isPro ? 999999 : (isStarter ? 10 : 3);
-
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-  const { count } = await supabaseClient
-    .from('invoices')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_email', email)
-    .gte('created_at', monthStart);
-
-  const used = count || 0;
-  const planLabel = isPro ? 'Pro' : (isStarter ? 'Starter' : 'Free');
-
+async function loadUsage(email) {
+  const { plan, used, limit } = await readDocumentUsage(supabaseClient, email);
+  const isPro = limit === Infinity;
   document.getElementById('invUsedCount').textContent = used;
-  document.getElementById('invUsedSub').textContent = isPro
-    ? 'Unlimited invoices on Pro'
-    : `of ${limit} invoices this month`;
-  document.getElementById('invUsageFill').style.width = isPro ? '10%' : Math.min((used / limit) * 100, 100) + '%';
-  document.getElementById('invUsageBarLabel').textContent = isPro
-    ? `${used} invoices sent this month`
-    : `${used} of ${limit} used`;
-
-  const planBadgeEl = document.getElementById('invPlanBadge');
-  planBadgeEl.textContent = planLabel;
-  if (isPro) planBadgeEl.classList.add('pro');
-
-  const upgradeLink = document.getElementById('upgradeLink');
-  if (isPro) upgradeLink.style.display = 'none';
+  document.getElementById('invUsedSub').textContent = isPro ? 'Shared documents — unlimited on Pro' : `of ${limit} shared documents`;
+  document.getElementById('invUsageFill').style.width = isPro ? '0%' : Math.min(used / limit * 100, 100) + '%';
+  document.getElementById('invUsageBarLabel').textContent = 'Proposals, SOWs, invoices and standalone receipts. Invoice-linked receipts are free.';
+  const badge = document.getElementById('invPlanBadge');
+  badge.textContent = isPro ? 'Pro' : plan.includes('starter') ? 'Starter' : 'Free';
+  badge.classList.toggle('pro', isPro);
+  document.getElementById('upgradeLink').style.display = isPro ? 'none' : '';
 }
 
 async function generateInvoice() {
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) {
-      window.location.href = 'https://www.aadya-ai.com';
+    if (!session?.user) { window.location.href = '/?signin=1'; return; }
+    const { plan, used, limit, name } = await readDocumentUsage(supabaseClient, session.user.email);
+    if (used >= limit) {
+      showRegionalUpgrade(plan.includes('starter') ? 'pro' : 'starter', session.user.email);
       return;
     }
-    const email = session.user.email;
-
-    const { data: userData } = await supabaseClient
-      .from('users')
-      .select('plan, name')
-      .eq('email', email)
-      .maybeSingle();
-
-    const plan = ((userData && userData.plan) || 'free').toLowerCase();
-    const isPro = plan.includes('pro');
-    const isStarter = plan.includes('starter');
-    const invoiceLimit = isPro ? Infinity : (isStarter ? 10 : 3);
-    const userName = (userData && userData.name) ? userData.name : email.split('@')[0];
-
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-    const { count } = await supabaseClient
-      .from('invoices')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_email', email)
-      .gte('created_at', monthStart);
-
-    const used = count || 0;
-
-    if (used >= invoiceLimit) {
-      showInvoiceLimitModal(invoiceLimit, plan);
-      return;
-    }
-
-    openInvoicePopup(email, userName, start, currentBusinessProfile);
+    openInvoicePopup(session.user.email, name || session.user.email.split('@')[0], start, currentBusinessProfile);
   } catch(e) {
     console.error('Generate invoice error:', e);
-    openInvoicePopup('', '', start);
+    alert('Could not check your document allowance. Please try again.');
   }
-}
-
-function showInvoiceLimitModal(limit, plan) {
-  const existing = document.getElementById('invoiceLimitModal');
-  if (existing) existing.remove();
-
-  const isStarter = plan.includes('starter');
-  const nextPlan = isStarter ? 'Pro' : 'Starter';
-  const nextPrice = isStarter ? '₹599/month' : '₹299/month';
-  const nextCount = isStarter ? 'unlimited' : '10';
-
-  const modal = document.createElement('div');
-  modal.id = 'invoiceLimitModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,45,107,0.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.innerHTML = `
-    <div style="background:#ffffff;border-radius:20px;padding:40px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-      <div style="font-size:48px;margin-bottom:16px;">📄</div>
-      <h2 style="font-size:22px;font-weight:800;color:#0F2D6B;margin:0 0 10px;">You've used all ${limit} invoice${limit === 1 ? '' : 's'} this month!</h2>
-      <p style="font-size:15px;color:#64748b;margin:0 0 24px;line-height:1.6;">
-        Upgrade to <strong>${nextPlan}</strong> for just <strong>${nextPrice}</strong> and generate up to ${nextCount} invoices every month.
-      </p>
-      <div style="background:#EEF4FF;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
-        <div style="font-size:13px;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">${nextPlan} Plan — ${nextPrice}</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;${nextCount} invoices per month</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Professional branded PDFs</div>
-        <div style="font-size:14px;color:#0F2D6B;margin-bottom:8px;">✅ &nbsp;Delivered to you &amp; your client</div>
-        <div style="font-size:14px;color:#0F2D6B;">✅ &nbsp;Cancel anytime</div>
-      </div>
-      <a href="https://www.aadya-ai.com/#pricing" target="_blank"
-         style="display:block;background:linear-gradient(135deg,#0F2D6B,#3B82F6);color:#ffffff;text-decoration:none;padding:15px 32px;border-radius:50px;font-size:16px;font-weight:700;margin-bottom:12px;">
-        Upgrade to ${nextPlan} →
-      </a>
-      <button onclick="document.getElementById('invoiceLimitModal').remove()"
-              style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;">
-        Maybe later
-      </button>
-    </div>
-  `;
-  document.body.appendChild(modal);
 }
 
 async function logout() {
@@ -1108,6 +1067,7 @@ async function start() {
     hideLoader();
 
     const email = session.user.email;
+    receiptOwnerId = session.user.id;
     const firstName = email.split('@')[0].charAt(0).toUpperCase();
     document.getElementById('userAvatar').textContent = firstName;
     document.getElementById('userNameDisplay').textContent = email.split('@')[0];
@@ -1168,6 +1128,7 @@ async function start() {
 }
 
 start();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') start(); });
 </script>
 
 <!-- PWA Service Worker Registration -->

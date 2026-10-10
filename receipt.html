@@ -625,6 +625,7 @@ textarea.form-input { resize: vertical; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/document-usage.js"></script>
 <script src="/js/business-profile.js"></script>
 </head>
 <body>
@@ -1000,16 +1001,6 @@ const RECEIPT_WEBHOOK_URL = 'https://hook.eu1.make.com/2xhx94pg778jqs1h7sjxxujrq
 let rcptProfile = pickBusinessProfile(null);
 let rcptSavedLogoUrl = null;
 
-// Matches dashboard.html's PLAN_LIMITS — documents_used is shared across
-// invoices, proposals and receipts.
-const RCPT_PLAN_LIMITS = { free: 3, starter: 20, pro: Infinity };
-function rcptPlanLimit(plan) {
-  const p = (plan || 'free').toLowerCase();
-  if (p.includes('pro')) return RCPT_PLAN_LIMITS.pro;
-  if (p.includes('starter')) return RCPT_PLAN_LIMITS.starter;
-  return RCPT_PLAN_LIMITS.free;
-}
-
 function rcptShowMsg(html, kind) {
   const box = document.getElementById('receiptFormMsg');
   const bg = kind === 'error' ? '#FEF2F2' : kind === 'success' ? '#F0FDF4' : '#EFF6FF';
@@ -1144,14 +1135,10 @@ async function rcptSubmit(e) {
     }
     const email = session.user.email;
 
-    const { data: userData } = await receiptSupabase
-      .from('users').select('plan, documents_used').eq('email', email).maybeSingle();
-    const plan = (userData && userData.plan || 'free').toLowerCase();
-    const docsUsed = (userData && userData.documents_used) || 0;
-    const limit = rcptPlanLimit(plan);
+    const { plan, used: docsUsed, limit } = await readDocumentUsage(receiptSupabase, email);
 
     if (docsUsed >= limit) {
-      rcptShowMsg(`You've used ${docsUsed} of ${limit} documents this month. <a href="/dashboard" style="color:inherit;font-weight:700;">Upgrade your plan →</a>`, 'error');
+      rcptShowMsg(`You've used ${docsUsed} of ${limit} documents included in your plan. <a href="/dashboard" style="color:inherit;font-weight:700;">Upgrade your plan →</a>`, 'error');
       return;
     }
 

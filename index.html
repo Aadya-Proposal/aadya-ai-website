@@ -2620,15 +2620,21 @@ async function openModal() {
     if (session && session.user) {
       const email = session.user.email;
       let name = email.split('@')[0];
-      const { data: userData } = await aadyaSupabase
-        .from('users').select('name').eq('email', email).maybeSingle();
-      if (userData && userData.name) name = userData.name;
+      const usage = await readDocumentUsage(aadyaSupabase, email);
+      if (usage.used >= usage.limit) {
+        closeModal();
+        showRegionalUpgrade(usage.plan.includes('starter') ? 'pro' : 'starter', email);
+        return;
+      }
+      if (usage.name) name = usage.name;
       const params = new URLSearchParams({ user_name: name, user_email: email });
       iframe.src = `${BASE_URL}?${params}`;
       return;
     }
   } catch (e) {
-    // fall through to plain URL
+    closeModal();
+    alert('Could not check your document allowance. Please try again.');
+    return;
   }
 
   iframe.src = BASE_URL;
@@ -2645,13 +2651,18 @@ async function openInvoicePopup() {
     if (session && session.user) {
       email = session.user.email;
       name = email.split('@')[0];
-      const { data: userData } = await aadyaSupabase
-        .from('users').select('name').eq('email', email).maybeSingle();
-      if (userData && userData.name) name = userData.name;
+      const usage = await readDocumentUsage(aadyaSupabase, email);
+      if (usage.used >= usage.limit) {
+        closeModal();
+        showRegionalUpgrade(usage.plan.includes('starter') ? 'pro' : 'starter', email);
+        return;
+      }
+      if (usage.name) name = usage.name;
       profile = await loadBusinessProfile(aadyaSupabase, email);
     }
   } catch (e) {
-    // fall through to blank pre-fill
+    alert('Could not check your document allowance. Please try again.');
+    return;
   }
 
   const existing = document.getElementById('invoicePopupOverlay');
@@ -3088,8 +3099,9 @@ document.getElementById('payment-overlay').addEventListener('click', function(e)
 
 <!-- SUPABASE AUTH -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/document-usage.js"></script>
 <script src="/js/business-profile.js"></script>
-<script src="/checkout-links.js"></script>
+<script src="/checkout-links.js?v=batch-one"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>

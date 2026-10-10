@@ -82,3 +82,45 @@ function openSubscriptionCheckout({ subscriptionId, tier, email }) {
   });
   rzp.open();
 }
+
+// Always let the buyer choose; timezone is not a reliable billing-country signal.
+function showRegionalUpgrade(tier, email) {
+  if (!['starter', 'pro'].includes(tier)) throw new Error('Unknown plan');
+  document.getElementById('regionalCheckout')?.remove();
+  const dialog = document.createElement('dialog');
+  dialog.id = 'regionalCheckout';
+  dialog.style.cssText = 'margin:auto;padding:28px;border:1px solid #e2e8f0;border-radius:16px;max-width:440px;width:calc(100% - 32px);font-family:Arial,sans-serif;color:#0F2D6B;';
+  dialog.innerHTML = `<h2 style="margin:0 0 12px">Upgrade to ${tier === 'pro' ? 'Pro' : 'Starter'}</h2>
+    <p>Choose your billing region. Invoice-linked receipts stay free.</p>
+    <button type="button" data-region="inr" style="display:block;width:100%;padding:14px;margin:12px 0;cursor:pointer">India · ₹${RAZORPAY_PLAN_PRICES_INR[tier]}/month · Razorpay</button>
+    <button type="button" data-region="usd" style="display:block;width:100%;padding:14px;margin:12px 0;cursor:pointer">EU / US · US$${LEMON_PLAN_PRICES[tier]}/month · Lemon Squeezy</button>
+    <p style="font-size:12px">International plans are priced in USD. Review the final total at checkout.</p>
+    <p role="alert" data-error style="color:#b91c1c"></p>
+    <button type="button" data-close>Not now</button>`;
+  document.body.appendChild(dialog);
+  dialog.querySelector('[data-close]').onclick = () => dialog.close();
+  dialog.addEventListener('close', () => dialog.remove());
+  dialog.querySelectorAll('[data-region]').forEach(button => {
+    button.onclick = async () => {
+      if (button.dataset.region === 'usd') {
+        const url = new URL(LEMON_CHECKOUT_LINKS[tier]);
+        if (email) url.searchParams.set('checkout[email]', email);
+        if (typeof gtag === 'function') gtag('event', 'begin_checkout', { value: LEMON_PLAN_PRICES[tier], currency: 'USD', tier });
+        window.location.assign(url.href);
+        return;
+      }
+      dialog.querySelectorAll('button').forEach(b => b.disabled = true);
+      try {
+        const { subscription_id } = await createSubscriptionCheckout(tier, email);
+        if (!subscription_id) throw new Error('Missing subscription');
+        openSubscriptionCheckout({ subscriptionId: subscription_id, tier, email });
+        dialog.close();
+      } catch (e) {
+        dialog.querySelector('[data-error]').textContent = 'Could not open checkout. Please try again.';
+        dialog.querySelectorAll('button').forEach(b => b.disabled = false);
+      }
+    };
+  });
+  dialog.addEventListener('cancel', event => { if (dialog.querySelector('[data-close]').disabled) event.preventDefault(); });
+  dialog.showModal();
+}
