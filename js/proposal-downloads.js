@@ -1,7 +1,7 @@
 // Only user-folder paths are signed. Flat legacy files need the migration in docs/batch-one-rollout.md.
 // Keep false until the SQL, file migration and Make upload steps in that doc are done.
 // While false the dashboard renders no proposal download controls and never calls Storage for proposals.
-const PROPOSAL_DOWNLOADS_ENABLED = false;
+const PROPOSAL_DOWNLOADS_ENABLED = true;
 function proposalObjectPath(proposal, userId) {
   const path = proposal.pdf_path;
   if (typeof path !== 'string' || !userId) return null;
