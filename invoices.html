@@ -553,7 +553,7 @@ function actionCell(invoice) {
   const receipt = receiptsByInvoiceId[invoice.id];
   const request = receiptRequest(invoice.id);
   if (receipt?.pdf_url) {
-    return `${dl}<button class="download-btn" onclick="downloadLinkedReceipt('${invoice.id}')">Download receipt</button> <span>✓ Paid</span>`;
+    return `${dl}<button class="download-btn" onclick="downloadLinkedReceipt('${invoice.id}', this)">Download receipt</button> <span>✓ Paid</span>`;
   }
   // A saved receipt without a PDF (e.g. legacy rows) is final, not processing.
   if (receipt) {
@@ -568,13 +568,39 @@ function actionCell(invoice) {
   }
   return `${dl}<button class="mark-paid-btn" onclick="openReceiptModal('${invoice.id}')">Record payment</button>`;
 }
-function downloadLinkedReceipt(invoiceId) {
-  const url = receiptsByInvoiceId[invoiceId]?.pdf_url;
+// Receipt PDFs live in the private 'documents' bucket. pdf_url keeps the old
+// public-style URL; only its file name is used, to sign a 60-second download
+// link with the user's own session (Storage RLS checks they own the receipt).
+const RECEIPT_FILE_PREFIX = 'https://rscpsmwqtkduahhaejtv.supabase.co/storage/v1/object/public/documents/';
+function receiptObjectPath(url) {
+  if (typeof url !== 'string' || !url.startsWith(RECEIPT_FILE_PREFIX)) return null;
+  const name = url.slice(RECEIPT_FILE_PREFIX.length);
+  if (!name.endsWith('.pdf') || /[\/\\%?#\x00-\x1f]/.test(name)) return null;
+  return name;
+}
+async function downloadReceipt(receipt, btn) {
+  const path = receiptObjectPath(receipt?.pdf_url);
+  if (!path) { alert('Receipt download is not available yet. Please refresh.'); return; }
+  if (btn) btn.disabled = true;
   try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== 'https:') throw new Error('Invalid receipt URL');
-    window.open(parsed.href, '_blank', 'noopener,noreferrer');
-  } catch (_) { alert('Receipt download is not available yet. Please refresh.'); }
+    const fileName = `${String(receipt.receipt_number || 'receipt').replace(/[^\w.-]+/g, '-')}.pdf`;
+    const { data, error } = await supabaseClient.storage
+      .from('documents')
+      .createSignedUrl(path, 60, { download: fileName });
+    if (error || !data?.signedUrl) throw error || new Error('No signed URL');
+    window.location.href = data.signedUrl;
+  } catch (e) {
+    console.error('Receipt download error:', e);
+    alert('Could not download this receipt. Please try again.');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+function downloadLinkedReceipt(invoiceId, btn) {
+  downloadReceipt(receiptsByInvoiceId[invoiceId], btn);
+}
+function downloadReceiptById(receiptId, btn) {
+  downloadReceipt(allReceipts.find(r => r.id === receiptId), btn);
 }
 
 async function downloadInvoice(invoiceId, btn) {
@@ -698,7 +724,7 @@ function renderReceiptsTable(receipts) {
   // "hide it, show a dash" treatment as linkedInvoiceNumber above.
   const downloadAction = r => {
     if (!r.pdf_url) return '—';
-    return `<a href="${r.pdf_url}" target="_blank" rel="noopener noreferrer" style="color:var(--blue);font-weight:600;text-decoration:none;">Download</a>`;
+    return `<button class="download-btn" onclick="downloadReceiptById('${r.id}', this)">Download</button>`;
   };
 
   tbody.innerHTML = receipts.map(r => `
