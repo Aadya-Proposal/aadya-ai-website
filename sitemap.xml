@@ -3,16 +3,23 @@
 
   <url>
     <loc>https://www.aadya-ai.com/</loc>
-    <lastmod>2026-05-30</lastmod>
+    <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://www.aadya-ai.com/dashboard</loc>
-    <lastmod>2026-05-30</lastmod>
+    <loc>https://www.aadya-ai.com/invoice</loc>
+    <lastmod>2026-10-20</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://www.aadya-ai.com/receipt</loc>
+    <lastmod>2026-10-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <url>
